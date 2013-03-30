@@ -8,17 +8,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Provides generic asynchronous access to a set of values, each identified
- * by a unique key. Keys and values are each of uniform types.
+ * by a unique key. Keys are of uniform type, but values may not be.
  *
  * As in the {@link Collection} interfaces, operations are optional for
  * implementers and may throw {@link UnsupportedOperationException}.
  *
- * @param <K> The type of the keys. XXX: Should there be 2 parameters, one
- *        for success and one for failure?
- * @param <V> The type of the values. XXX: Should there be 2 parameters, one
- *        for success and one for failure?
+ * XXX: Should operations take a second consumer for handling failures?
  */
-public interface ResourceProvider<K, V> {
+public interface ResourceProvider<KEY> {
 
     /**
      * Issue an asynchronous request to get the value of the resource
@@ -28,6 +25,8 @@ public interface ResourceProvider<K, V> {
      * across multiple requests while still keeping track of which response
      * goes with which request.
      *
+     * @param  <RSRC>   The expected type of the identified resource.
+     *
      * @return A future that will return null from {@link Future#get()} on
      *         success or throw on failure. This is useful for clients that
      *         need to block for the operation to complete before continuing.
@@ -39,7 +38,10 @@ public interface ResourceProvider<K, V> {
      * @throws UnsupportedOperationException    If this provider does not
      *         support get operations.
      */
-    public abstract ListenableFuture<?> get(K key, ResourceConsumer<? super K, ? super V> consumer);
+    public abstract <RSRC> ListenableFuture<?> get(
+            KEY key,
+            Class<? extends RSRC> resourceClass,
+            ResourceConsumer<? super KEY, RSRC> consumer);
 
     /**
      * Set the value of the resource identified by the given key to the
@@ -48,10 +50,8 @@ public interface ResourceProvider<K, V> {
      * That response may have the same or different type as the type of the
      * resource itself.
      *
-     * FIXME: KR and VR should really be parameters of ResourceProvider
-     * itself; they should not vary by invocation of this method.
-     *
-     * @param  <VR> The value type of the response.
+     * @param  <RSRC>   The expected type of the identified resource.
+     * @param  <RESP>   The expected type of the response.
      *
      * @return A future that will return null from {@link Future#get()} on
      *         success or throw on failure. This is useful for clients that
@@ -64,18 +64,19 @@ public interface ResourceProvider<K, V> {
      * @throws UnsupportedOperationException    If this provider does not
      *         support get operations.
      */
-    public abstract <VR> ListenableFuture<?> set(K key, V newValue, ResourceConsumer<? super K, VR> consumer);
+    public abstract <RSRC, RESP> ListenableFuture<?> set(
+            KEY key,
+            RSRC newValue,
+            Class<? extends RESP> responseClass,
+            ResourceConsumer<? super KEY, RESP> consumer);
 
     /**
      * Perform a partial update of the identified resource. The operation will
      * return some response upon completion of the request. That response may
      * have the same or different type as the type of the resource itself.
      *
-     * FIXME: VU, KR, and VR should really be parameters of ResourceProvider
-     * itself; they should not vary by invocation of this method.
-     *
-     * @param  <VU> The type of the partial update to be applied.
-     * @param  <VR> The value type of the response.
+     * @param  <UP>     The type of the partial update to be applied.
+     * @param  <RESP>   The expected type of the response.
      *
      * @return A future that will return null from {@link Future#get()} on
      *         success or throw on failure. This is useful for clients that
@@ -88,17 +89,18 @@ public interface ResourceProvider<K, V> {
      * @throws UnsupportedOperationException    If this provider does not
      *         support get operations.
      */
-    public abstract <VU, VR> ListenableFuture<?> update(K key, VU valueUpdate, ResourceConsumer<? super K, VR> consumer);
+    public abstract <UP, RESP> ListenableFuture<?> update(
+            KEY key,
+            UP resourceUpdate,
+            Class<? extends RESP> responseClass,
+            ResourceConsumer<? super KEY, RESP> consumer);
 
     /**
      * Delete the resource identified by the given key. The operation will
      * return some response upon completion of the request. That response may
      * have the same or different type as the type of the resource itself.
      *
-     * FIXME: KR and VR should really be parameters of ResourceProvider
-     * itself; they should not vary by invocation of this method.
-     *
-     * @param  <VR> The value type of the response.
+     * @param  <RESP>   The value type of the response.
      *
      * @return A future that will return null from {@link Future#get()} on
      *         success or throw on failure. This is useful for clients that
@@ -111,6 +113,9 @@ public interface ResourceProvider<K, V> {
      * @throws UnsupportedOperationException    If this provider does not
      *         support get operations.
      */
-    public abstract <VR> ListenableFuture<?> delete(K key, ResourceConsumer<? super K, VR> consumer);
+    public abstract <RESP> ListenableFuture<?> delete(
+            KEY key,
+            Class<? extends RESP> responseClass,
+            ResourceConsumer<? super KEY, RESP> consumer);
 
 }
