@@ -6,18 +6,19 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 
 /**
- * Performs and asynchronous update of a resource. The update may be full or
- * partial, depending on the implementation.
+ * Perform an asynchronous update of the state of a resource identified by a
+ * unique key. The update may be full or partial, depending on the
+ * implementation. Resources and keys are of uniform type.
  *
  * XXX: Should the operation take a second consumer for handling failures?
  */
-public interface ResourceUpdater<UPDATE, RESPONSE> {
+public interface MapResourceUpdater<KEY, UPDATE, RESPONSE> {
 
     /**
-     * Update the value of the resource in an unspecified way based on the
-     * given value. The operation will return some response upon completion
-     * of the request. That response may have the same or different type as
-     * the type of the resource itself.
+     * Updates the value of the resource identified by the given key in an the
+     * unspecified way, based on the given value. The operation will return
+     * some response upon completion of the request. That response may have
+     * the same or different type as the type of the resource itself.
      *
      * @return A future that will return null from {@link Future#get()} on
      *         success or throw on failure. This is useful for clients that
@@ -29,7 +30,8 @@ public interface ResourceUpdater<UPDATE, RESPONSE> {
      *         inappropriate.
      */
     public abstract ListenableFuture<?> apply(
+            KEY key,
             UPDATE update,
-            ResourceConsumer<? super RESPONSE> consumer);
+            MapResourceConsumer<? super KEY, ? super RESPONSE> consumer);
 
 }
