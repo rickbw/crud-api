@@ -1,9 +1,5 @@
 package rickbw.crud;
 
-import java.util.concurrent.Future;
-
-import com.google.common.util.concurrent.ListenableFuture;
-
 
 /**
  * Provides asynchronous access to a resource.
@@ -20,12 +16,8 @@ public interface ResourceProvider<RSRC> {
      * Issue an asynchronous request to get the value of the resource. That
      * resource will be delivered to the given {@link ResourceConsumer} when
      * it is ready.
-     *
-     * @return A future that will return null from {@link Future#get()} on
-     *         success or throw on failure. This is useful for clients that
-     *         need to block for the operation to complete before continuing.
      */
-    public abstract ListenableFuture<?> get(
+    public abstract void get(
             ResourceConsumer<? super RSRC> consumer);
 
 }

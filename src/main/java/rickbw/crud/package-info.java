@@ -16,11 +16,15 @@
  *  resources support all operations, the operations are composable, defined
  *  in separate interfaces designed to work together.</li>
  *
- *  <li><em>Performance</em>: The API is entirely asynchronous, and it
- *  emphasizes visitors over futures to discourage unnecessary blocking.
- *  (Operations do return futures, but these deliberately do not provide
- *  access to calculated results. They are intended for advanced task-
- *  coordination activities; they are not intended for data processing.)</li>
+ *  <li><em>Performance</em>: The API is entirely asynchronous. It relies on
+ *  visitors over futures to discourage unnecessary blocking and to isolate
+ *  clients from resource-management concerns. For example, how would a
+ *  generic client know that its resource type T happens to be bound at run
+ *  time to a {@link java.io.Closeable}, which it is responsible for cleaning
+ *  up? What if it does know but contains a bug that prevents closing in
+ *  some conditions? How would client-controlled closing interact with
+ *  additional behaviors, such as retries, that may be composed with the
+ *  client?</li>
  * </ul>
  *
  * Interactions with resources depend on one more factor, which is the
