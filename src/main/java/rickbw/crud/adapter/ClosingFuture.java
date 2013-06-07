@@ -1,15 +1,10 @@
 package rickbw.crud.adapter;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ForwardingListenableFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import rickbw.crud.future.FutureMapResourceProvider;
@@ -19,17 +14,15 @@ import rickbw.crud.future.FutureMapResourceProvider;
  * A {@link ListenableFuture} for use with {@link FutureMapResourceProvider}
  * that makes sure results get closed properly.
  */
-public class ClosingFuture<V> implements ListenableFuture<V> {
+public final class ClosingFuture<V> extends ForwardingListenableFuture<V> {
 
-    private static final Logger log = LoggerFactory.getLogger(ClosingFuture.class);
-
-    private final ListenableFuture<? extends V> delegate;
-    private final FutureMapResourceProvider<?, ? super V> closer;
+    private final ListenableFuture<V> delegate;
+    private final Function<? super V, ?> closer;
 
 
     public ClosingFuture(
-            final ListenableFuture<? extends V> delegate,
-            final FutureMapResourceProvider<?, ? super V> closer) {
+            final ListenableFuture<V> delegate,
+            final Function<? super V, ?> closer) {
         this.delegate = Preconditions.checkNotNull(delegate);
         this.closer = Preconditions.checkNotNull(closer);
     }
@@ -46,11 +39,7 @@ public class ClosingFuture<V> implements ListenableFuture<V> {
         if (!cancelled && this.delegate.isDone()) {
             try {
                 final V result = this.delegate.get();
-                try {
-                    this.closer.close(result);
-                } catch (final IOException iox) {
-                    log.error("Unable to close " + result, iox);
-                }
+                this.closer.apply(result); // ignore return result
             } catch (final ExecutionException noop) {
                 // No result, so nothing to close
             } catch (final InterruptedException unreachable) {
@@ -62,29 +51,8 @@ public class ClosingFuture<V> implements ListenableFuture<V> {
     }
 
     @Override
-    public boolean isCancelled() {
-        return this.delegate.isCancelled();
-    }
-
-    @Override
-    public boolean isDone() {
-        return this.delegate.isDone();
-    }
-
-    @Override
-    public V get() throws InterruptedException, ExecutionException {
-        return this.delegate.get();
-    }
-
-    @Override
-    public V get(final long timeout, final TimeUnit unit)
-    throws InterruptedException, ExecutionException, TimeoutException {
-        return this.delegate.get(timeout, unit);
-    }
-
-    @Override
-    public void addListener(final Runnable listener, final Executor executor) {
-        this.delegate.addListener(listener, executor);
+    protected synchronized ListenableFuture<V> delegate() {
+        return this.delegate;
     }
 
 }

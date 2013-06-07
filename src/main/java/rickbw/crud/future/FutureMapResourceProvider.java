@@ -1,14 +1,12 @@
 package rickbw.crud.future;
 
-import java.io.IOException;
-
 import com.google.common.util.concurrent.ListenableFuture;
 
+import rickbw.crud.sync.ResourceCloser;
 
-public interface FutureMapResourceProvider<KEY, RSRC> {
+
+public interface FutureMapResourceProvider<KEY, RSRC> extends ResourceCloser<RSRC> {
 
     public abstract ListenableFuture<RSRC> getFuture(KEY key);
-
-    public abstract void close(RSRC resource) throws IOException;
 
 }

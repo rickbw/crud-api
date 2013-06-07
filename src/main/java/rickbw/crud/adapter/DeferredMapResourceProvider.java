@@ -12,6 +12,7 @@ import rickbw.crud.sync.SyncMapResourceProvider;
 
 
 public final class DeferredMapResourceProvider<KEY, RSRC>
+extends DeferredResourceCloser<RSRC>
 implements FutureMapResourceProvider<KEY, RSRC> {
 
     private final SyncMapResourceProvider<? super KEY, RSRC> delegate;
@@ -21,6 +22,7 @@ implements FutureMapResourceProvider<KEY, RSRC> {
     public DeferredMapResourceProvider(
             final SyncMapResourceProvider<? super KEY, RSRC> delegate,
             final ListeningExecutorService executor) {
+        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -33,13 +35,8 @@ implements FutureMapResourceProvider<KEY, RSRC> {
                 return delegate.get(key);
             }
         });
-        final ListenableFuture<RSRC> safeFuture = new ClosingFuture<RSRC>(future, this);
+        final ListenableFuture<RSRC> safeFuture = wrap(future);
         return safeFuture;
-    }
-
-    @Override
-    public void close(final RSRC resource) throws IOException {
-        this.delegate.close(resource);
     }
 
 }
