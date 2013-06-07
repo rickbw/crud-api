@@ -7,13 +7,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import rickbw.crud.future.FutureMapResourceProvider;
+import rickbw.crud.async.AsyncMapResourceProvider;
 import rickbw.crud.sync.SyncMapResourceProvider;
 
 
 public final class DeferredMapResourceProvider<KEY, RSRC>
 extends DeferredResourceCloser<RSRC>
-implements FutureMapResourceProvider<KEY, RSRC> {
+implements AsyncMapResourceProvider<KEY, RSRC> {
 
     private final SyncMapResourceProvider<? super KEY, RSRC> delegate;
     private final ListeningExecutorService executor;
@@ -28,11 +28,11 @@ implements FutureMapResourceProvider<KEY, RSRC> {
     }
 
     @Override
-    public ListenableFuture<RSRC> getFuture(final KEY key) {
+    public ListenableFuture<RSRC> getAsync(final KEY key) {
         final ListenableFuture<RSRC> future = this.executor.submit(new Callable<RSRC>() {
             @Override
             public RSRC call() throws IOException {
-                return delegate.get(key);
+                return delegate.getSync(key);
             }
         });
         final ListenableFuture<RSRC> safeFuture = wrap(future);

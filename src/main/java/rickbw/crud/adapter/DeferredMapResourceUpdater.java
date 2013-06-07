@@ -7,20 +7,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import rickbw.crud.async.AsyncMapResourceDeleter;
-import rickbw.crud.sync.SyncMapResourceDeleter;
+import rickbw.crud.async.AsyncMapResourceUpdater;
+import rickbw.crud.sync.SyncMapResourceUpdater;
 
 
-public final class DeferredMapResourceDeleter<KEY, RESPONSE>
+public final class DeferredMapResourceUpdater<KEY, UPDATE, RESPONSE>
 extends DeferredResourceCloser<RESPONSE>
-implements AsyncMapResourceDeleter<KEY, RESPONSE> {
+implements AsyncMapResourceUpdater<KEY, UPDATE, RESPONSE> {
 
-    private final SyncMapResourceDeleter<? super KEY, RESPONSE> delegate;
+    private final SyncMapResourceUpdater<? super KEY, ? super UPDATE, RESPONSE> delegate;
     private final ListeningExecutorService executor;
 
 
-    public DeferredMapResourceDeleter(
-            final SyncMapResourceDeleter<? super KEY, RESPONSE> delegate,
+    public DeferredMapResourceUpdater(
+            final SyncMapResourceUpdater<? super KEY, ? super UPDATE, RESPONSE> delegate,
             final ListeningExecutorService executor) {
         super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -28,11 +28,11 @@ implements AsyncMapResourceDeleter<KEY, RESPONSE> {
     }
 
     @Override
-    public ListenableFuture<RESPONSE> deleteAsync(final KEY key) {
+    public ListenableFuture<RESPONSE> updateAsync(final KEY key, final UPDATE update) {
         final ListenableFuture<RESPONSE> future = this.executor.submit(new Callable<RESPONSE>() {
             @Override
             public RESPONSE call() throws IOException {
-                return delegate.deleteSync(key);
+                return delegate.updateSync(key, update);
             }
         });
         final ListenableFuture<RESPONSE> safeFuture = wrap(future);

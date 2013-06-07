@@ -1,4 +1,4 @@
-package rickbw.crud.adapter;
+package rickbw.crud.async;
 
 import java.io.IOException;
 
@@ -8,19 +8,18 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import rickbw.crud.future.FutureMapResourceProvider;
 import rickbw.retry.RetrierFuture;
 
 
-public final class RetryFutureMapResourceProvider<KEY, RSRC>
-implements FutureMapResourceProvider<KEY, RSRC> {
+public final class RetryAsyncMapResourceProvider<KEY, RSRC>
+implements AsyncMapResourceProvider<KEY, RSRC> {
 
-    private final FutureMapResourceProvider<? super KEY, RSRC> delegateProvider;
+    private final AsyncMapResourceProvider<? super KEY, RSRC> delegateProvider;
     private final int maxRetries;
 
 
-    public RetryFutureMapResourceProvider(
-            final FutureMapResourceProvider<? super KEY, RSRC> delegate,
+    public RetryAsyncMapResourceProvider(
+            final AsyncMapResourceProvider<? super KEY, RSRC> delegate,
             final int maxRetries) {
         this.delegateProvider = Preconditions.checkNotNull(delegate);
 
@@ -29,9 +28,9 @@ implements FutureMapResourceProvider<KEY, RSRC> {
     }
 
     @Override
-    public ListenableFuture<RSRC> getFuture(final KEY key) {
+    public ListenableFuture<RSRC> getAsync(final KEY key) {
         // Make first getFuture() call here so async activity starts now:
-        final ListenableFuture<RSRC> future = this.delegateProvider.getFuture(key);
+        final ListenableFuture<RSRC> future = this.delegateProvider.getAsync(key);
         // Wrap in retrier in case original Future throws:
         final ListenableFuture<RSRC> retryFuture = new RetrierFuture<RSRC>(future, new FutureProvider(key), this.maxRetries);
         return retryFuture;
@@ -53,7 +52,7 @@ implements FutureMapResourceProvider<KEY, RSRC> {
 
         @Override
         public ListenableFuture<RSRC> apply(final Integer retryIndex) {
-            return RetryFutureMapResourceProvider.this.delegateProvider.getFuture(this.key);
+            return RetryAsyncMapResourceProvider.this.delegateProvider.getAsync(this.key);
         }
     }
 

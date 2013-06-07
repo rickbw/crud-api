@@ -5,6 +5,6 @@ import java.io.IOException;
 
 public interface SyncMapResourceProvider<KEY, RSRC> extends ResourceCloser<RSRC> {
 
-    public abstract RSRC get(KEY key) throws IOException;
+    public abstract RSRC getSync(KEY key) throws IOException;
 
 }

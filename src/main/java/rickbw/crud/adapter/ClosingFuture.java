@@ -7,11 +7,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ForwardingListenableFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import rickbw.crud.future.FutureMapResourceProvider;
+import rickbw.crud.async.AsyncMapResourceProvider;
 
 
 /**
- * A {@link ListenableFuture} for use with {@link FutureMapResourceProvider}
+ * A {@link ListenableFuture} for use with {@link AsyncMapResourceProvider}
  * that makes sure results get closed properly.
  */
 public final class ClosingFuture<V> extends ForwardingListenableFuture<V> {
@@ -30,7 +30,7 @@ public final class ClosingFuture<V> extends ForwardingListenableFuture<V> {
     /**
      * If the delegate {@link ListenableFuture} was not cancelled because it
      * has already completed, attempt to close it with
-     * {@link FutureMapResourceProvider#close(Object)}. Failures to close will
+     * {@link AsyncMapResourceProvider#close(Object)}. Failures to close will
      * be logged.
      */
     @Override

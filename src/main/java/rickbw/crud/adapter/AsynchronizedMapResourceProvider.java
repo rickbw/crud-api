@@ -14,7 +14,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import rickbw.crud.MapResourceConsumer;
 import rickbw.crud.MapResourceProvider;
-import rickbw.crud.future.FutureMapResourceProvider;
+import rickbw.crud.async.AsyncMapResourceProvider;
 
 
 public final class AsynchronizedMapResourceProvider<KEY, RSRC>
@@ -22,13 +22,13 @@ implements MapResourceProvider<KEY, RSRC> {
 
     private static final Logger log = LoggerFactory.getLogger(AsynchronizedMapResourceProvider.class);
 
-    private final FutureMapResourceProvider<KEY, RSRC> delegate;
+    private final AsyncMapResourceProvider<KEY, RSRC> delegate;
     private final MapResourceConsumer<? super KEY, ? super Throwable> exceptionConsumer;
     private final Executor consumerExecutor;
 
 
     public AsynchronizedMapResourceProvider(
-            final FutureMapResourceProvider<KEY, RSRC> delegate,
+            final AsyncMapResourceProvider<KEY, RSRC> delegate,
             final Executor consumerExecutor,
             final Optional<MapResourceConsumer<? super KEY, ? super Throwable>> exceptionConsumer) {
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -49,7 +49,7 @@ implements MapResourceProvider<KEY, RSRC> {
 
     @Override
     public final void get(final KEY key, final MapResourceConsumer<? super KEY, ? super RSRC> consumer) {
-        final ListenableFuture<RSRC> future = this.delegate.getFuture(key);
+        final ListenableFuture<RSRC> future = this.delegate.getAsync(key);
         Futures.addCallback(
                 future,
                 new Callback(consumer, key),
