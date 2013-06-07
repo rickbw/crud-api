@@ -9,7 +9,7 @@
  *  like flare -- set, get, update, delete -- though the types in this package
  *  do <em>not</em> depend on HTTP as an implementation technology. For an
  *  HTTP implementation, see
- *  {@link com.eharmony.matching.playground.crud.http}.</li>
+ *  {@link rickbw.crud.http}.</li>
  *
  *  <li><em>Safety</em>: The types of resources are statically type-safe,
  *  configured by means of generic type parameters. And because not all
