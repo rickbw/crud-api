@@ -11,16 +11,16 @@ import rickbw.crud.async.AsyncMapResourceSetter;
 import rickbw.crud.sync.SyncMapResourceSetter;
 
 
-public final class DeferredMapResourceSetter<KEY, UPDATE, RESPONSE>
+public final class DeferredMapResourceSetter<KEY, RSRC, RESPONSE>
 extends DeferredResourceCloser<RESPONSE>
-implements AsyncMapResourceSetter<KEY, UPDATE, RESPONSE> {
+implements AsyncMapResourceSetter<KEY, RSRC, RESPONSE> {
 
-    private final SyncMapResourceSetter<? super KEY, ? super UPDATE, RESPONSE> delegate;
+    private final SyncMapResourceSetter<? super KEY, ? super RSRC, RESPONSE> delegate;
     private final ListeningExecutorService executor;
 
 
     public DeferredMapResourceSetter(
-            final SyncMapResourceSetter<? super KEY, ? super UPDATE, RESPONSE> delegate,
+            final SyncMapResourceSetter<? super KEY, ? super RSRC, RESPONSE> delegate,
             final ListeningExecutorService executor) {
         super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -28,7 +28,7 @@ implements AsyncMapResourceSetter<KEY, UPDATE, RESPONSE> {
     }
 
     @Override
-    public ListenableFuture<RESPONSE> putAsync(final KEY key, final UPDATE update) {
+    public ListenableFuture<RESPONSE> putAsync(final KEY key, final RSRC update) {
         final ListenableFuture<RESPONSE> future = this.executor.submit(new Callable<RESPONSE>() {
             @Override
             public RESPONSE call() throws IOException {

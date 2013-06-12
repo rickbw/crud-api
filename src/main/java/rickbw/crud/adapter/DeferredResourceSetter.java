@@ -11,16 +11,16 @@ import rickbw.crud.async.AsyncResourceSetter;
 import rickbw.crud.sync.SyncResourceSetter;
 
 
-public final class DeferredResourceSetter<UPDATE, RESPONSE>
+public final class DeferredResourceSetter<RSRC, RESPONSE>
 extends DeferredResourceCloser<RESPONSE>
-implements AsyncResourceSetter<UPDATE, RESPONSE> {
+implements AsyncResourceSetter<RSRC, RESPONSE> {
 
-    private final SyncResourceSetter<? super UPDATE, RESPONSE> delegate;
+    private final SyncResourceSetter<? super RSRC, RESPONSE> delegate;
     private final ListeningExecutorService executor;
 
 
     public DeferredResourceSetter(
-            final SyncResourceSetter<? super UPDATE, RESPONSE> delegate,
+            final SyncResourceSetter<? super RSRC, RESPONSE> delegate,
             final ListeningExecutorService executor) {
         super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -28,7 +28,7 @@ implements AsyncResourceSetter<UPDATE, RESPONSE> {
     }
 
     @Override
-    public ListenableFuture<RESPONSE> putAsync(final UPDATE update) {
+    public ListenableFuture<RESPONSE> putAsync(final RSRC update) {
         final ListenableFuture<RESPONSE> future = this.executor.submit(new Callable<RESPONSE>() {
             @Override
             public RESPONSE call() throws IOException {

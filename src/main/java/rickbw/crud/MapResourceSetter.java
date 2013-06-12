@@ -7,7 +7,7 @@ package rickbw.crud;
  *
  * XXX: Should the operation take a second consumer for handling failures?
  */
-public interface MapResourceSetter<KEY, UPDATE, RESPONSE> {
+public interface MapResourceSetter<KEY, RSRC, RESPONSE> {
 
     /**
      * Replaces the value of the resource identified by the given key with the
@@ -23,7 +23,7 @@ public interface MapResourceSetter<KEY, UPDATE, RESPONSE> {
      */
     public abstract void put(
             KEY key,
-            UPDATE update,
+            RSRC update,
             MapResourceConsumer<? super KEY, ? super RESPONSE> consumer);
 
 }

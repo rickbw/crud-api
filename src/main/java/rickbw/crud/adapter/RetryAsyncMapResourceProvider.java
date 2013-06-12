@@ -1,4 +1,4 @@
-package rickbw.crud.async;
+package rickbw.crud.adapter;
 
 import java.io.IOException;
 
@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import rickbw.crud.async.AsyncMapResourceProvider;
 import rickbw.retry.RetrierFuture;
 
 
@@ -47,7 +48,7 @@ implements AsyncMapResourceProvider<KEY, RSRC> {
         private final KEY key;
 
         public FutureProvider(@Nullable final KEY key) {
-            this.key = Preconditions.checkNotNull(key);
+            this.key = key;
         }
 
         @Override
