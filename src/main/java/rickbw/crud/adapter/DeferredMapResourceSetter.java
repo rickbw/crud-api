@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncMapResourceSetter;
 
 
 public final class DeferredMapResourceSetter<KEY, RSRC, RESPONSE>
-extends DeferredResourceCloser<RESPONSE>
 implements AsyncMapResourceSetter<KEY, RSRC, RESPONSE> {
 
     private final SyncMapResourceSetter<? super KEY, ? super RSRC, RESPONSE> delegate;
@@ -22,7 +21,6 @@ implements AsyncMapResourceSetter<KEY, RSRC, RESPONSE> {
     public DeferredMapResourceSetter(
             final SyncMapResourceSetter<? super KEY, ? super RSRC, RESPONSE> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -35,8 +33,7 @@ implements AsyncMapResourceSetter<KEY, RSRC, RESPONSE> {
                 return delegate.putSync(key, update);
             }
         });
-        final ListenableFuture<RESPONSE> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

@@ -1,6 +1,5 @@
 package rickbw.crud.adapter;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
@@ -71,12 +70,6 @@ implements MapResourceProvider<KEY, RSRC> {
                 this.consumer.accept(this.key, result);
             } catch (final Throwable ex) {
                 handleException(ex);
-            } finally {
-                try {
-                    delegate.close(result);
-                } catch (final IOException iox) {
-                    log.error("Error closing " + result, iox);
-                }
             }
         }
 

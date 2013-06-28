@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncResourceSetter;
 
 
 public final class DeferredResourceSetter<RSRC, RESPONSE>
-extends DeferredResourceCloser<RESPONSE>
 implements AsyncResourceSetter<RSRC, RESPONSE> {
 
     private final SyncResourceSetter<? super RSRC, RESPONSE> delegate;
@@ -22,7 +21,6 @@ implements AsyncResourceSetter<RSRC, RESPONSE> {
     public DeferredResourceSetter(
             final SyncResourceSetter<? super RSRC, RESPONSE> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -35,8 +33,7 @@ implements AsyncResourceSetter<RSRC, RESPONSE> {
                 return delegate.putSync(update);
             }
         });
-        final ListenableFuture<RESPONSE> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncResourceProvider;
 
 
 public final class DeferredResourceProvider<RSRC>
-extends DeferredResourceCloser<RSRC>
 implements AsyncResourceProvider<RSRC> {
 
     private final SyncResourceProvider<RSRC> delegate;
@@ -29,7 +28,6 @@ implements AsyncResourceProvider<RSRC> {
     public DeferredResourceProvider(
             final SyncResourceProvider<RSRC> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -37,8 +35,7 @@ implements AsyncResourceProvider<RSRC> {
     @Override
     public ListenableFuture<RSRC> getAsync() {
         final ListenableFuture<RSRC> future = this.executor.submit(this.task);
-        final ListenableFuture<RSRC> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

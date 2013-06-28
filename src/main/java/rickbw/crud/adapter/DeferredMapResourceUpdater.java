@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncMapResourceUpdater;
 
 
 public final class DeferredMapResourceUpdater<KEY, UPDATE, RESPONSE>
-extends DeferredResourceCloser<RESPONSE>
 implements AsyncMapResourceUpdater<KEY, UPDATE, RESPONSE> {
 
     private final SyncMapResourceUpdater<? super KEY, ? super UPDATE, RESPONSE> delegate;
@@ -22,7 +21,6 @@ implements AsyncMapResourceUpdater<KEY, UPDATE, RESPONSE> {
     public DeferredMapResourceUpdater(
             final SyncMapResourceUpdater<? super KEY, ? super UPDATE, RESPONSE> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -35,8 +33,7 @@ implements AsyncMapResourceUpdater<KEY, UPDATE, RESPONSE> {
                 return delegate.updateSync(key, update);
             }
         });
-        final ListenableFuture<RESPONSE> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

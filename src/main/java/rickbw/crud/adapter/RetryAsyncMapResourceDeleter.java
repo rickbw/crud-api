@@ -1,7 +1,5 @@
 package rickbw.crud.adapter;
 
-import java.io.IOException;
-
 import javax.annotation.Nullable;
 
 import com.google.common.base.Function;
@@ -35,11 +33,6 @@ implements AsyncMapResourceDeleter<KEY, RESPONSE> {
         // Wrap in retrier in case original Future throws:
         final ListenableFuture<RESPONSE> retryFuture = new RetrierFuture<RESPONSE>(future, new FutureProvider(key), this.maxRetries);
         return retryFuture;
-    }
-
-    @Override
-    public void close(final RESPONSE resource) throws IOException {
-        this.delegateDeleter.close(resource);
     }
 
 

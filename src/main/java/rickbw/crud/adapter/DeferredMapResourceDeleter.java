@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncMapResourceDeleter;
 
 
 public final class DeferredMapResourceDeleter<KEY, RESPONSE>
-extends DeferredResourceCloser<RESPONSE>
 implements AsyncMapResourceDeleter<KEY, RESPONSE> {
 
     private final SyncMapResourceDeleter<? super KEY, RESPONSE> delegate;
@@ -22,7 +21,6 @@ implements AsyncMapResourceDeleter<KEY, RESPONSE> {
     public DeferredMapResourceDeleter(
             final SyncMapResourceDeleter<? super KEY, RESPONSE> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -35,8 +33,7 @@ implements AsyncMapResourceDeleter<KEY, RESPONSE> {
                 return delegate.deleteSync(key);
             }
         });
-        final ListenableFuture<RESPONSE> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

@@ -12,7 +12,6 @@ import rickbw.crud.sync.SyncResourceDeleter;
 
 
 public final class DeferredResourceDeleter<RESPONSE>
-extends DeferredResourceCloser<RESPONSE>
 implements AsyncResourceDeleter<RESPONSE> {
 
     private final SyncResourceDeleter<RESPONSE> delegate;
@@ -29,7 +28,6 @@ implements AsyncResourceDeleter<RESPONSE> {
     public DeferredResourceDeleter(
             final SyncResourceDeleter<RESPONSE> delegate,
             final ListeningExecutorService executor) {
-        super(delegate);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.executor = Preconditions.checkNotNull(executor);
     }
@@ -37,8 +35,7 @@ implements AsyncResourceDeleter<RESPONSE> {
     @Override
     public ListenableFuture<RESPONSE> deleteAsync() {
         final ListenableFuture<RESPONSE> future = this.executor.submit(this.task);
-        final ListenableFuture<RESPONSE> safeFuture = wrap(future);
-        return safeFuture;
+        return future;
     }
 
 }

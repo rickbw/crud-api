@@ -3,8 +3,8 @@ package rickbw.crud.sync;
 import java.io.IOException;
 
 
-public interface SyncResourceSetter<UPDATE, RESPONSE> extends ResourceCloser<RESPONSE> {
+public interface SyncResourceSetter<RSRC, RESPONSE> {
 
-    public abstract RESPONSE putSync(UPDATE update) throws IOException;
+    public abstract RESPONSE putSync(RSRC update) throws IOException;
 
 }
