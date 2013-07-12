@@ -1,26 +1,27 @@
 package rickbw.crud;
 
+import rx.Observable;
+
 
 /**
- * Performs an asynchronous partial update of a resource.
+ * Allows a client to perform a partial update of the value of a resource.
  *
- * XXX: Should the operation take a second consumer for handling failures?
+ * @param <UPDATE>  The type of the update to be applied to the value of the
+ *        resource. It may or may not be the same as the type of the resource
+ *        itself.
+ * @param <RESPONSE>    The type of the response(s) that may come back as a
+ *        result of the update. It may or may not be the same as the type of
+ *        the resource itself.
  */
 public interface UpdatableResource<UPDATE, RESPONSE> {
 
     /**
      * Update the value of the resource in an unspecified way based on the
-     * given value. The operation will return some response upon completion
-     * of the request. That response may have the same or different type as
-     * the type of the resource itself.
+     * given value. The operation may return one or more responses via the
+     * given {@link Observable} as the response is acted upon.
      *
-     * @throws IllegalArgumentException         If the request is malformed --
-     *         either the key itself is malformed or the combination of the
-     *         key with some other state of this MapResourceSetter is
-     *         inappropriate.
+     * @throws IllegalArgumentException If the request is malformed in some way.
      */
-    public abstract void update(
-            UPDATE update,
-            ResourceConsumer<? super RESPONSE> consumer);
+    public abstract Observable<RESPONSE> update(UPDATE update);
 
 }

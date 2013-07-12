@@ -1,4 +1,4 @@
-package rickbw.crud.sync;
+package rickbw.crud;
 
 import org.junit.Test;
 
@@ -8,11 +8,11 @@ import org.junit.Test;
  */
 public final class ResourceProviderTest {
 
-    public interface Readable extends SyncReadableResource<String> {
+    public interface Readable extends ReadableResource<String> {
         // empty
     }
 
-    public interface Writable extends SyncWritableResource<Object, StringBuilder> {
+    public interface Writable extends WritableResource<Object, StringBuilder> {
         // empty
     }
 
@@ -20,7 +20,7 @@ public final class ResourceProviderTest {
         // empty
     }
 
-    public interface Provider extends SyncReadableResourceProvider<Enum<?>, String>, SyncWritableResourceProvider<Enum<?>, Object, StringBuilder> {
+    public interface Provider extends ReadableResourceProvider<Enum<?>, String>, WritableResourceProvider<Enum<?>, Object, StringBuilder> {
         @Override
         public abstract ReadWritable get(Enum<?> key);
     }

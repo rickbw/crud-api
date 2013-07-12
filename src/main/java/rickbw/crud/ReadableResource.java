@@ -1,21 +1,19 @@
 package rickbw.crud;
 
+import rx.Observable;
+
 
 /**
- * Provides asynchronous access to a resource.
+ * Allows a client to read the value(s) of a resource.
  *
- * XXX: Should the operation take a second consumer for handling failures?
- *
- * @param <RSRC>    The type of the resources.
+ * @param <RSRC>    The type of the resource's value(s).
  */
 public interface ReadableResource<RSRC> {
 
     /**
      * Issue an asynchronous request to get the value of the resource. That
-     * resource will be delivered to the given {@link ResourceConsumer} when
-     * it is ready.
+     * resource will be delivered when it is ready.
      */
-    public abstract void get(
-            ResourceConsumer<? super RSRC> consumer);
+    public abstract Observable<RSRC> get();
 
 }
