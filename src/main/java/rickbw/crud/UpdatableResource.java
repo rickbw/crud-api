@@ -13,7 +13,7 @@ import rx.Observable;
  *        result of the update. It may or may not be the same as the type of
  *        the resource itself.
  */
-public interface UpdatableResource<UPDATE, RESPONSE> {
+public interface UpdatableResource<UPDATE, RESPONSE> extends Resource {
 
     /**
      * Update the value of the resource in an unspecified way based on the

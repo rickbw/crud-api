@@ -11,7 +11,7 @@ import rx.Observable;
  * @param <RESPONSE>    The type of the response(s) that may be returned as
  *        a result of the change in the value.
  */
-public interface WritableResource<RSRC, RESPONSE> {
+public interface WritableResource<RSRC, RESPONSE> extends Resource {
 
     public abstract Observable<RESPONSE> write(RSRC resource);
 

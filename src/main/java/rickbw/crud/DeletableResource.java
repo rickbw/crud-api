@@ -8,7 +8,7 @@ import rx.Observable;
  *
  * @param <RESPONSE>    The type of the deletion response, if any.
  */
-public interface DeletableResource<RESPONSE> {
+public interface DeletableResource<RESPONSE> extends Resource {
 
     /**
      * Issue a (possibly asynchronous) request to delete the value of the

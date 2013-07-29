@@ -8,7 +8,7 @@ import rx.Observable;
  *
  * @param <RSRC>    The type of the resource's value(s).
  */
-public interface ReadableResource<RSRC> {
+public interface ReadableResource<RSRC> extends Resource {
 
     /**
      * Issue an asynchronous request to get the value of the resource. That
