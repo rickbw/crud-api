@@ -4,6 +4,10 @@ package rickbw.crud;
 /**
  * A "resource" encapsulates a particular state. This is a marker interface
  * for all other resource interfaces.
+ *
+ * A Resource is assumed to be relatively expensive to work with -- for
+ * example, its state may need to be fetched from storage or transferred to
+ * the program across a network.
  */
 public interface Resource {
 
