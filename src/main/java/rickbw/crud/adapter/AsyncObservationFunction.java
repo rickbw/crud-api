@@ -60,17 +60,4 @@ public final class AsyncObservationFunction<T> implements Func1<Observer<T>, Sub
         }
     }
 
-    private static final class FutureSubscription implements Subscription {
-        private final Future<?> task;
-
-        public FutureSubscription(final Future<?> task) {
-            this.task = Preconditions.checkNotNull(task);
-        }
-
-        @Override
-        public void unsubscribe() {
-            this.task.cancel(false);
-        }
-    }
-
 }
