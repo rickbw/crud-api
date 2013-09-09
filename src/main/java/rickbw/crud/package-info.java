@@ -8,10 +8,9 @@
  *  conventional "CRUD": Create, Read, Update, and Delete. These have an HTTP-
  *  like flare -- set, get, update, delete -- though the types in this package
  *  do <em>not</em> depend on HTTP as an implementation technology. (For an
- *  HTTP implementation, see
- *  {@link rickbw.crud.http}. These operations
+ *  HTTP implementation, see the Crud HTTP project). These operations
  *  should also be familiar to anyone who has worked with other data-oriented
- *  APIs, such as JDBC.) Each of these capabilities is represented by a
+ *  APIs, such as JDBC. Each of these capabilities is represented by a
  *  distinct interface; see e.g.
  *  {@link rickbw.crud.ReadableResource}. Resource
  *  navigation is also represented by distinct interfaces; see e.g.
