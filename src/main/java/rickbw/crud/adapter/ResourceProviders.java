@@ -11,6 +11,7 @@ import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
+import rickbw.crud.adapter.rx.GuavaToRxFunction;
 import rx.util.functions.Func1;
 
 

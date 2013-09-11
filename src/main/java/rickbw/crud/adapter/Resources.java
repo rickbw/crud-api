@@ -9,6 +9,7 @@ import rickbw.crud.DeletableResource;
 import rickbw.crud.ReadableResource;
 import rickbw.crud.UpdatableResource;
 import rickbw.crud.WritableResource;
+import rickbw.crud.adapter.rx.GuavaToRxFunction;
 import rx.Observable;
 import rx.util.functions.Func1;
 

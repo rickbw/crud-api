@@ -1,4 +1,4 @@
-package rickbw.crud.adapter;
+package rickbw.crud.adapter.rx;
 
 import javax.annotation.Nullable;
 
