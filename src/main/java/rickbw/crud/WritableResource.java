@@ -1,7 +1,5 @@
 package rickbw.crud;
 
-import javax.annotation.Nullable;
-
 import rx.Observable;
 
 
@@ -28,11 +26,14 @@ public interface WritableResource<RSRC, RESPONSE> extends Resource {
      *
      * This operation is idempotent.
      *
+     * @throws NullPointerException     If the given value is null. In
+     *         particular, writing null is <em>not</em> equivalent to
+     *         deletion; see {@link DeletableResource}.
      * @throws IllegalArgumentException If the new value is malformed in some
      *         way that is detectable at invocation time.
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    public abstract Observable<RESPONSE> write(@Nullable RSRC newValue);
+    public abstract Observable<RESPONSE> write(RSRC newValue);
 
 }

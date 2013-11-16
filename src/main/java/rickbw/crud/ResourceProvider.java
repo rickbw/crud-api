@@ -21,7 +21,19 @@ public interface ResourceProvider<KEY> {
      * data across a network -- within the Resource implementations
      * themselves, and leave the ResourceProviders to simply prepare the
      * necessary objects.
+     *
+     * @throws NullPointerException if the given key is null.
      */
     public abstract Resource get(KEY key);
+
+    /**
+     * Two ResourceProviders are considered equal if the would return the
+     * same {@link Resource}s for the same keys.
+     */
+    @Override
+    public abstract boolean equals(Object other);
+
+    @Override
+    public abstract int hashCode();
 
 }

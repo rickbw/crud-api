@@ -13,7 +13,9 @@ import rickbw.crud.WritableResourceProvider;
 
 /**
  * A combination of {@link Resource} operations likely to occur when using a
- * key-value data store, such as a {@link Map} or a Voldemort store.
+ * key-value data source, such as a {@link Map} or a Voldemort store. A
+ * {@link KeyValueResource.Provider} is analogous to an asynchronous Map; a
+ * resource itself is analogous to a single {@link java.util.Map.Entry}.
  */
 public interface KeyValueResource<RSRC, WR_RESP, DEL_RESP>
 extends ReadableResource<RSRC>,
