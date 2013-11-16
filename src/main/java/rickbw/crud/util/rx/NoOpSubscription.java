@@ -1,4 +1,4 @@
-package rickbw.crud.adapter.rx;
+package rickbw.crud.util.rx;
 
 import rx.Observable;
 import rx.Subscription;

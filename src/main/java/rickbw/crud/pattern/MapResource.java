@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.base.Preconditions;
 
 import rickbw.crud.Resource;
-import rickbw.crud.adapter.rx.NoOpSubscription;
+import rickbw.crud.util.rx.NoOpSubscription;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;

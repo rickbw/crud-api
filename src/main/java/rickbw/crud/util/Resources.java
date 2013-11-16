@@ -1,15 +1,15 @@
-package rickbw.crud.adapter;
+package rickbw.crud.util;
 
 import javax.annotation.Nullable;
-
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.ReadableResource;
 import rickbw.crud.UpdatableResource;
 import rickbw.crud.WritableResource;
-import rickbw.crud.adapter.rx.GuavaToRxFunction;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+
+import rickbw.crud.util.rx.GuavaToRxFunction;
 import rx.Observable;
 import rx.util.functions.Func1;
 
@@ -39,7 +39,7 @@ public final class Resources {
      * Access the response to deleting the given resource as a resource in its
      * own right.
      */
-    public static <RSRC, RESPONSE> ReadableResource<RESPONSE> asReadableResource(
+    public static <RESPONSE> ReadableResource<RESPONSE> asReadableResource(
             final DeletableResource<RESPONSE> resource) {
         Preconditions.checkNotNull(resource);
 

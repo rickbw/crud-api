@@ -1,7 +1,4 @@
-package rickbw.crud.adapter;
-
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
+package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
@@ -11,7 +8,10 @@ import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
-import rickbw.crud.adapter.rx.GuavaToRxFunction;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+
+import rickbw.crud.util.rx.GuavaToRxFunction;
 import rx.util.functions.Func1;
 
 

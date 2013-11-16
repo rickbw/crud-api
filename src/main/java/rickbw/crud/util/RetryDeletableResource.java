@@ -1,9 +1,9 @@
-package rickbw.crud.adapter;
-
-import com.google.common.base.Preconditions;
+package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.ReadableResource;
+import com.google.common.base.Preconditions;
+
 import rx.Observable;
 
 

@@ -32,7 +32,7 @@
  *  asynchronous implementations just as easily as synchronous ones, and
  *  cross-cutting behaviors like retries can be transparently composed as
  *  needed -- see, for example,
- *  {@link rickbw.crud.adapter.RetryReadableResource}.
+ *  {@link rickbw.crud.util.RetryReadableResource}.
  *  </li>
  * </ul>
  */

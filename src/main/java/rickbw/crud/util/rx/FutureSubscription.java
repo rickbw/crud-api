@@ -1,4 +1,4 @@
-package rickbw.crud.adapter;
+package rickbw.crud.util.rx;
 
 import java.util.concurrent.Future;
 
@@ -12,10 +12,16 @@ import rx.Subscription;
  */
 public class FutureSubscription implements Subscription {
     private final Future<?> task;
+    private final boolean mayInterruptIfRunning;
 
 
     public FutureSubscription(final Future<?> task) {
+        this(task, false);
+    }
+
+    public FutureSubscription(final Future<?> task, final boolean mayInterruptIfRunning) {
         this.task = Preconditions.checkNotNull(task);
+        this.mayInterruptIfRunning = mayInterruptIfRunning;
     }
 
     /**
@@ -25,6 +31,6 @@ public class FutureSubscription implements Subscription {
      */
     @Override
     public void unsubscribe() {
-        this.task.cancel(false);
+        this.task.cancel(this.mayInterruptIfRunning);
     }
 }

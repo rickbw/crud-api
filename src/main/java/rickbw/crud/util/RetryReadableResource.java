@@ -1,10 +1,10 @@
-package rickbw.crud.adapter;
+package rickbw.crud.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import rickbw.crud.ReadableResource;
 import com.google.common.base.Preconditions;
 
-import rickbw.crud.ReadableResource;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;

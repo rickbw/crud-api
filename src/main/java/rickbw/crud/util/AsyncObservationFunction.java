@@ -1,4 +1,4 @@
-package rickbw.crud.adapter;
+package rickbw.crud.util;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import com.google.common.base.Preconditions;
 
+import rickbw.crud.util.rx.FutureSubscription;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
