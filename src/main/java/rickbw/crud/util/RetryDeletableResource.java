@@ -17,7 +17,7 @@ implements DeletableResource<RESPONSE> {
     public RetryDeletableResource(
             final DeletableResource<RESPONSE> delegate,
             final int maxRetries) {
-        this.readableDelegate = Resources.asReadableResource(delegate);
+        this.readableDelegate = DeletableResources.asReadableResource(delegate);
         this.maxRetries = maxRetries;
         Preconditions.checkArgument(this.maxRetries >= 0, "Negative retries");
     }
