@@ -28,7 +28,7 @@ public final class DeletableResourceProviders {
             @Override
             public DeletableResource<TO> get(final KEY key) {
                 final DeletableResource<? extends FROM> resource = provider.get(key);
-                final DeletableResource<TO> mapped = DeletableResources.mapResponse(resource, mapper);
+                final DeletableResource<TO> mapped = FluentDeletableResource.from(resource).mapResponse(mapper);
                 return mapped;
             }
         };

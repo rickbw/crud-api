@@ -23,8 +23,8 @@ implements WritableResource<RSRC, RESPONSE> {
     }
 
     @Override
-    public Observable<RESPONSE> write(final RSRC resource) {
-        final ReadableResource<RESPONSE> readable = WritableResources.asReadableResource(this.delegateSetter, resource);
+    public Observable<RESPONSE> write(final RSRC newValue) {
+        final ReadableResource<RESPONSE> readable = FluentWritableResource.from(this.delegateSetter).asReadableResource(newValue);
         final ReadableResource<RESPONSE> retryable = new RetryReadableResource<RESPONSE>(readable, this.maxRetries);
         final Observable<RESPONSE> response = retryable.get();
         return response;
