@@ -1,7 +1,5 @@
 package rickbw.crud.pattern;
 
-import com.google.common.base.Preconditions;
-
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
 import rickbw.crud.ReadableResource;
@@ -9,6 +7,7 @@ import rickbw.crud.ReadableResourceProvider;
 import rickbw.crud.Resource;
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 
 

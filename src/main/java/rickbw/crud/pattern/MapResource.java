@@ -5,12 +5,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-
 import rickbw.crud.Resource;
 import rickbw.crud.ResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rickbw.crud.util.rx.NoOpSubscription;
 import rx.Observable;
 import rx.Observer;
@@ -86,7 +83,7 @@ public final class MapResource<KEY, VALUE> implements KeyValueResource<VALUE, VA
      * support null keys or values, even if the backing Map does. This should
      * not be a barrier to most applications, which do not use this facility
      * (in e.g. {@link HashMap}). Leading ConcurrentMap implementations, like
-     * {@link ConcurrentHashMap} and Guava's {@link MapMaker}, don't support
+     * {@link ConcurrentHashMap} and Guava's MapMaker, don't support
      * null keys or values either. However, if the backing Map does contain a
      * null key or value, and an attempt is made to retrieve it via a
      * {@link Resource}, the result will be a {@link NullPointerException}.
@@ -105,7 +102,7 @@ public final class MapResource<KEY, VALUE> implements KeyValueResource<VALUE, VA
      * @see #viewOf(Map)
      */
     public static <KEY, VALUE> KeyValueResource.Provider<KEY, VALUE, VALUE, VALUE> emptyMap() {
-        final ConcurrentMap<KEY, VALUE> newMap = Maps.newConcurrentMap();
+        final ConcurrentMap<KEY, VALUE> newMap = new ConcurrentHashMap<>();
         return new Provider<KEY, VALUE>(newMap);
     }
 

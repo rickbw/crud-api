@@ -1,7 +1,5 @@
 package rickbw.crud.util;
 
-import com.google.common.base.Preconditions;
-
 import rickbw.crud.DeletableResource;
 import rx.Observable;
 import rx.util.functions.Func1;

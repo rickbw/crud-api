@@ -1,22 +1,11 @@
 package rickbw.crud.util;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
-import rickbw.crud.util.rx.GuavaToRxFunction;
 import rx.util.functions.Func1;
 
 
 public final class DeletableResourceProviders {
-
-    public static <KEY, FROM, TO> DeletableResourceProvider<KEY, TO> map(
-            final DeletableResourceProvider<? super KEY, ? extends FROM> provider,
-            final Function<? super FROM, ? extends TO> mapper) {
-        final Func1<FROM, TO> rxFunc = new GuavaToRxFunction<FROM, TO>(mapper);
-        return map(provider, rxFunc);
-    }
 
     public static <KEY, FROM, TO> DeletableResourceProvider<KEY, TO> map(
             final DeletableResourceProvider<? super KEY, ? extends FROM> provider,
@@ -33,13 +22,6 @@ public final class DeletableResourceProviders {
             }
         };
         return result;
-    }
-
-    public static <FROM, TO, RESPONSE> DeletableResourceProvider<TO, RESPONSE> adaptKey(
-            final DeletableResourceProvider<? super FROM, RESPONSE> provider,
-            final Function<? super TO, ? extends FROM> adapter) {
-        final Func1<TO, FROM> rxFunc = new GuavaToRxFunction<TO, FROM>(adapter);
-        return adaptKey(provider, rxFunc);
     }
 
     public static <FROM, TO, RESPONSE> DeletableResourceProvider<TO, RESPONSE> adaptKey(

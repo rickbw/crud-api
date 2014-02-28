@@ -2,8 +2,7 @@ package rickbw.crud.util.rx;
 
 import java.util.concurrent.Future;
 
-import com.google.common.base.Preconditions;
-
+import rickbw.crud.util.Preconditions;
 import rx.Subscription;
 
 

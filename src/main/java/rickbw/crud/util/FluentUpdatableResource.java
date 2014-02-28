@@ -1,7 +1,5 @@
 package rickbw.crud.util;
 
-import com.google.common.base.Preconditions;
-
 import rickbw.crud.ReadableResource;
 import rickbw.crud.UpdatableResource;
 import rx.Observable;

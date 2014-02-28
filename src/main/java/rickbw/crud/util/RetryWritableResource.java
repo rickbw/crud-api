@@ -2,8 +2,6 @@ package rickbw.crud.util;
 
 import rickbw.crud.ReadableResource;
 import rickbw.crud.WritableResource;
-import com.google.common.base.Preconditions;
-
 import rx.Observable;
 
 
