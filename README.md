@@ -1,7 +1,7 @@
 Crud API
 ========
 
-This project takes its name from the acronym Create/Read/Update/Delete. It provides a generic, foundational abstraction for accessing and manipulating state in the Java programming language. This abstraction is implemented by other projects in the `crud-*` family—for example, [crud-http](https://github.com/rickbw/crud-http) contains an HTTP-based implementation.
+This project takes its name from the acronym Create/Read/Update/Delete. It provides a generic, foundational abstraction for accessing and manipulating state in the Java programming language. This abstraction is implemented by other projects in the `crud-*` family—for example, [Crud HTTP](https://github.com/rickbw/crud-http) contains an HTTP-based implementation.
 
 The Crud API supports data-oriented interactions based on generic _Resources_, which encapsulate state and build upon the [Observable](https://github.com/Netflix/RxJava/blob/master/rxjava-core/src/main/java/rx/Observable.java) abstraction from [RxJava](https://github.com/Netflix/RxJava/). The design emphasizes generality, safety and concurrency.
 
@@ -31,7 +31,12 @@ utilities of two kinds in corresponding packages:
 * The `pattern` package contains ready-to-implement combinations of Crud interfaces intended to meet the needs of certain data-access patterns out of the box. For example, [KeyValueResource](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/pattern/KeyValueResource.java) emulates a `Map` by combining read, write and delete operations while omitting (partial) update.
 
 
+See Also
+--------
+* The [Crud HTTP](https://github.com/rickbw/crud-http) project (`crud-http`) implements this API for HTTP, based on [Jersey](https://jersey.java.net).
+* The [Crud JDBC](https://github.com/rickbw/crud-jdbc) project (`crud-jdbc`) implements this API for JDBC.
+
+
 Copyright and License
 ---------------------
-All files in this project are copyright Rick Warren and, unless otherwise
-noted, licensed under the terms of the Apache 2 license.
+All files in this project are copyright Rick Warren and, unless otherwise noted, licensed under the terms of the Apache 2 license.
