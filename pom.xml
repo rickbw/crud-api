@@ -84,12 +84,6 @@ the License.
             <version>4.5</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-            <version>1.8.5</version>
-        </dependency>
     </dependencies>
 
     <reporting>
@@ -158,9 +152,7 @@ the License.
                         <configuration>
                             <rules>
                                 <banDuplicateClasses>
-                                    <ignoreClasses>
-                                        <ignoreClass>org/hamcrest/*</ignoreClass> <!-- mockito and junit -->
-                                    </ignoreClasses>
+                                    <ignoreClasses />
                                     <findAllDuplicates>true</findAllDuplicates>
                                 </banDuplicateClasses>
                             </rules>
