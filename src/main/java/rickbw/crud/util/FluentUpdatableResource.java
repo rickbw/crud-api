@@ -18,7 +18,7 @@ package rickbw.crud.util;
 import rickbw.crud.ReadableResource;
 import rickbw.crud.UpdatableResource;
 import rx.Observable;
-import rx.util.functions.Func1;
+import rx.functions.Func1;
 
 
 /**

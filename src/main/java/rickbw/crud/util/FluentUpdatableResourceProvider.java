@@ -17,7 +17,7 @@ package rickbw.crud.util;
 
 import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
-import rx.util.functions.Func1;
+import rx.functions.Func1;
 
 
 public abstract class FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>

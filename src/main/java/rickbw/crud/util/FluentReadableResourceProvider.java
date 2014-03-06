@@ -17,7 +17,7 @@ package rickbw.crud.util;
 
 import rickbw.crud.ReadableResource;
 import rickbw.crud.ReadableResourceProvider;
-import rx.util.functions.Func1;
+import rx.functions.Func1;
 
 
 public abstract class FluentReadableResourceProvider<KEY, RSRC>

@@ -17,7 +17,7 @@ package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
-import rx.util.functions.Func1;
+import rx.functions.Func1;
 
 
 public abstract class FluentDeletableResourceProvider<KEY, RESPONSE>

@@ -22,13 +22,14 @@ the License.
     <groupId>rickbw</groupId>
     <artifactId>crud-api</artifactId>
     <name>Crud API</name>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <description>
         A generic abstraction for accessing and manipulating state.
     </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <rxjava-version>0.17.0-RC7</rxjava-version>
     </properties>
 
     <profiles>
@@ -75,7 +76,7 @@ the License.
         <dependency>
             <groupId>com.netflix.rxjava</groupId>
             <artifactId>rxjava-core</artifactId>
-            <version>0.9.0</version>
+            <version>${rxjava-version}</version>
         </dependency>
 
         <dependency>

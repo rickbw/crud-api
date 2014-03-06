@@ -17,7 +17,7 @@ package rickbw.crud.util;
 
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
-import rx.util.functions.Func1;
+import rx.functions.Func1;
 
 
 public abstract class FluentWritableResourceProvider<KEY, RSRC, RESPONSE>

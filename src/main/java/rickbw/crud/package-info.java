@@ -26,8 +26,7 @@
  *  class. This encapsulation means that applications can work with
  *  asynchronous implementations just as easily as synchronous ones, and
  *  cross-cutting behaviors like retries can be transparently composed as
- *  needed -- see, for example,
- *  {@link rickbw.crud.util.RetryReadableResource}.
+ *  needed.
  *  </li>
  * </ul>
  *
@@ -59,9 +58,7 @@
  * In addition to these core abstractions, this library provides a number of
  * utilities of two kinds in corresponding packages:
  * <ul>
- *  <li>The {@link rickbw.crud.util} package contains general utilities.
- *      The related {@link rickbw.crud.util.rx} package contains
- *      utilities specific to working with Rx.</li>
+ *  <li>The {@link rickbw.crud.util} package contains general utilities.</li>
  *  <li>The {@link rickbw.crud.pattern} package contains ready-to-
  *      implement combinations of Crud interfaces intended to meet the needs
  *      of certain data-access patterns out of the box. For example,

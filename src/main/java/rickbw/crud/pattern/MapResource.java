@@ -23,11 +23,8 @@ import java.util.concurrent.ConcurrentMap;
 import rickbw.crud.Resource;
 import rickbw.crud.ResourceProvider;
 import rickbw.crud.util.Preconditions;
-import rickbw.crud.util.rx.NoOpSubscription;
 import rx.Observable;
-import rx.Observer;
-import rx.Subscription;
-import rx.util.functions.Func1;
+import rx.Subscriber;
 
 
 /**
@@ -40,25 +37,23 @@ public final class MapResource<KEY, VALUE> implements KeyValueResource<VALUE, VA
     private final Map<? super KEY, VALUE> map;
     private final KEY key;
 
-    private final Func1<Observer<VALUE>, Subscription> getter = new Func1<Observer<VALUE>, Subscription>() {
+    private final Observable.OnSubscribe<VALUE> getter = new Observable.OnSubscribe<VALUE>() {
         @Override
-        public Subscription call(final Observer<VALUE> observer) {
+        public void call(final Subscriber<? super VALUE> observer) {
             final VALUE value = MapResource.this.map.get(MapResource.this.key);
             Preconditions.checkNotNull(value, "null value in backing Map");
             observer.onNext(value);
             observer.onCompleted();
-            return NoOpSubscription.getInstance();
         }
     };
 
-    private final Func1<Observer<VALUE>, Subscription> remover = new Func1<Observer<VALUE>, Subscription>() {
+    private final Observable.OnSubscribe<VALUE> remover = new Observable.OnSubscribe<VALUE>() {
         @Override
-        public Subscription call(final Observer<VALUE> observer) {
+        public void call(final Subscriber<? super VALUE> observer) {
             final VALUE removed = MapResource.this.map.remove(MapResource.this.key);
             Preconditions.checkNotNull(removed, "null value in backing Map");
             observer.onNext(removed);
             observer.onCompleted();
-            return NoOpSubscription.getInstance();
         }
     };
 
@@ -129,14 +124,13 @@ public final class MapResource<KEY, VALUE> implements KeyValueResource<VALUE, VA
     @Override
     public Observable<VALUE> write(final VALUE newValue) {
         Preconditions.checkNotNull(newValue);
-        return Observable.create(new Func1<Observer<VALUE>, Subscription>() {
+        return Observable.create(new Observable.OnSubscribe<VALUE>() {
             @Override
-            public Subscription call(final Observer<VALUE> observer) {
+            public void call(final Subscriber<? super VALUE> observer) {
                 final VALUE oldValue = MapResource.this.map.put(MapResource.this.key, newValue);
                 Preconditions.checkNotNull(oldValue);
                 observer.onNext(oldValue);
                 observer.onCompleted();
-                return NoOpSubscription.getInstance();
             }
         });
     }
