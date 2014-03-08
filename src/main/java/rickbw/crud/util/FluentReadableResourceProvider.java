@@ -37,10 +37,10 @@ implements ReadableResourceProvider<KEY, RSRC> {
         } else {
             return new FluentReadableResourceProvider<KEY, RSRC>() {
                 @Override
-                public ReadableResource<RSRC> get(final KEY key) {
+                public FluentReadableResource<RSRC> get(final KEY key) {
                     final ReadableResource<RSRC> resource
                             = (ReadableResource<RSRC>) provider.get(key);
-                    return resource;
+                    return FluentReadableResource.from(resource);
                 }
             };
         }
@@ -52,10 +52,10 @@ implements ReadableResourceProvider<KEY, RSRC> {
 
         final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
             @Override
-            public ReadableResource<R> get(final KEY key) {
+            public FluentReadableResource<R> get(final KEY key) {
                 final ReadableResource<? extends RSRC> resource = outerProvider().get(key);
                 final ReadableResource<R> mapped = FluentReadableResource.from(resource).mapValue(mapper);
-                return mapped;
+                return FluentReadableResource.from(mapped);
             }
         };
         return result;
@@ -67,14 +67,17 @@ implements ReadableResourceProvider<KEY, RSRC> {
 
         final FluentReadableResourceProvider<K, RSRC> result = new FluentReadableResourceProvider<K, RSRC>() {
             @Override
-            public ReadableResource<RSRC> get(final K key) {
+            public FluentReadableResource<RSRC> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
                 final ReadableResource<RSRC> resource = outerProvider().get(transformedKey);
-                return resource;
+                return FluentReadableResource.from(resource);
             }
         };
         return result;
     }
+
+    @Override
+    public abstract FluentReadableResource<RSRC> get(KEY key);
 
     private FluentReadableResourceProvider<KEY, RSRC> outerProvider() {
         return this;

@@ -37,10 +37,10 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         } else {
             return new FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>() {
                 @Override
-                public UpdatableResource<UPDATE, RESPONSE> get(final KEY key) {
+                public FluentUpdatableResource<UPDATE, RESPONSE> get(final KEY key) {
                     final UpdatableResource<UPDATE, RESPONSE> resource
                             = (UpdatableResource<UPDATE, RESPONSE>) provider.get(key);
-                    return resource;
+                    return FluentUpdatableResource.from(resource);
                 }
             };
         }
@@ -53,10 +53,10 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
         final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
             @Override
-            public UpdatableResource<UPDATE, R> get(final KEY key) {
+            public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
                 final UpdatableResource<? super UPDATE, ? extends RESPONSE> resource = outerProvider().get(key);
                 final UpdatableResource<UPDATE, R> mapped = FluentUpdatableResource.from(resource).mapResponse(mapper);
-                return mapped;
+                return FluentUpdatableResource.from(mapped);
             }
         };
         return result;
@@ -68,10 +68,10 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
         final FluentUpdatableResourceProvider<KEY, U, RESPONSE> result = new FluentUpdatableResourceProvider<KEY, U, RESPONSE>() {
             @Override
-            public UpdatableResource<U, RESPONSE> get(final KEY key) {
+            public FluentUpdatableResource<U, RESPONSE> get(final KEY key) {
                 final UpdatableResource<? super UPDATE, RESPONSE> resource = outerProvider().get(key);
                 final UpdatableResource<U, RESPONSE> transformed = FluentUpdatableResource.from(resource).adaptUpdate(adapter);
-                return transformed;
+                return FluentUpdatableResource.from(transformed);
             }
         };
         return result;
@@ -83,14 +83,17 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
         final FluentUpdatableResourceProvider<K, UPDATE, RESPONSE> result = new FluentUpdatableResourceProvider<K, UPDATE, RESPONSE>() {
             @Override
-            public UpdatableResource<UPDATE, RESPONSE> get(final K key) {
+            public FluentUpdatableResource<UPDATE, RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
                 final UpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(transformedKey);
-                return resource;
+                return FluentUpdatableResource.from(resource);
             }
         };
         return result;
     }
+
+    @Override
+    public abstract FluentUpdatableResource<UPDATE, RESPONSE> get(KEY key);
 
     private FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE> outerProvider() {
         return this;

@@ -37,10 +37,10 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         } else {
             return new FluentDeletableResourceProvider<KEY, RESPONSE>() {
                 @Override
-                public DeletableResource<RESPONSE> get(final KEY key) {
+                public FluentDeletableResource<RESPONSE> get(final KEY key) {
                     final DeletableResource<RESPONSE> resource
                             = (DeletableResource<RESPONSE>) provider.get(key);
-                    return resource;
+                    return FluentDeletableResource.from(resource);
                 }
             };
         }
@@ -52,10 +52,10 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
 
         final FluentDeletableResourceProvider<KEY, R> result = new FluentDeletableResourceProvider<KEY, R>() {
             @Override
-            public DeletableResource<R> get(final KEY key) {
+            public FluentDeletableResource<R> get(final KEY key) {
                 final DeletableResource<? extends RESPONSE> resource = outerProvider().get(key);
                 final DeletableResource<R> mapped = FluentDeletableResource.from(resource).mapResponse(mapper);
-                return mapped;
+                return FluentDeletableResource.from(mapped);
             }
         };
         return result;
@@ -67,14 +67,17 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
 
         final FluentDeletableResourceProvider<K, RESPONSE> result = new FluentDeletableResourceProvider<K, RESPONSE>() {
             @Override
-            public DeletableResource<RESPONSE> get(final K key) {
+            public FluentDeletableResource<RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
                 final DeletableResource<RESPONSE> resource = outerProvider().get(transformedKey);
-                return resource;
+                return FluentDeletableResource.from(resource);
             }
         };
         return result;
     }
+
+    @Override
+    public abstract FluentDeletableResource<RESPONSE> get(KEY key);
 
     private FluentDeletableResourceProvider<KEY, RESPONSE> outerProvider() {
         return this;

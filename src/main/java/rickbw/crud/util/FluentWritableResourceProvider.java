@@ -37,10 +37,10 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         } else {
             return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
                 @Override
-                public WritableResource<RSRC, RESPONSE> get(final KEY key) {
+                public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
                     final WritableResource<RSRC, RESPONSE> rsrc
                             = (WritableResource<RSRC, RESPONSE>) provider.get(key);
-                    return rsrc;
+                    return FluentWritableResource.from(rsrc);
                 }
             };
         }
@@ -52,10 +52,10 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
         final FluentWritableResourceProvider<KEY, RSRC, RESP> result = new FluentWritableResourceProvider<KEY, RSRC, RESP>() {
             @Override
-            public WritableResource<RSRC, RESP> get(final KEY key) {
+            public FluentWritableResource<RSRC, RESP> get(final KEY key) {
                 final WritableResource<? super RSRC, ? extends RESPONSE> resource = outerProvider().get(key);
                 final WritableResource<RSRC, RESP> mapped = FluentWritableResource.from(resource).mapResponse(mapper);
-                return mapped;
+                return FluentWritableResource.from(mapped);
             }
         };
         return result;
@@ -67,10 +67,10 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
         final FluentWritableResourceProvider<KEY, RC, RESPONSE> result = new FluentWritableResourceProvider<KEY, RC, RESPONSE>() {
             @Override
-            public WritableResource<RC, RESPONSE> get(final KEY key) {
+            public FluentWritableResource<RC, RESPONSE> get(final KEY key) {
                 final WritableResource<? super RSRC, RESPONSE> resource = outerProvider().get(key);
                 final WritableResource<RC, RESPONSE> transformed = FluentWritableResource.from(resource).adaptNewValue(adapter);
-                return transformed;
+                return FluentWritableResource.from(transformed);
             }
         };
         return result;
@@ -82,14 +82,17 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
         final FluentWritableResourceProvider<K, RSRC, RESPONSE> result = new FluentWritableResourceProvider<K, RSRC, RESPONSE>() {
             @Override
-            public WritableResource<RSRC, RESPONSE> get(final K key) {
+            public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
                 final WritableResource<RSRC, RESPONSE> resource = outerProvider().get(transformedKey);
-                return resource;
+                return FluentWritableResource.from(resource);
             }
         };
         return result;
     }
+
+    @Override
+    public abstract FluentWritableResource<RSRC, RESPONSE> get(KEY key);
 
     private FluentWritableResourceProvider<KEY, RSRC, RESPONSE> outerProvider() {
         return this;
