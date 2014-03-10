@@ -42,22 +42,6 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
         }
     }
 
-    /**
-     * Access the response to writing the given resource as a resource in its
-     * own right.
-     */
-    public FluentReadableResource<RESPONSE> asReadableResource(final RSRC newValue) {
-        final FluentReadableResource<RESPONSE> wrapper = new FluentReadableResource<RESPONSE>() {
-            @Override
-            public Observable<RESPONSE> get() {
-                // FIXME: Memoize result so we don't write over and over!
-                final Observable<RESPONSE> response = write(newValue);
-                return response;
-            }
-        };
-        return wrapper;
-    }
-
     public <TO> FluentWritableResource<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 

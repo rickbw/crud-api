@@ -15,7 +15,6 @@
 
 package rickbw.crud.util;
 
-import rickbw.crud.ReadableResource;
 import rickbw.crud.UpdatableResource;
 import rx.Observable;
 import rx.functions.Func1;
@@ -23,15 +22,6 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link UpdatableResource}s.
- *
- * You may notice that there is a method
- * {@link FluentWritableResource#asReadableResource(Object)}
- * and a method
- * {@link FluentDeletableResource#asReadableResource()};
- * however, there is no <code>UpdatableResources.asReadableResource<code>.
- * This is by design: Read, Write, and Delete are all idempotent operations;
- * Update is not. To expose an Update as a Read would be to violate the
- * contract of {@link ReadableResource}.
  */
 public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements UpdatableResource<UPDATE, RESPONSE> {
 

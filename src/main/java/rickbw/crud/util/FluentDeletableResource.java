@@ -41,22 +41,6 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
         }
     }
 
-    /**
-     * Access the response to deleting the given resource as a resource in its
-     * own right.
-     */
-    public FluentReadableResource<RESPONSE> asReadableResource() {
-        final FluentReadableResource<RESPONSE> wrapper = new FluentReadableResource<RESPONSE>() {
-            @Override
-            public Observable<RESPONSE> get() {
-                // FIXME: Memoize the result so we don't delete over and over!
-                final Observable<RESPONSE> response = delete();
-                return response;
-            }
-        };
-        return wrapper;
-    }
-
     public <TO> FluentDeletableResource<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 
