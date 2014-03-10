@@ -85,6 +85,8 @@ implements DynamicResource<RSRC, UPDATE, WR_RESP, UP_RESP, DEL_RESP> {
         return this.deleter.delete();
     }
 
+    // TODO: override equals() and hashCode()
+
     private AssembledDynamicResource(
             final ReadableResource<RSRC> reader,
             final WritableResource<? super RSRC, WR_RESP> writer,

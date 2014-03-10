@@ -89,6 +89,8 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
     // TODO: Adapt Subscriber
 
+    // TODO: override equals() and hashCode()
+
     private FluentWritableResource<RSRC, RESPONSE> outerResource() {
         return this;
     }

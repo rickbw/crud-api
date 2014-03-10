@@ -35,6 +35,8 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
                 public Observable<RESPONSE> delete() {
                     return resource.delete();
                 }
+
+                // TODO: override equals() and hashCode()
             };
         }
     }
@@ -65,6 +67,8 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
                 final Observable<TO> mapped = observable.map(mapper);
                 return mapped;
             }
+
+            // TODO: override equals() and hashCode()
         };
         final DeletableResource<TO> newDelegate = result;
         return from(newDelegate);

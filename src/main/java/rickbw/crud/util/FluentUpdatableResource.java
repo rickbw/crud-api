@@ -84,6 +84,8 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
 
     // TODO: Transform Subscriber
 
+    // TODO: override equals() and hashCode()
+
     private FluentUpdatableResource<UPDATE, RESPONSE> outerResource() {
         return this;
     }

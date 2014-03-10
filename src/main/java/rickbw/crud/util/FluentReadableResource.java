@@ -35,6 +35,8 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
                 public Observable<RSRC> get() {
                     return resource.get();
                 }
+
+                // TODO: override equals() and hashCode()
             };
         }
     }
@@ -48,6 +50,8 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
                 final Observable<TO> mapped = observable.map(mapper);
                 return mapped;
             }
+
+            // TODO: override equals() and hashCode()
         };
     }
 

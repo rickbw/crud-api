@@ -209,32 +209,6 @@ public final class MapResource<KEY, VALUE> implements KeyValueResource<VALUE, VA
             return MapResource.class.getSimpleName() + '.' + getClass().getSimpleName()
                     + "[map=" + mapToString(this.map) + ']';
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Provider<?, ?> other = (Provider<?, ?>) obj;
-            if (this.map != other.map) {   // object identity comparison!
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + System.identityHashCode(this.map);
-            return result;
-        }
     }
 
 }

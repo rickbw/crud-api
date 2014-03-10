@@ -73,6 +73,8 @@ implements KeyValueResource<RSRC, WR_RESP, DEL_RESP> {
         return this.deleter.delete();
     }
 
+    // TODO: override equals() and hashCode()
+
     private AssembledKeyValueResource(
             final ReadableResource<RSRC> reader,
             final WritableResource<? super RSRC, WR_RESP> writer,

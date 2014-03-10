@@ -41,14 +41,4 @@ public interface ResourceProvider<KEY> {
      */
     public abstract Resource get(KEY key);
 
-    /**
-     * Two ResourceProviders are considered equal if the would return the
-     * same {@link Resource}s for the same keys.
-     */
-    @Override
-    public abstract boolean equals(Object other);
-
-    @Override
-    public abstract int hashCode();
-
 }
