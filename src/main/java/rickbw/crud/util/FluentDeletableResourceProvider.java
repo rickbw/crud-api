@@ -17,6 +17,8 @@ package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
+import rx.Observable;
+import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -74,6 +76,52 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
             }
         };
         return result;
+    }
+
+    /**
+     * Return a resource provider, the resource from which will transparently
+     * retry calls to {@link DeletableResource#delete()} that throw, as with
+     * {@link Observable#retry(int)}. Specifically, any {@link Observable}
+     * returned by {@link DeletableResource#delete()} will re-subscribe up to
+     * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
+     * called, rather than propagating that {@code onError} call.
+     *
+     * If a subscription fails after emitting some number of elements via
+     * {@link Observer#onNext(Object)}, those elements will be emitted again
+     * on the retry. For example, if an {@code Observable} fails at first
+     * after emitting {@code [1, 2]}, then succeeds the second time after
+     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
+     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
+     *
+     * @param maxRetries    number of retry attempts before failing
+     */
+    public FluentDeletableResourceProvider<KEY, RESPONSE> retry(final int maxRetries) {
+        if (maxRetries == 0) {
+            return this;    // no-op
+        } else if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
+        } else {
+            return new FluentDeletableResourceProvider<KEY, RESPONSE>() {
+                @Override
+                public FluentDeletableResource<RESPONSE> get(final KEY key) {
+                    final FluentDeletableResource<RESPONSE> resource = outerProvider().get(key)
+                            .retry(maxRetries);
+                    return resource;
+                }
+            };
+        }
+    }
+
+    public <TO> FluentDeletableResourceProvider<KEY, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+        Preconditions.checkNotNull(bind, "null operator");
+        return new FluentDeletableResourceProvider<KEY, TO>() {
+            @Override
+            public FluentDeletableResource<TO> get(final KEY key) {
+                final FluentDeletableResource<TO> resource = outerProvider().get(key)
+                        .lift(bind);
+                return resource;
+            }
+        };
     }
 
     @Override
