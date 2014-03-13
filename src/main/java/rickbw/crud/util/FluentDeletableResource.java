@@ -25,45 +25,105 @@ import rx.functions.Func1;
  */
 public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
 
+    /*package*/ final DeletableResource<?> delegate;
+
+
     public static <RESPONSE> FluentDeletableResource<RESPONSE> from(final DeletableResource<RESPONSE> resource) {
         if (resource instanceof FluentDeletableResource<?>) {
             return (FluentDeletableResource<RESPONSE>) resource;
         } else {
-            Preconditions.checkNotNull(resource);
-            return new FluentDeletableResource<RESPONSE>() {
-                @Override
-                public Observable<RESPONSE> delete() {
-                    return resource.delete();
-                }
-
-                // TODO: override equals() and hashCode()
-            };
+            return new DelegatingDeletableResource<>(resource);
         }
     }
 
     public <TO> FluentDeletableResource<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
-        final FluentDeletableResource<TO> result = new FluentDeletableResource<TO>() {
-            @Override
-            public Observable<TO> delete() {
-                final Observable<? extends RESPONSE> observable = outerResource().delete();
-                final Observable<TO> mapped = observable.map(mapper);
-                return mapped;
-            }
-
-            // TODO: override equals() and hashCode()
-        };
-        final DeletableResource<TO> newDelegate = result;
-        return from(newDelegate);
+        return new MappingDeletableResource<>(this, mapper);
     }
 
     // TODO: Expose other Observable methods
 
     // TODO: Adapt Subscriber
 
-    private FluentDeletableResource<RESPONSE> outerResource() {
-        return this;
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FluentDeletableResource<?> other = (FluentDeletableResource<?>) obj;
+        if (!this.delegate.equals(other.delegate)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        final int result = prime + this.delegate.hashCode();
+        return result;
+    }
+
+    protected FluentDeletableResource(final DeletableResource<?> delegate) {
+        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
+    }
+
+
+    private static class DelegatingDeletableResource<RESPONSE>
+    extends FluentDeletableResource<RESPONSE> {
+        public DelegatingDeletableResource(final DeletableResource<RESPONSE> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public Observable<RESPONSE> delete() {
+            @SuppressWarnings("unchecked")
+            final DeletableResource<RESPONSE> rsrc = (DeletableResource<RESPONSE>) super.delegate;
+            return rsrc.delete();
+        }
+    }
+
+
+    private static final class MappingDeletableResource<FROM, TO> extends FluentDeletableResource<TO> {
+        private final Func1<? super FROM, ? extends TO> mapper;
+
+        public MappingDeletableResource(
+                final DeletableResource<FROM> delegate,
+                final Func1<? super FROM, ? extends TO> mapper) {
+            super(delegate);
+            this.mapper = Preconditions.checkNotNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> delete() {
+            @SuppressWarnings("unchecked")
+            final DeletableResource<FROM> rsrc = (DeletableResource<FROM>) super.delegate;
+            final Observable<? extends FROM> observable = rsrc.delete();
+            final Observable<TO> mapped = observable.map(this.mapper);
+            return mapped;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final MappingDeletableResource<?, ?> other = (MappingDeletableResource<?, ?>) obj;
+            return this.mapper.equals(other.mapper);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.mapper.hashCode();
+            return result;
+        }
     }
 
 }
