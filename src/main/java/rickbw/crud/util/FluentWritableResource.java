@@ -25,6 +25,9 @@ import rx.functions.Func1;
  */
 public abstract class FluentWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
+    protected final WritableResource<?, ?> delegate;
+
+
     public static <RSRC, RESPONSE> FluentWritableResource<RSRC, RESPONSE> from(
             final WritableResource<? super RSRC, RESPONSE> resource) {
         if (resource instanceof FluentWritableResource<?, ?>) {
@@ -32,51 +35,143 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             final FluentWritableResource<RSRC, RESPONSE> result = (FluentWritableResource<RSRC, RESPONSE>) resource;
             return result;
         } else {
-            Preconditions.checkNotNull(resource);
-            return new FluentWritableResource<RSRC, RESPONSE>() {
-                @Override
-                public Observable<RESPONSE> write(final RSRC newValue) {
-                    return resource.write(newValue);
-                }
-            };
+            return new DelegatingWritableResource<>(resource);
         }
     }
 
     public <TO> FluentWritableResource<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
-        return new FluentWritableResource<RSRC, TO>() {
-            @Override
-            public Observable<TO> write(final RSRC value) {
-                final Observable<? extends RESPONSE> observable = outerResource().write(value);
-                final Observable<TO> mapped = observable.map(mapper);
-                return mapped;
-            }
-        };
+        return new MappingWritableResource<>(this, mapper);
     }
-
-    // TODO: Expose other Observable methods
 
     public <TO> FluentWritableResource<TO, RESPONSE> adaptNewValue(
             final Func1<? super TO, ? extends RSRC> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
-        return new FluentWritableResource<TO, RESPONSE>() {
-            @Override
-            public Observable<RESPONSE> write(final TO value) {
-                final RSRC transformed = adapter.call(value);
-                final Observable<RESPONSE> observable = outerResource().write(transformed);
-                return observable;
-            }
-        };
+        return new AdaptingWritableResource<>(this, adapter);
     }
 
     // TODO: Adapt Subscriber
 
-    // TODO: override equals() and hashCode()
+    // TODO: Expose other Observable methods
 
-    private FluentWritableResource<RSRC, RESPONSE> outerResource() {
-        return this;
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FluentWritableResource<?, ?> other = (FluentWritableResource<?, ?>) obj;
+        if (!this.delegate.equals(other.delegate)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        final int result = prime + this.delegate.hashCode();
+        return result;
+    }
+
+    protected FluentWritableResource(final WritableResource<?, ?> delegate) {
+        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
+    }
+
+
+    private static final class DelegatingWritableResource<RSRC, RESPONSE>
+    extends FluentWritableResource<RSRC, RESPONSE> {
+        public DelegatingWritableResource(final WritableResource<? super RSRC, RESPONSE> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public Observable<RESPONSE> write(final RSRC newValue) {
+            @SuppressWarnings("unchecked")
+            final WritableResource<? super RSRC, RESPONSE> rsrc = (WritableResource<? super RSRC, RESPONSE>) super.delegate;
+            return rsrc.write(newValue);
+        }
+    }
+
+
+    private static final class MappingWritableResource<RSRC, FROM, TO>
+    extends FluentWritableResource<RSRC, TO> {
+        private final Func1<? super FROM, ? extends TO> mapper;
+
+        public MappingWritableResource(
+                final WritableResource<RSRC, FROM> delegate,
+                final Func1<? super FROM, ? extends TO> mapper) {
+            super(delegate);
+            this.mapper = Preconditions.checkNotNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> write(final RSRC value) {
+            @SuppressWarnings("unchecked")
+            final WritableResource<RSRC, FROM> rsrc = (WritableResource<RSRC, FROM>) super.delegate;
+            final Observable<? extends FROM> observable = rsrc.write(value);
+            final Observable<TO> mapped = observable.map(this.mapper);
+            return mapped;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final MappingWritableResource<?, ?, ?> other = (MappingWritableResource<?, ?, ?>) obj;
+            return this.mapper.equals(other.mapper);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.mapper.hashCode();
+            return result;
+        }
+    }
+
+
+    private static final class AdaptingWritableResource<FROM, TO, RESPONSE>
+    extends FluentWritableResource<TO, RESPONSE> {
+        private final Func1<? super TO, ? extends FROM> adapter;
+
+        private AdaptingWritableResource(
+                final WritableResource<FROM, RESPONSE> delegate,
+                final Func1<? super TO, ? extends FROM> adapter) {
+            super(delegate);
+            this.adapter = Preconditions.checkNotNull(adapter, "null function");
+        }
+
+        @Override
+        public Observable<RESPONSE> write(final TO value) {
+            final FROM transformed = this.adapter.call(value);
+            @SuppressWarnings("unchecked")
+            final WritableResource<FROM, RESPONSE> rsrc = (WritableResource<FROM, RESPONSE>) super.delegate;
+            final Observable<RESPONSE> observable = rsrc.write(transformed);
+            return observable;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final AdaptingWritableResource<?, ?, ?> other = (AdaptingWritableResource<?, ?, ?>) obj;
+            return this.adapter.equals(other.adapter);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.adapter.hashCode();
+            return result;
+        }
     }
 
 }
