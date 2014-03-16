@@ -17,6 +17,7 @@ package rickbw.crud.util;
 
 import rickbw.crud.WritableResource;
 import rx.Observable;
+import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -48,7 +49,34 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
         return new AdaptingWritableResource<>(this, adapter);
     }
 
-    // TODO: Adapt Subscriber
+    /**
+     * Return a resource that will transparently retry calls to
+     * {@link #write(Object)} that throw, as with {@link Observable#retry(int)}.
+     * Specifically, any {@link Observable} returned by {@link #write(Object)}
+     * will re-subscribe up to {@code maxRetries} times if
+     * {@link Observer#onError(Throwable)} is called, rather than propagating
+     * that {@code onError} call.
+     *
+     * If a subscription fails after emitting some number of elements via
+     * {@link Observer#onNext(Object)}, those elements will be emitted again
+     * on the retry. For example, if an {@code Observable} fails at first
+     * after emitting {@code [1, 2]}, then succeeds the second time after
+     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
+     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
+     *
+     * @param maxRetries    number of retry attempts before failing
+     */
+    public FluentWritableResource<RSRC, RESPONSE> retry(final int maxRetries) {
+        if (maxRetries == 0) {
+            return this;
+        } else {
+            return new RetryingWritableResource<>(this, maxRetries);
+        }
+    }
+
+    public <TO> FluentWritableResource<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+        return new LiftingWritableResource<>(this, bind);
+    }
 
     // TODO: Expose other Observable methods
 
@@ -170,6 +198,87 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             final int prime = 31;
             int result = super.hashCode();
             result = prime * result + this.adapter.hashCode();
+            return result;
+        }
+    }
+
+
+    private static final class RetryingWritableResource<RSRC, RESPONSE>
+    extends FluentWritableResource<RSRC, RESPONSE> {
+        private final int maxRetries;
+
+        public RetryingWritableResource(
+                final WritableResource<RSRC, RESPONSE> delegate,
+                final int maxRetries) {
+            super(delegate);
+            if (maxRetries <= 0) {
+                throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
+            }
+            this.maxRetries = maxRetries;
+        }
+
+        @Override
+        public Observable<RESPONSE> write(final RSRC newResourceState) {
+            @SuppressWarnings("unchecked")
+            final WritableResource<RSRC, RESPONSE> rsrc = (WritableResource<RSRC, RESPONSE>) super.delegate;
+            final Observable<RESPONSE> obs = rsrc.write(newResourceState)
+                    .retry(this.maxRetries);
+            return obs;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final RetryingWritableResource<?, ?> other = (RetryingWritableResource<?, ?>) obj;
+            return this.maxRetries != other.maxRetries;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.maxRetries;
+            return result;
+        }
+    }
+
+
+    private static final class LiftingWritableResource<RSRC, FROM, TO>
+    extends FluentWritableResource<RSRC, TO> {
+        private final Observable.Operator<TO, FROM> bind;
+
+        public LiftingWritableResource(
+                final WritableResource<RSRC, FROM> delegate,
+                final Observable.Operator<TO, FROM> bind) {
+            super(delegate);
+            this.bind = Preconditions.checkNotNull(bind, "null operator");
+        }
+
+        @Override
+        public Observable<TO> write(final RSRC newResourceState) {
+            @SuppressWarnings("unchecked")
+            final WritableResource<RSRC, FROM> rsrc = (WritableResource<RSRC, FROM>) super.delegate;
+            final Observable<TO> obs = rsrc.write(newResourceState)
+                    .lift(this.bind);
+            return obs;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final LiftingWritableResource<?, ?, ?> other = (LiftingWritableResource<?, ?, ?>) obj;
+            return this.bind.equals(other.bind);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.bind.hashCode();
             return result;
         }
     }

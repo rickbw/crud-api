@@ -17,6 +17,8 @@ package rickbw.crud.util;
 
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
+import rx.Observable;
+import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -89,6 +91,53 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
             }
         };
         return result;
+    }
+
+    /**
+     * Return a resource provider, the resource from which will transparently
+     * retry calls to {@link WritableResource#write(Object)} that throw, as
+     * with {@link Observable#retry(int)}. Specifically, any
+     * {@link Observable} returned by {@link WritableResource#write(Object)}
+     * will re-subscribe up to {@code maxRetries} times if
+     * {@link Observer#onError(Throwable)} is called, rather than propagating
+     * that {@code onError} call.
+     *
+     * If a subscription fails after emitting some number of elements via
+     * {@link Observer#onNext(Object)}, those elements will be emitted again
+     * on the retry. For example, if an {@code Observable} fails at first
+     * after emitting {@code [1, 2]}, then succeeds the second time after
+     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
+     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
+     *
+     * @param maxRetries    number of retry attempts before failing
+     */
+    public FluentWritableResourceProvider<KEY, RSRC, RESPONSE> retry(final int maxRetries) {
+        if (maxRetries == 0) {
+            return this;    // no-op
+        } else if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
+        } else {
+            return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
+                @Override
+                public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
+                    final FluentWritableResource<RSRC, RESPONSE> resource = outerProvider().get(key)
+                            .retry(maxRetries);
+                    return resource;
+                }
+            };
+        }
+    }
+
+    public <TO> FluentWritableResourceProvider<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+        Preconditions.checkNotNull(bind, "null operator");
+        return new FluentWritableResourceProvider<KEY, RSRC, TO>() {
+            @Override
+            public FluentWritableResource<RSRC, TO> get(final KEY key) {
+                final FluentWritableResource<RSRC, TO> resource = outerProvider().get(key)
+                        .lift(bind);
+                return resource;
+            }
+        };
     }
 
     @Override
