@@ -22,6 +22,11 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link UpdatableResource}s.
+ *
+ * Note that this class lacks a {@code retry} operation, as in e.g.
+ * {@link FluentReadableResource#retry(int)}. This is because updates are not
+ * idempotent; hence, retries are not inherently retriable. Applications
+ * must handle retry logic, if any, themselves.
  */
 public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements UpdatableResource<UPDATE, RESPONSE> {
 
@@ -50,7 +55,9 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
         return new AdaptingUpdatableResource<>(this, adapter);
     }
 
-    // TODO: Transform Subscriber
+    public <TO> FluentUpdatableResource<UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+        return new LiftingUpdatableResource<>(this, bind);
+    }
 
     // TODO: Expose other Observable methods
 
@@ -173,6 +180,45 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
             final int prime = 31;
             int result = super.hashCode();
             result = prime * result + this.adapter.hashCode();
+            return result;
+        }
+    }
+
+
+    private static final class LiftingUpdatableResource<UPDATE, FROM, TO>
+    extends FluentUpdatableResource<UPDATE, TO> {
+        private final Observable.Operator<TO, FROM> bind;
+
+        public LiftingUpdatableResource(
+                final UpdatableResource<UPDATE, FROM> delegate,
+                final Observable.Operator<TO, FROM> bind) {
+            super(delegate);
+            this.bind = Preconditions.checkNotNull(bind, "null operator");
+        }
+
+        @Override
+        public Observable<TO> update(final UPDATE update) {
+            @SuppressWarnings("unchecked")
+            final UpdatableResource<UPDATE, FROM> rsrc = (UpdatableResource<UPDATE, FROM>) super.delegate;
+            final Observable<TO> obs = rsrc.update(update)
+                    .lift(this.bind);
+            return obs;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (!super.equals(obj)) {
+                return false;
+            }
+            final LiftingUpdatableResource<?, ?, ?> other = (LiftingUpdatableResource<?, ?, ?>) obj;
+            return this.bind.equals(other.bind);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + this.bind.hashCode();
             return result;
         }
     }

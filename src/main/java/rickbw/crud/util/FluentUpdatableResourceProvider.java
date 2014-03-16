@@ -17,9 +17,18 @@ package rickbw.crud.util;
 
 import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
+import rx.Observable;
 import rx.functions.Func1;
 
 
+/**
+ * A set of fluent transformations on {@link UpdatableResourceProvider}s.
+ *
+ * Note that this class lacks a {@code retry} operation, as in e.g.
+ * {@link FluentReadableResourceProvider#retry(int)}. This is because updates
+ * are not idempotent; hence, retries are not inherently retriable.
+ * Applications must handle retry logic, if any, themselves.
+ */
 public abstract class FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>
 implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
@@ -90,6 +99,18 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
             }
         };
         return result;
+    }
+
+    public <TO> FluentUpdatableResourceProvider<KEY, UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+        Preconditions.checkNotNull(bind, "null operator");
+        return new FluentUpdatableResourceProvider<KEY, UPDATE, TO>() {
+            @Override
+            public FluentUpdatableResource<UPDATE, TO> get(final KEY key) {
+                final FluentUpdatableResource<UPDATE, TO> resource = outerProvider().get(key)
+                        .lift(bind);
+                return resource;
+            }
+        };
     }
 
     @Override
