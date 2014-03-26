@@ -29,7 +29,7 @@ the License.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <rxjava-version>0.17.0-RC7</rxjava-version>
+        <rxjava-version>0.17.2</rxjava-version>
     </properties>
 
     <profiles>
