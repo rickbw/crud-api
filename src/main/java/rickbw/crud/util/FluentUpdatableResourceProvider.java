@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.UpdatableResource;
@@ -33,23 +32,14 @@ public abstract class FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>
 implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
     public static <KEY, UPDATE, RESPONSE> FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE> from(
-            final UpdatableResourceProvider<? super KEY, ? super UPDATE, ? extends RESPONSE> provider) {
-        /* XXX: The casts below should be safe, since the API only consumes
-         * instances of KEY and UPDATE and only produces instances of RESPONSE.
-         * However, the Java generic wildcards don't want to cooperate.
-         */
+            final UpdatableResourceProvider<KEY, UPDATE, RESPONSE> provider) {
         if (provider instanceof FluentUpdatableResourceProvider<?, ?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE> typedProvider
-                    = (FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>) provider;
-            return typedProvider;
+            return (FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>) provider;
         } else {
             return new FluentUpdatableResourceProvider<KEY, UPDATE, RESPONSE>() {
                 @Override
                 public FluentUpdatableResource<UPDATE, RESPONSE> get(final KEY key) {
-                    final UpdatableResource<UPDATE, RESPONSE> resource
-                            = (UpdatableResource<UPDATE, RESPONSE>) provider.get(key);
-                    return FluentUpdatableResource.from(resource);
+                    return FluentUpdatableResource.from(provider.get(key));
                 }
             };
         }
@@ -63,7 +53,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
             @Override
             public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
-                final UpdatableResource<? super UPDATE, ? extends RESPONSE> resource = outerProvider().get(key);
+                final FluentUpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(key);
                 final UpdatableResource<UPDATE, R> mapped = FluentUpdatableResource.from(resource).mapResponse(mapper);
                 return FluentUpdatableResource.from(mapped);
             }
@@ -78,7 +68,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         final FluentUpdatableResourceProvider<KEY, U, RESPONSE> result = new FluentUpdatableResourceProvider<KEY, U, RESPONSE>() {
             @Override
             public FluentUpdatableResource<U, RESPONSE> get(final KEY key) {
-                final UpdatableResource<? super UPDATE, RESPONSE> resource = outerProvider().get(key);
+                final UpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(key);
                 final UpdatableResource<U, RESPONSE> transformed = FluentUpdatableResource.from(resource).adaptUpdate(adapter);
                 return FluentUpdatableResource.from(transformed);
             }

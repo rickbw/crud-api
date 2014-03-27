@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.WritableResource;
@@ -26,15 +25,10 @@ import rx.functions.Func1;
  */
 public abstract class FluentWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
-    protected final WritableResource<?, ?> delegate;
-
-
     public static <RSRC, RESPONSE> FluentWritableResource<RSRC, RESPONSE> from(
-            final WritableResource<? super RSRC, RESPONSE> resource) {
+            final WritableResource<RSRC, RESPONSE> resource) {
         if (resource instanceof FluentWritableResource<?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentWritableResource<RSRC, RESPONSE> result = (FluentWritableResource<RSRC, RESPONSE>) resource;
-            return result;
+            return (FluentWritableResource<RSRC, RESPONSE>) resource;
         } else {
             return new DelegatingWritableResource<>(resource);
         }
@@ -80,206 +74,139 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
     // TODO: Expose other Observable methods
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+
+    /**
+     * Private superclass for the concrete nested classes here. It cannot be
+     * combined with its parent class, because it needs additional type
+     * parameters that should not be public.
+     */
+    private static abstract class AbstractFluentWritableResource<FROMRS, TORS, FROMRP, TORP, T>
+    extends FluentWritableResource<TORS, TORP> {
+        protected final FluentResourceStateMixin<WritableResource<FROMRS, FROMRP>, T> state;
+
+        protected AbstractFluentWritableResource(
+                final WritableResource<FROMRS, FROMRP> delegate,
+                final T auxiliary) {
+            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final AbstractFluentWritableResource<?, ?, ?, ?, ?> other = (AbstractFluentWritableResource<?, ?, ?, ?, ?>) obj;
+            if (!this.state.equals(other.state)) {
+                return false;
+            }
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FluentWritableResource<?, ?> other = (FluentWritableResource<?, ?>) obj;
-        if (!this.delegate.equals(other.delegate)) {
-            return false;
-        }
-        return true;
-    }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        final int result = prime + this.delegate.hashCode();
-        return result;
-    }
-
-    protected FluentWritableResource(final WritableResource<?, ?> delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + this.state.hashCode();
+            return result;
+        }
     }
 
 
     private static final class DelegatingWritableResource<RSRC, RESPONSE>
-    extends FluentWritableResource<RSRC, RESPONSE> {
-        public DelegatingWritableResource(final WritableResource<? super RSRC, RESPONSE> delegate) {
-            super(delegate);
+    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
+        public DelegatingWritableResource(final WritableResource<RSRC, RESPONSE> delegate) {
+            super(delegate, null);
         }
 
         @Override
         public Observable<RESPONSE> write(final RSRC newValue) {
-            @SuppressWarnings("unchecked")
-            final WritableResource<? super RSRC, RESPONSE> rsrc = (WritableResource<? super RSRC, RESPONSE>) super.delegate;
-            return rsrc.write(newValue);
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .write(newValue);
+            return response;
         }
     }
 
 
     private static final class MappingWritableResource<RSRC, FROM, TO>
-    extends FluentWritableResource<RSRC, TO> {
-        private final Func1<? super FROM, ? extends TO> mapper;
-
+    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
         public MappingWritableResource(
                 final WritableResource<RSRC, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
-            super(delegate);
-            this.mapper = Preconditions.checkNotNull(mapper, "null function");
+            super(delegate, mapper);
+            Preconditions.checkNotNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> write(final RSRC value) {
-            @SuppressWarnings("unchecked")
-            final WritableResource<RSRC, FROM> rsrc = (WritableResource<RSRC, FROM>) super.delegate;
-            final Observable<? extends FROM> observable = rsrc.write(value);
-            final Observable<TO> mapped = observable.map(this.mapper);
-            return mapped;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final MappingWritableResource<?, ?, ?> other = (MappingWritableResource<?, ?, ?>) obj;
-            return this.mapper.equals(other.mapper);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.mapper.hashCode();
-            return result;
+            final Observable<TO> response = super.state.getDelegate()
+                    .write(value)
+                    .map(super.state.getAuxiliaryState());
+            return response;
         }
     }
 
 
     private static final class AdaptingWritableResource<FROM, TO, RESPONSE>
-    extends FluentWritableResource<TO, RESPONSE> {
-        private final Func1<? super TO, ? extends FROM> adapter;
-
+    extends AbstractFluentWritableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
         private AdaptingWritableResource(
                 final WritableResource<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
-            super(delegate);
-            this.adapter = Preconditions.checkNotNull(adapter, "null function");
+            super(delegate, adapter);
+            Preconditions.checkNotNull(adapter, "null function");
         }
 
         @Override
         public Observable<RESPONSE> write(final TO value) {
-            final FROM transformed = this.adapter.call(value);
-            @SuppressWarnings("unchecked")
-            final WritableResource<FROM, RESPONSE> rsrc = (WritableResource<FROM, RESPONSE>) super.delegate;
-            final Observable<RESPONSE> observable = rsrc.write(transformed);
-            return observable;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final AdaptingWritableResource<?, ?, ?> other = (AdaptingWritableResource<?, ?, ?>) obj;
-            return this.adapter.equals(other.adapter);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.adapter.hashCode();
-            return result;
+            final FROM transformed = super.state.getAuxiliaryState().call(value);
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .write(transformed);
+            return response;
         }
     }
 
 
     private static final class RetryingWritableResource<RSRC, RESPONSE>
-    extends FluentWritableResource<RSRC, RESPONSE> {
-        private final int maxRetries;
-
+    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
         public RetryingWritableResource(
                 final WritableResource<RSRC, RESPONSE> delegate,
                 final int maxRetries) {
-            super(delegate);
+            super(delegate, maxRetries);
             if (maxRetries <= 0) {
                 throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
             }
-            this.maxRetries = maxRetries;
         }
 
         @Override
         public Observable<RESPONSE> write(final RSRC newResourceState) {
-            @SuppressWarnings("unchecked")
-            final WritableResource<RSRC, RESPONSE> rsrc = (WritableResource<RSRC, RESPONSE>) super.delegate;
-            final Observable<RESPONSE> obs = rsrc.write(newResourceState)
-                    .retry(this.maxRetries);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final RetryingWritableResource<?, ?> other = (RetryingWritableResource<?, ?>) obj;
-            return this.maxRetries != other.maxRetries;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.maxRetries;
-            return result;
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .write(newResourceState)
+                    .retry(super.state.getAuxiliaryState());
+            return response;
         }
     }
 
 
     private static final class LiftingWritableResource<RSRC, FROM, TO>
-    extends FluentWritableResource<RSRC, TO> {
-        private final Observable.Operator<TO, FROM> bind;
-
+    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingWritableResource(
                 final WritableResource<RSRC, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
-            super(delegate);
-            this.bind = Preconditions.checkNotNull(bind, "null operator");
+            super(delegate, bind);
+            Preconditions.checkNotNull(bind, "null operator");
         }
 
         @Override
         public Observable<TO> write(final RSRC newResourceState) {
-            @SuppressWarnings("unchecked")
-            final WritableResource<RSRC, FROM> rsrc = (WritableResource<RSRC, FROM>) super.delegate;
-            final Observable<TO> obs = rsrc.write(newResourceState)
-                    .lift(this.bind);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final LiftingWritableResource<?, ?, ?> other = (LiftingWritableResource<?, ?, ?>) obj;
-            return this.bind.equals(other.bind);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.bind.hashCode();
-            return result;
+            final Observable<TO> response = super.state.getDelegate()
+                    .write(newResourceState)
+                    .lift(super.state.getAuxiliaryState());
+            return response;
         }
     }
 

@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
@@ -26,23 +25,14 @@ public abstract class FluentDeletableResourceProvider<KEY, RESPONSE>
 implements DeletableResourceProvider<KEY, RESPONSE> {
 
     public static <KEY, RESPONSE> FluentDeletableResourceProvider<KEY, RESPONSE> from(
-            final DeletableResourceProvider<? super KEY, ? extends RESPONSE> provider) {
-        /* XXX: The casts below should be safe, since the API only consumes
-         * instances of KEY and only produces instances of RESPONSE.
-         * However, the Java generic wildcards don't want to cooperate.
-         */
+            final DeletableResourceProvider<KEY, RESPONSE> provider) {
         if (provider instanceof FluentDeletableResourceProvider<?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentDeletableResourceProvider<KEY, RESPONSE> typedProvider
-                    = (FluentDeletableResourceProvider<KEY, RESPONSE>) provider;
-            return typedProvider;
+            return (FluentDeletableResourceProvider<KEY, RESPONSE>) provider;
         } else {
             return new FluentDeletableResourceProvider<KEY, RESPONSE>() {
                 @Override
                 public FluentDeletableResource<RESPONSE> get(final KEY key) {
-                    final DeletableResource<RESPONSE> resource
-                            = (DeletableResource<RESPONSE>) provider.get(key);
-                    return FluentDeletableResource.from(resource);
+                    return FluentDeletableResource.from(provider.get(key));
                 }
             };
         }

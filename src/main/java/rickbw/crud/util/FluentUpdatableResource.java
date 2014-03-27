@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.UpdatableResource;
@@ -30,17 +29,11 @@ import rx.functions.Func1;
  */
 public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements UpdatableResource<UPDATE, RESPONSE> {
 
-    protected final UpdatableResource<?, ?> delegate;
-
-
     public static <UPDATE, RESPONSE> FluentUpdatableResource<UPDATE, RESPONSE> from(
-            final UpdatableResource<? super UPDATE, RESPONSE> resource) {
+            final UpdatableResource<UPDATE, RESPONSE> resource) {
         if (resource instanceof FluentUpdatableResource<?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentUpdatableResource<UPDATE, RESPONSE> result = (FluentUpdatableResource<UPDATE, RESPONSE>) resource;
-            return result;
+            return (FluentUpdatableResource<UPDATE, RESPONSE>) resource;
         } else {
-            Preconditions.checkNotNull(resource);
             return new DelegatingUpdatableResource<>(resource);
         }
     }
@@ -61,165 +54,123 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
 
     // TODO: Expose other Observable methods
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+
+    /**
+     * Private superclass for the concrete nested classes here. It cannot be
+     * combined with its parent class, because it needs additional type
+     * parameters that should not be public.
+     */
+    private static abstract class AbstractFluentUpdatableResource<FROMU, TOU, FROMR, TOR, T>
+    extends FluentUpdatableResource<TOU, TOR> {
+        protected final FluentResourceStateMixin<UpdatableResource<FROMU, FROMR>, T> state;
+
+        protected AbstractFluentUpdatableResource(
+                final UpdatableResource<FROMU, FROMR> delegate,
+                final T auxiliary) {
+            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final AbstractFluentUpdatableResource<?, ?, ?, ?, ?> other = (AbstractFluentUpdatableResource<?, ?, ?, ?, ?>) obj;
+            if (!this.state.equals(other.state)) {
+                return false;
+            }
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FluentUpdatableResource<?, ?> other = (FluentUpdatableResource<?, ?>) obj;
-        if (!this.delegate.equals(other.delegate)) {
-            return false;
-        }
-        return true;
-    }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        final int result = prime + this.delegate.hashCode();
-        return result;
-    }
-
-    protected FluentUpdatableResource(final UpdatableResource<?, ?> delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + this.state.hashCode();
+            return result;
+        }
     }
 
 
+    /**
+     * It may seem that the business of this class could be accomplished by
+     * FluentUpdatableResource itself. However, that would require an
+     * additional layer of equals() and hashCode overrides and an unsafe cast.
+     */
     private static final class DelegatingUpdatableResource<UPDATE, RESPONSE>
-    extends FluentUpdatableResource<UPDATE, RESPONSE> {
-        public DelegatingUpdatableResource(final UpdatableResource<? super UPDATE, RESPONSE> delegate) {
-            super(delegate);
+    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, RESPONSE, RESPONSE, Void> {
+        public DelegatingUpdatableResource(final UpdatableResource<UPDATE, RESPONSE> delegate) {
+            super(delegate, null);
         }
 
         @Override
         public Observable<RESPONSE> update(final UPDATE update) {
-            @SuppressWarnings("unchecked")
-            final UpdatableResource<? super UPDATE, RESPONSE> rsrc
-                    = (UpdatableResource<? super UPDATE, RESPONSE>) super.delegate;
-            return rsrc.update(update);
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .update(update);
+            return response;
         }
     }
 
 
     private static final class MappingUpdatableResource<UPDATE, FROM, TO>
-    extends FluentUpdatableResource<UPDATE, TO> {
-        private final Func1<? super FROM, ? extends TO> mapper;
-
+    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends TO>> {
         private MappingUpdatableResource(
                 final UpdatableResource<UPDATE, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
-            super(delegate);
-            this.mapper = Preconditions.checkNotNull(mapper, "null function");
+            super(delegate, mapper);
+            Preconditions.checkNotNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> update(final UPDATE update) {
-            @SuppressWarnings("unchecked")
-            final UpdatableResource<UPDATE, FROM> rsrc = (UpdatableResource<UPDATE, FROM>) super.delegate;
-            final Observable<? extends FROM> observable = rsrc.update(update);
-            final Observable<TO> mapped = observable.map(this.mapper);
-            return mapped;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final MappingUpdatableResource<?, ?, ?> other = (MappingUpdatableResource<?, ?, ?>) obj;
-            return this.mapper.equals(other.mapper);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.mapper.hashCode();
-            return result;
+            final Observable<TO> response = super.state.getDelegate()
+                    .update(update)
+                    .map(super.state.getAuxiliaryState());
+            return response;
         }
     }
 
 
     private static final class AdaptingUpdatableResource<FROM, TO, RESPONSE>
-    extends FluentUpdatableResource<TO, RESPONSE> {
-        private final Func1<? super TO, ? extends FROM> adapter;
-
+    extends AbstractFluentUpdatableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
         private AdaptingUpdatableResource(
                 final UpdatableResource<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
-            super(delegate);
-            this.adapter = Preconditions.checkNotNull(adapter, "null function");
+            super(delegate, adapter);
+            Preconditions.checkNotNull(adapter, "null function");
         }
 
         @Override
         public Observable<RESPONSE> update(final TO update) {
-            final FROM transformed = this.adapter.call(update);
-            @SuppressWarnings("unchecked")
-            final UpdatableResource<FROM, RESPONSE> rsrc = (UpdatableResource<FROM, RESPONSE>) super.delegate;
-            final Observable<RESPONSE> observable = rsrc.update(transformed);
-            return observable;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final AdaptingUpdatableResource<?, ?, ?> other = (AdaptingUpdatableResource<?, ?, ?>) obj;
-            return this.adapter.equals(other.adapter);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.adapter.hashCode();
-            return result;
+            final FROM transformed = super.state.getAuxiliaryState().call(update);
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .update(transformed);
+            return response;
         }
     }
 
 
     private static final class LiftingUpdatableResource<UPDATE, FROM, TO>
-    extends FluentUpdatableResource<UPDATE, TO> {
-        private final Observable.Operator<TO, FROM> bind;
-
+    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingUpdatableResource(
                 final UpdatableResource<UPDATE, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
-            super(delegate);
-            this.bind = Preconditions.checkNotNull(bind, "null operator");
+            super(delegate, bind);
+            Preconditions.checkNotNull(bind, "null operator");
         }
 
         @Override
         public Observable<TO> update(final UPDATE update) {
-            @SuppressWarnings("unchecked")
-            final UpdatableResource<UPDATE, FROM> rsrc = (UpdatableResource<UPDATE, FROM>) super.delegate;
-            final Observable<TO> obs = rsrc.update(update)
-                    .lift(this.bind);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final LiftingUpdatableResource<?, ?, ?> other = (LiftingUpdatableResource<?, ?, ?>) obj;
-            return this.bind.equals(other.bind);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.bind.hashCode();
-            return result;
+            final Observable<TO> response = super.state.getDelegate()
+                    .update(update)
+                    .lift(super.state.getAuxiliaryState());
+            return response;
         }
     }
 

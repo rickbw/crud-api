@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.WritableResource;
@@ -26,23 +25,14 @@ public abstract class FluentWritableResourceProvider<KEY, RSRC, RESPONSE>
 implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
     public static <KEY, RSRC, RESPONSE> FluentWritableResourceProvider<KEY, RSRC, RESPONSE> from(
-            final WritableResourceProvider<? super KEY, ? super RSRC, ? extends RESPONSE> provider) {
-        /* XXX: The casts below should be safe, since the API only consumes
-         * instances of KEY and RSRC and only produces instances of RESPONSE.
-         * However, the Java generic wildcards don't want to cooperate.
-         */
+            final WritableResourceProvider<KEY, RSRC, RESPONSE> provider) {
         if (provider instanceof FluentWritableResourceProvider<?, ?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentWritableResourceProvider<KEY, RSRC, RESPONSE> typedProvider
-                    = (FluentWritableResourceProvider<KEY, RSRC, RESPONSE>) provider;
-            return typedProvider;
+            return (FluentWritableResourceProvider<KEY, RSRC, RESPONSE>) provider;
         } else {
             return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
                 @Override
                 public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    final WritableResource<RSRC, RESPONSE> rsrc
-                            = (WritableResource<RSRC, RESPONSE>) provider.get(key);
-                    return FluentWritableResource.from(rsrc);
+                    return FluentWritableResource.from(provider.get(key));
                 }
             };
         }
@@ -55,7 +45,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         final FluentWritableResourceProvider<KEY, RSRC, RESP> result = new FluentWritableResourceProvider<KEY, RSRC, RESP>() {
             @Override
             public FluentWritableResource<RSRC, RESP> get(final KEY key) {
-                final WritableResource<? super RSRC, ? extends RESPONSE> resource = outerProvider().get(key);
+                final FluentWritableResource<RSRC, RESPONSE> resource = outerProvider().get(key);
                 final WritableResource<RSRC, RESP> mapped = FluentWritableResource.from(resource).mapResponse(mapper);
                 return FluentWritableResource.from(mapped);
             }

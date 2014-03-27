@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.ReadableResource;
@@ -25,9 +24,6 @@ import rx.functions.Func1;
  * A set of fluent transformations on {@link ReadableResource}s.
  */
 public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
-
-    /*package*/ final ReadableResource<?> delegate;
-
 
     public static <RSRC> FluentReadableResource<RSRC> from(final ReadableResource<RSRC> resource) {
         if (resource instanceof FluentReadableResource<?>) {
@@ -72,165 +68,125 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
     // TODO: Expose other Observable methods
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+
+    /**
+     * Private superclass for the concrete nested classes here. It cannot be
+     * combined with its parent class, because it needs additional type
+     * parameters that should not be public.
+     */
+    private static abstract class AbstractFluentReadableResource<FROM, TO, T>
+    extends FluentReadableResource<TO> {
+        protected final FluentResourceStateMixin<ReadableResource<FROM>, T> state;
+
+        protected AbstractFluentReadableResource(
+                final ReadableResource<FROM> delegate,
+                final T auxiliary) {
+            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final AbstractFluentReadableResource<?, ?, ?> other = (AbstractFluentReadableResource<?, ?, ?>) obj;
+            if (!this.state.equals(other.state)) {
+                return false;
+            }
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FluentReadableResource<?> other = (FluentReadableResource<?>) obj;
-        if (!this.delegate.equals(other.delegate)) {
-            return false;
-        }
-        return true;
-    }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        final int result = prime + this.delegate.hashCode();
-        return result;
-    }
-
-    protected FluentReadableResource(final ReadableResource<?> delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + this.state.hashCode();
+            return result;
+        }
     }
 
 
+    /**
+     * It may seem that the business of this class could be accomplished by
+     * FluentReadableResource itself. However, that would require an
+     * additional layer of equals() and hashCode overrides and an unsafe cast.
+     */
     private static final class DelegatingReadableResource<RSRC>
-    extends FluentReadableResource<RSRC> {
+    extends AbstractFluentReadableResource<RSRC, RSRC, Void> {
         public DelegatingReadableResource(final ReadableResource<RSRC> delegate) {
-            super(delegate);
+            super(delegate, null);
         }
 
         @Override
         public Observable<RSRC> get() {
-            @SuppressWarnings("unchecked")
-            final ReadableResource<RSRC> rsrc = (ReadableResource<RSRC>) super.delegate;
-            return rsrc.get();
+            final Observable<RSRC> rsrc = super.state.getDelegate()
+                    .get();
+            return rsrc;
         }
     }
 
 
-    private static final class MappingReadableResource<FROM, TO> extends FluentReadableResource<TO> {
-        private final Func1<? super FROM, ? extends TO> mapper;
-
+    private static final class MappingReadableResource<FROM, TO>
+    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
         public MappingReadableResource(
-                final ReadableResource<? extends FROM> delegate,
+                final ReadableResource<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
-            super(delegate);
-            this.mapper = Preconditions.checkNotNull(mapper, "null function");
+            super(delegate, mapper);
+            Preconditions.checkNotNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> get() {
-            @SuppressWarnings("unchecked")
-            final ReadableResource<FROM> rsrc = (ReadableResource<FROM>) super.delegate;
-            final Observable<FROM> observable = rsrc.get();
-            final Observable<TO> mapped = observable.map(this.mapper);
-            return mapped;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final MappingReadableResource<?, ?> other = (MappingReadableResource<?, ?>) obj;
-            return this.mapper.equals(other.mapper);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.mapper.hashCode();
-            return result;
+            final Observable<TO> rsrc = super.state.getDelegate()
+                    .get()
+                    .map(super.state.getAuxiliaryState());
+            return rsrc;
         }
     }
 
 
-    private static final class RetryingReadableResource<RSRC> extends FluentReadableResource<RSRC>{
-        private final int maxRetries;
-
+    private static final class RetryingReadableResource<RSRC>
+    extends AbstractFluentReadableResource<RSRC, RSRC, Integer>{
         public RetryingReadableResource(
                 final ReadableResource<RSRC> delegate,
                 final int maxRetries) {
-            super(delegate);
+            super(delegate, maxRetries);
             if (maxRetries <= 0) {
                 throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
             }
-            this.maxRetries = maxRetries;
         }
 
         @Override
         public Observable<RSRC> get() {
-            @SuppressWarnings("unchecked")
-            final ReadableResource<RSRC> rsrc = (ReadableResource<RSRC>) super.delegate;
-            final Observable<RSRC> obs = rsrc.get()
-                    .retry(this.maxRetries);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final RetryingReadableResource<?> other = (RetryingReadableResource<?>) obj;
-            return this.maxRetries != other.maxRetries;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.maxRetries;
-            return result;
+            final Observable<RSRC> rsrc = super.state.getDelegate()
+                    .get()
+                    .retry(super.state.getAuxiliaryState());
+            return rsrc;
         }
     }
 
 
     private static final class LiftingReadableResource<FROM, TO>
-    extends FluentReadableResource<TO> {
-        private final Observable.Operator<TO, FROM> bind;
-
+    extends AbstractFluentReadableResource<FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingReadableResource(
                 final ReadableResource<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
-            super(delegate);
-            this.bind = Preconditions.checkNotNull(bind, "null operator");
+            super(delegate, bind);
+            Preconditions.checkNotNull(bind, "null operator");
         }
 
         @Override
         public Observable<TO> get() {
-            @SuppressWarnings("unchecked")
-            final ReadableResource<FROM> rsrc = (ReadableResource<FROM>) super.delegate;
-            final Observable<TO> obs = rsrc.get()
-                    .lift(this.bind);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final LiftingReadableResource<?, ?> other = (LiftingReadableResource<?, ?>) obj;
-            return this.bind.equals(other.bind);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.bind.hashCode();
-            return result;
+            final Observable<TO> rsrc = super.state.getDelegate()
+                    .get()
+                    .lift(super.state.getAuxiliaryState());
+            return rsrc;
         }
     }
 

@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.DeletableResource;
@@ -25,9 +24,6 @@ import rx.functions.Func1;
  * A set of fluent transformations on {@link DeletableResource}s.
  */
 public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
-
-    /*package*/ final DeletableResource<?> delegate;
-
 
     public static <RESPONSE> FluentDeletableResource<RESPONSE> from(final DeletableResource<RESPONSE> resource) {
         if (resource instanceof FluentDeletableResource<?>) {
@@ -72,165 +68,124 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
 
     // TODO: Expose other Observable methods
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FluentDeletableResource<?> other = (FluentDeletableResource<?>) obj;
-        if (!this.delegate.equals(other.delegate)) {
-            return false;
-        }
-        return true;
-    }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        final int result = prime + this.delegate.hashCode();
-        return result;
-    }
+    /**
+     * Private superclass for the concrete nested classes here. It cannot be
+     * combined with its parent class, because it needs additional type
+     * parameters that should not be public.
+     */
+    private static abstract class AbstractFluentDeletableResource<FROM, TO, T>
+    extends FluentDeletableResource<TO> {
+        protected final FluentResourceStateMixin<DeletableResource<FROM>, T> state;
 
-    protected FluentDeletableResource(final DeletableResource<?> delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate, "null delegate");
-    }
-
-
-    private static class DelegatingDeletableResource<RESPONSE>
-    extends FluentDeletableResource<RESPONSE> {
-        public DelegatingDeletableResource(final DeletableResource<RESPONSE> delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public Observable<RESPONSE> delete() {
-            @SuppressWarnings("unchecked")
-            final DeletableResource<RESPONSE> rsrc = (DeletableResource<RESPONSE>) super.delegate;
-            return rsrc.delete();
-        }
-    }
-
-
-    private static final class MappingDeletableResource<FROM, TO> extends FluentDeletableResource<TO> {
-        private final Func1<? super FROM, ? extends TO> mapper;
-
-        public MappingDeletableResource(
+        protected AbstractFluentDeletableResource(
                 final DeletableResource<FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
-            super(delegate);
-            this.mapper = Preconditions.checkNotNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> delete() {
-            @SuppressWarnings("unchecked")
-            final DeletableResource<FROM> rsrc = (DeletableResource<FROM>) super.delegate;
-            final Observable<? extends FROM> observable = rsrc.delete();
-            final Observable<TO> mapped = observable.map(this.mapper);
-            return mapped;
+                final T auxiliary) {
+            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
         }
 
         @Override
         public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
                 return false;
             }
-            final MappingDeletableResource<?, ?> other = (MappingDeletableResource<?, ?>) obj;
-            return this.mapper.equals(other.mapper);
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final AbstractFluentDeletableResource<?, ?, ?> other = (AbstractFluentDeletableResource<?, ?, ?>) obj;
+            if (!this.state.equals(other.state)) {
+                return false;
+            }
+            return true;
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.mapper.hashCode();
+            int result = 1;
+            result = prime * result + this.state.hashCode();
             return result;
+        }
+    }
+
+
+    /**
+     * It may seem that the business of this class could be accomplished by
+     * FluentDeletableResource itself. However, that would require an
+     * additional layer of equals() and hashCode overrides and an unsafe cast.
+     */
+    private static final class DelegatingDeletableResource<RSRC>
+    extends AbstractFluentDeletableResource<RSRC, RSRC, Void> {
+        public DelegatingDeletableResource(final DeletableResource<RSRC> delegate) {
+            super(delegate, null);
+        }
+
+        @Override
+        public Observable<RSRC> delete() {
+            final Observable<RSRC> response = super.state.getDelegate()
+                    .delete();
+            return response;
+        }
+    }
+
+
+    private static final class MappingDeletableResource<FROM, TO>
+    extends AbstractFluentDeletableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
+        public MappingDeletableResource(
+                final DeletableResource<FROM> delegate,
+                final Func1<? super FROM, ? extends TO> mapper) {
+            super(delegate, mapper);
+            Preconditions.checkNotNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> delete() {
+            final Observable<TO> response = super.state.getDelegate()
+                    .delete()
+                    .map(super.state.getAuxiliaryState());
+            return response;
         }
     }
 
 
     private static final class RetryingDeletableResource<RESPONSE>
-    extends FluentDeletableResource<RESPONSE> {
-        private final int maxRetries;
-
+    extends AbstractFluentDeletableResource<RESPONSE, RESPONSE, Integer> {
         public RetryingDeletableResource(
                 final DeletableResource<RESPONSE> delegate,
                 final int maxRetries) {
-            super(delegate);
+            super(delegate, maxRetries);
             if (maxRetries <= 0) {
                 throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
             }
-            this.maxRetries = maxRetries;
         }
 
         @Override
         public Observable<RESPONSE> delete() {
-            @SuppressWarnings("unchecked")
-            final DeletableResource<RESPONSE> rsrc = (DeletableResource<RESPONSE>) super.delegate;
-            final Observable<RESPONSE> observable = rsrc.delete()
-                    .retry(this.maxRetries);
-            return observable;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final RetryingDeletableResource<?> other = (RetryingDeletableResource<?>) obj;
-            return this.maxRetries != other.maxRetries;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.maxRetries;
-            return result;
+            final Observable<RESPONSE> response = super.state.getDelegate()
+                    .delete()
+                    .retry(super.state.getAuxiliaryState());
+            return response;
         }
     }
 
     private static final class LiftingDeletableResource<FROM, TO>
-    extends FluentDeletableResource<TO> {
-        private final Observable.Operator<TO, FROM> bind;
-
+    extends AbstractFluentDeletableResource<FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingDeletableResource(
                 final DeletableResource<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
-            super(delegate);
-            this.bind = Preconditions.checkNotNull(bind, "null operator");
+            super(delegate, bind);
+            Preconditions.checkNotNull(bind, "null operator");
         }
 
         @Override
         public Observable<TO> delete() {
-            @SuppressWarnings("unchecked")
-            final DeletableResource<FROM> rsrc = (DeletableResource<FROM>) super.delegate;
-            final Observable<TO> obs = rsrc.delete()
-                    .lift(this.bind);
-            return obs;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (!super.equals(obj)) {
-                return false;
-            }
-            final LiftingDeletableResource<?, ?> other = (LiftingDeletableResource<?, ?>) obj;
-            return this.bind.equals(other.bind);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + this.bind.hashCode();
-            return result;
+            final Observable<TO> response = super.state.getDelegate()
+                    .delete()
+                    .lift(super.state.getAuxiliaryState());
+            return response;
         }
     }
 

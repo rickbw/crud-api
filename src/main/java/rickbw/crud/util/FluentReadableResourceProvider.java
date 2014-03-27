@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud.util;
 
 import rickbw.crud.ReadableResource;
@@ -26,23 +25,14 @@ public abstract class FluentReadableResourceProvider<KEY, RSRC>
 implements ReadableResourceProvider<KEY, RSRC> {
 
     public static <KEY, RSRC> FluentReadableResourceProvider<KEY, RSRC> from(
-            final ReadableResourceProvider<? super KEY, ? extends RSRC> provider) {
-        /* XXX: The casts below should be safe, since the API only consumes
-         * instances of KEY and only produces instances of RSRC.
-         * However, the Java generic wildcards don't want to cooperate.
-         */
+            final ReadableResourceProvider<KEY, RSRC> provider) {
         if (provider instanceof FluentReadableResourceProvider<?, ?>) {
-            @SuppressWarnings("unchecked")
-            final FluentReadableResourceProvider<KEY, RSRC> typedProvider
-                    = (FluentReadableResourceProvider<KEY, RSRC>) provider;
-            return typedProvider;
+            return (FluentReadableResourceProvider<KEY, RSRC>) provider;
         } else {
             return new FluentReadableResourceProvider<KEY, RSRC>() {
                 @Override
                 public FluentReadableResource<RSRC> get(final KEY key) {
-                    final ReadableResource<RSRC> resource
-                            = (ReadableResource<RSRC>) provider.get(key);
-                    return FluentReadableResource.from(resource);
+                    return FluentReadableResource.from(provider.get(key));
                 }
             };
         }
