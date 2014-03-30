@@ -12,10 +12,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -38,16 +39,16 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         }
     }
 
-    public <R> FluentDeletableResourceProvider<KEY, R> map(
+    public <R> FluentDeletableResourceProvider<KEY, R> mapResponse(
             final Func1<? super RESPONSE, ? extends R> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 
         final FluentDeletableResourceProvider<KEY, R> result = new FluentDeletableResourceProvider<KEY, R>() {
             @Override
             public FluentDeletableResource<R> get(final KEY key) {
-                final DeletableResource<? extends RESPONSE> resource = outerProvider().get(key);
-                final DeletableResource<R> mapped = FluentDeletableResource.from(resource).mapResponse(mapper);
-                return FluentDeletableResource.from(mapped);
+                return outerProvider()
+                        .get(key)
+                        .mapResponse(mapper);
             }
         };
         return result;
@@ -61,8 +62,7 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
             @Override
             public FluentDeletableResource<RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
-                final DeletableResource<RESPONSE> resource = outerProvider().get(transformedKey);
-                return FluentDeletableResource.from(resource);
+                return outerProvider().get(transformedKey);
             }
         };
         return result;
@@ -94,9 +94,9 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
             return new FluentDeletableResourceProvider<KEY, RESPONSE>() {
                 @Override
                 public FluentDeletableResource<RESPONSE> get(final KEY key) {
-                    final FluentDeletableResource<RESPONSE> resource = outerProvider().get(key)
+                    return outerProvider()
+                            .get(key)
                             .retry(maxRetries);
-                    return resource;
                 }
             };
         }
@@ -107,9 +107,9 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         return new FluentDeletableResourceProvider<KEY, TO>() {
             @Override
             public FluentDeletableResource<TO> get(final KEY key) {
-                final FluentDeletableResource<TO> resource = outerProvider().get(key)
+                return outerProvider()
+                        .get(key)
                         .lift(bind);
-                return resource;
             }
         };
     }

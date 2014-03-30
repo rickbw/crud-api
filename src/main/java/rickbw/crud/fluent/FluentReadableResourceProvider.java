@@ -12,10 +12,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
 import rickbw.crud.ReadableResource;
 import rickbw.crud.ReadableResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -38,16 +39,16 @@ implements ReadableResourceProvider<KEY, RSRC> {
         }
     }
 
-    public <R> FluentReadableResourceProvider<KEY, R> map(
+    public <R> FluentReadableResourceProvider<KEY, R> mapValue(
             final Func1<? super RSRC, ? extends R> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 
         final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
             @Override
             public FluentReadableResource<R> get(final KEY key) {
-                final ReadableResource<? extends RSRC> resource = outerProvider().get(key);
-                final ReadableResource<R> mapped = FluentReadableResource.from(resource).mapValue(mapper);
-                return FluentReadableResource.from(mapped);
+                return outerProvider()
+                        .get(key)
+                        .mapValue(mapper);
             }
         };
         return result;
@@ -61,8 +62,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
             @Override
             public FluentReadableResource<RSRC> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
-                final ReadableResource<RSRC> resource = outerProvider().get(transformedKey);
-                return FluentReadableResource.from(resource);
+                return outerProvider().get(transformedKey);
             }
         };
         return result;
@@ -94,9 +94,9 @@ implements ReadableResourceProvider<KEY, RSRC> {
             return new FluentReadableResourceProvider<KEY, RSRC>() {
                 @Override
                 public FluentReadableResource<RSRC> get(final KEY key) {
-                    final FluentReadableResource<RSRC> resource = outerProvider().get(key)
+                    return outerProvider()
+                            .get(key)
                             .retry(maxRetries);
-                    return resource;
                 }
             };
         }
@@ -107,9 +107,9 @@ implements ReadableResourceProvider<KEY, RSRC> {
         return new FluentReadableResourceProvider<KEY, TO>() {
             @Override
             public FluentReadableResource<TO> get(final KEY key) {
-                final FluentReadableResource<TO> resource = outerProvider().get(key)
+                return outerProvider()
+                        .get(key)
                         .lift(bind);
-                return resource;
             }
         };
     }

@@ -12,10 +12,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -38,16 +39,16 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         }
     }
 
-    public <RESP> FluentWritableResourceProvider<KEY, RSRC, RESP> map(
+    public <RESP> FluentWritableResourceProvider<KEY, RSRC, RESP> mapResponse(
             final Func1<? super RESPONSE, ? extends RESP> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 
         final FluentWritableResourceProvider<KEY, RSRC, RESP> result = new FluentWritableResourceProvider<KEY, RSRC, RESP>() {
             @Override
             public FluentWritableResource<RSRC, RESP> get(final KEY key) {
-                final FluentWritableResource<RSRC, RESPONSE> resource = outerProvider().get(key);
-                final WritableResource<RSRC, RESP> mapped = FluentWritableResource.from(resource).mapResponse(mapper);
-                return FluentWritableResource.from(mapped);
+                return outerProvider()
+                        .get(key)
+                        .mapResponse(mapper);
             }
         };
         return result;
@@ -60,9 +61,9 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         final FluentWritableResourceProvider<KEY, RC, RESPONSE> result = new FluentWritableResourceProvider<KEY, RC, RESPONSE>() {
             @Override
             public FluentWritableResource<RC, RESPONSE> get(final KEY key) {
-                final WritableResource<? super RSRC, RESPONSE> resource = outerProvider().get(key);
-                final WritableResource<RC, RESPONSE> transformed = FluentWritableResource.from(resource).adaptNewValue(adapter);
-                return FluentWritableResource.from(transformed);
+                return outerProvider()
+                        .get(key)
+                        .<RC>adaptNewValue(adapter);
             }
         };
         return result;
@@ -76,8 +77,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
             @Override
             public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
-                final WritableResource<RSRC, RESPONSE> resource = outerProvider().get(transformedKey);
-                return FluentWritableResource.from(resource);
+                return outerProvider().get(transformedKey);
             }
         };
         return result;
@@ -110,9 +110,9 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
             return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
                 @Override
                 public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    final FluentWritableResource<RSRC, RESPONSE> resource = outerProvider().get(key)
+                    return outerProvider()
+                            .get(key)
                             .retry(maxRetries);
-                    return resource;
                 }
             };
         }
@@ -123,7 +123,8 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         return new FluentWritableResourceProvider<KEY, RSRC, TO>() {
             @Override
             public FluentWritableResource<RSRC, TO> get(final KEY key) {
-                final FluentWritableResource<RSRC, TO> resource = outerProvider().get(key)
+                final FluentWritableResource<RSRC, TO> resource = outerProvider()
+                        .get(key)
                         .lift(bind);
                 return resource;
             }

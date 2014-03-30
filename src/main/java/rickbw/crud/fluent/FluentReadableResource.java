@@ -12,35 +12,36 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
-import rickbw.crud.DeletableResource;
+import rickbw.crud.ReadableResource;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link DeletableResource}s.
+ * A set of fluent transformations on {@link ReadableResource}s.
  */
-public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
+public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
 
-    public static <RESPONSE> FluentDeletableResource<RESPONSE> from(final DeletableResource<RESPONSE> resource) {
-        if (resource instanceof FluentDeletableResource<?>) {
-            return (FluentDeletableResource<RESPONSE>) resource;
+    public static <RSRC> FluentReadableResource<RSRC> from(final ReadableResource<RSRC> resource) {
+        if (resource instanceof FluentReadableResource<?>) {
+            return (FluentReadableResource<RSRC>) resource;
         } else {
-            return new DelegatingDeletableResource<>(resource);
+            return new DelegatingReadableResource<>(resource);
         }
     }
 
-    public <TO> FluentDeletableResource<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
-        return new MappingDeletableResource<>(this, mapper);
+    public <TO> FluentReadableResource<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
+        return new MappingReadableResource<>(this, mapper);
     }
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #delete()} that throw, as with {@link Observable#retry(int)}.
-     * Specifically, any {@link Observable} returned by {@link #delete()}
+     * {@link #get()} that throw, as with {@link Observable#retry(int)}.
+     * Specifically, any {@link Observable} returned by {@link #get()}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
      * that {@code onError} call.
@@ -54,16 +55,16 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public FluentDeletableResource<RESPONSE> retry(final int maxRetries) {
+    public FluentReadableResource<RSRC> retry(final int maxRetries) {
         if (maxRetries == 0) {
-            return this;    // no-op
+            return this;
         } else {
-            return new RetryingDeletableResource<>(this, maxRetries);
+            return new RetryingReadableResource<>(this, maxRetries);
         }
     }
 
-    public <TO> FluentDeletableResource<TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingDeletableResource<>(this, bind);
+    public <TO> FluentReadableResource<TO> lift(final Observable.Operator<TO, RSRC> bind) {
+        return new LiftingReadableResource<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
@@ -74,12 +75,12 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentDeletableResource<FROM, TO, T>
-    extends FluentDeletableResource<TO> {
-        protected final FluentResourceStateMixin<DeletableResource<FROM>, T> state;
+    private static abstract class AbstractFluentReadableResource<FROM, TO, T>
+    extends FluentReadableResource<TO> {
+        protected final FluentResourceStateMixin<ReadableResource<FROM>, T> state;
 
-        protected AbstractFluentDeletableResource(
-                final DeletableResource<FROM> delegate,
+        protected AbstractFluentReadableResource(
+                final ReadableResource<FROM> delegate,
                 final T auxiliary) {
             this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
         }
@@ -95,7 +96,7 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentDeletableResource<?, ?, ?> other = (AbstractFluentDeletableResource<?, ?, ?>) obj;
+            final AbstractFluentReadableResource<?, ?, ?> other = (AbstractFluentReadableResource<?, ?, ?>) obj;
             if (!this.state.equals(other.state)) {
                 return false;
             }
@@ -114,47 +115,47 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
 
     /**
      * It may seem that the business of this class could be accomplished by
-     * FluentDeletableResource itself. However, that would require an
+     * FluentReadableResource itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
-    private static final class DelegatingDeletableResource<RSRC>
-    extends AbstractFluentDeletableResource<RSRC, RSRC, Void> {
-        public DelegatingDeletableResource(final DeletableResource<RSRC> delegate) {
+    private static final class DelegatingReadableResource<RSRC>
+    extends AbstractFluentReadableResource<RSRC, RSRC, Void> {
+        public DelegatingReadableResource(final ReadableResource<RSRC> delegate) {
             super(delegate, null);
         }
 
         @Override
-        public Observable<RSRC> delete() {
-            final Observable<RSRC> response = super.state.getDelegate()
-                    .delete();
-            return response;
+        public Observable<RSRC> get() {
+            final Observable<RSRC> rsrc = super.state.getDelegate()
+                    .get();
+            return rsrc;
         }
     }
 
 
-    private static final class MappingDeletableResource<FROM, TO>
-    extends AbstractFluentDeletableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
-        public MappingDeletableResource(
-                final DeletableResource<FROM> delegate,
+    private static final class MappingReadableResource<FROM, TO>
+    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
+        public MappingReadableResource(
+                final ReadableResource<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
             Preconditions.checkNotNull(mapper, "null function");
         }
 
         @Override
-        public Observable<TO> delete() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .delete()
+        public Observable<TO> get() {
+            final Observable<TO> rsrc = super.state.getDelegate()
+                    .get()
                     .map(super.state.getAuxiliaryState());
-            return response;
+            return rsrc;
         }
     }
 
 
-    private static final class RetryingDeletableResource<RESPONSE>
-    extends AbstractFluentDeletableResource<RESPONSE, RESPONSE, Integer> {
-        public RetryingDeletableResource(
-                final DeletableResource<RESPONSE> delegate,
+    private static final class RetryingReadableResource<RSRC>
+    extends AbstractFluentReadableResource<RSRC, RSRC, Integer>{
+        public RetryingReadableResource(
+                final ReadableResource<RSRC> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
             if (maxRetries <= 0) {
@@ -163,29 +164,30 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
         }
 
         @Override
-        public Observable<RESPONSE> delete() {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .delete()
+        public Observable<RSRC> get() {
+            final Observable<RSRC> rsrc = super.state.getDelegate()
+                    .get()
                     .retry(super.state.getAuxiliaryState());
-            return response;
+            return rsrc;
         }
     }
 
-    private static final class LiftingDeletableResource<FROM, TO>
-    extends AbstractFluentDeletableResource<FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingDeletableResource(
-                final DeletableResource<FROM> delegate,
+
+    private static final class LiftingReadableResource<FROM, TO>
+    extends AbstractFluentReadableResource<FROM, TO, Observable.Operator<TO, FROM>> {
+        public LiftingReadableResource(
+                final ReadableResource<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);
             Preconditions.checkNotNull(bind, "null operator");
         }
 
         @Override
-        public Observable<TO> delete() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .delete()
+        public Observable<TO> get() {
+            final Observable<TO> rsrc = super.state.getDelegate()
+                    .get()
                     .lift(super.state.getAuxiliaryState());
-            return response;
+            return rsrc;
         }
     }
 

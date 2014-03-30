@@ -12,10 +12,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
-import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -43,19 +43,18 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
                 }
             };
         }
-
     }
 
-    public <R> FluentUpdatableResourceProvider<KEY, UPDATE, R> map(
+    public <R> FluentUpdatableResourceProvider<KEY, UPDATE, R> mapResponse(
             final Func1<? super RESPONSE, ? extends R> mapper) {
         Preconditions.checkNotNull(mapper, "null function");
 
         final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
             @Override
             public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
-                final FluentUpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(key);
-                final UpdatableResource<UPDATE, R> mapped = FluentUpdatableResource.from(resource).mapResponse(mapper);
-                return FluentUpdatableResource.from(mapped);
+                return outerProvider()
+                        .get(key)
+                        .mapResponse(mapper);
             }
         };
         return result;
@@ -68,9 +67,9 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         final FluentUpdatableResourceProvider<KEY, U, RESPONSE> result = new FluentUpdatableResourceProvider<KEY, U, RESPONSE>() {
             @Override
             public FluentUpdatableResource<U, RESPONSE> get(final KEY key) {
-                final UpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(key);
-                final UpdatableResource<U, RESPONSE> transformed = FluentUpdatableResource.from(resource).adaptUpdate(adapter);
-                return FluentUpdatableResource.from(transformed);
+                return outerProvider()
+                        .get(key)
+                        .adaptUpdate(adapter);
             }
         };
         return result;
@@ -84,8 +83,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
             @Override
             public FluentUpdatableResource<UPDATE, RESPONSE> get(final K key) {
                 final KEY transformedKey = adapter.call(key);
-                final UpdatableResource<UPDATE, RESPONSE> resource = outerProvider().get(transformedKey);
-                return FluentUpdatableResource.from(resource);
+                return outerProvider().get(transformedKey);
             }
         };
         return result;
@@ -96,9 +94,9 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         return new FluentUpdatableResourceProvider<KEY, UPDATE, TO>() {
             @Override
             public FluentUpdatableResource<UPDATE, TO> get(final KEY key) {
-                final FluentUpdatableResource<UPDATE, TO> resource = outerProvider().get(key)
+                return outerProvider()
+                        .get(key)
                         .lift(bind);
-                return resource;
             }
         };
     }

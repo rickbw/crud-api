@@ -12,9 +12,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.util;
+package rickbw.crud.fluent;
 
 import rickbw.crud.WritableResource;
+import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
