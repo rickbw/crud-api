@@ -60,6 +60,21 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         return result;
     }
 
+    public <R> FluentUpdatableResourceProvider<KEY, UPDATE, R> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
+        Preconditions.checkNotNull(mapper, "null function");
+
+        final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
+            @Override
+            public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
+                return outerProvider()
+                        .get(key)
+                        .flatMapResponse(mapper);
+            }
+        };
+        return result;
+    }
+
     public <U> FluentUpdatableResourceProvider<KEY, U, RESPONSE> adaptUpdate(
             final Func1<? super U, ? extends UPDATE> adapter) {
         Preconditions.checkNotNull(adapter, "null function");

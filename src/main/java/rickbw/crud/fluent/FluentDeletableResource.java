@@ -26,6 +26,11 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link DeletableResource}s.
+ *
+ * Note that this class lacks a {@code flatMap} operation, e.g.
+ * {@link FluentUpdatableResource#flatMapResponse(Func1)}. This is because
+ * the result of executing the flat-mapping function may violate the
+ * abstraction of an an idempotent, delete-only operation.
  */
 public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
 

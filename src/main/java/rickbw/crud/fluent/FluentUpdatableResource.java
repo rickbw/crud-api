@@ -44,6 +44,11 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
         return new MappingUpdatableResource<>(this, mapper);
     }
 
+    public <TO> FluentUpdatableResource<UPDATE, TO> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
+        return new FlatMappingUpdatableResource<>(this, mapper);
+    }
+
     public <TO> FluentUpdatableResource<TO, RESPONSE> adaptUpdate(
             final Func1<? super TO, ? extends UPDATE> adapter) {
         return new AdaptingUpdatableResource<>(this, adapter);
@@ -148,6 +153,25 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
             final Observable<TO> response = super.state.getDelegate()
                     .update(update)
                     .map(super.state.getAuxiliaryState());
+            return response;
+        }
+    }
+
+
+    private static final class FlatMappingUpdatableResource<UPDATE, FROM, TO>
+    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingUpdatableResource(
+                final UpdatableResource<UPDATE, FROM> delegate,
+                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
+            super(delegate, mapper);
+            Preconditions.checkNotNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> update(final UPDATE update) {
+            final Observable<TO> response = super.state.getDelegate()
+                    .update(update)
+                    .flatMap(super.state.getAuxiliaryState());
             return response;
         }
     }

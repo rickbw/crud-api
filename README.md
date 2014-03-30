@@ -35,6 +35,7 @@ See Also
 --------
 * The [Crud HTTP](https://github.com/rickbw/crud-http) project (`crud-http`) implements this API for HTTP, based on [Jersey](https://jersey.java.net).
 * The [Crud JDBC](https://github.com/rickbw/crud-jdbc) project (`crud-jdbc`) implements this API for JDBC.
+* The [Crud Voldemort](https://github.com/rickbw/crud-voldemort) project (`crud-voldemort`) implements this API for [Project Voldemort](http://www.project-voldemort.com).
 
 
 Copyright and License

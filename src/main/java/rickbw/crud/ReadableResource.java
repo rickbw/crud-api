@@ -22,6 +22,9 @@ import rx.Observable;
  * Allows a client to read the value(s) of a resource. Any resource whose
  * value can be read should implement this interface.
  *
+ * Reads must be idempotent, and they must not modify the state of the
+ * resource they read.
+ *
  * @param <RSRC>    The type of the resource's value(s).
  *
  * @see WritableResource

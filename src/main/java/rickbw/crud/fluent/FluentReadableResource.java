@@ -17,6 +17,7 @@ package rickbw.crud.fluent;
 import java.util.concurrent.Callable;
 
 import rickbw.crud.ReadableResource;
+import rickbw.crud.pattern.ResourceMerger;
 import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
@@ -26,6 +27,12 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link ReadableResource}s.
+ *
+ * Note that this class lacks a {@code flatMap} operation, e.g.
+ * {@link FluentUpdatableResource#flatMapResponse(Func1)}. This is because
+ * the result of executing the flat-mapping function may violate the
+ * abstraction of an an idempotent, read-only operation. Consider using
+ * {@link ResourceMerger} instead.
  */
 public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
 
