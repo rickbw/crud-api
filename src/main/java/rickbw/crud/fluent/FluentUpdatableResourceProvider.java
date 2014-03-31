@@ -116,6 +116,15 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         };
     }
 
+    public Func1<KEY, FluentUpdatableResource<UPDATE, RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, FluentUpdatableResource<UPDATE, RESPONSE>>(this) {
+            @Override
+            public FluentUpdatableResource<UPDATE, RESPONSE> call(final KEY key) {
+                return get(key);
+            }
+        };
+    }
+
     @Override
     public abstract FluentUpdatableResource<UPDATE, RESPONSE> get(KEY key);
 

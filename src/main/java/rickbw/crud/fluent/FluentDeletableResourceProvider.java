@@ -114,6 +114,15 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         };
     }
 
+    public Func1<KEY, FluentDeletableResource<RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, FluentDeletableResource<RESPONSE>>(this) {
+            @Override
+            public FluentDeletableResource<RESPONSE> call(final KEY key) {
+                return get(key);
+            }
+        };
+    }
+
     @Override
     public abstract FluentDeletableResource<RESPONSE> get(KEY key);
 

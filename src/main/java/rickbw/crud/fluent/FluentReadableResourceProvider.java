@@ -114,6 +114,15 @@ implements ReadableResourceProvider<KEY, RSRC> {
         };
     }
 
+    public Func1<KEY, FluentReadableResource<RSRC>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, FluentReadableResource<RSRC>>(this) {
+            @Override
+            public FluentReadableResource<RSRC> call(final KEY key) {
+                return get(key);
+            }
+        };
+    }
+
     @Override
     public abstract FluentReadableResource<RSRC> get(KEY key);
 

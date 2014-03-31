@@ -67,7 +67,7 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
      * this resource.
      */
     public Func1<UPDATE, Observable<RESPONSE>> toFunction() {
-        return new ResourceFunction<UpdatableResource<UPDATE, RESPONSE>, UPDATE, Observable<RESPONSE>>(this) {
+        return new DelegateObjectMethods.Function<UPDATE, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final UPDATE update) {
                 return FluentUpdatableResource.this.update(update);

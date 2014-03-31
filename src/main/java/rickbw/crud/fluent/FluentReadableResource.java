@@ -99,8 +99,8 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         return toResourceCallable();
     }
 
-    private ResourceCallable<ReadableResource<RSRC>, Observable<RSRC>> toResourceCallable() {
-        return new ResourceCallable<ReadableResource<RSRC>, Observable<RSRC>>(this) {
+    private DelegateObjectMethods.Callable<Observable<RSRC>> toResourceCallable() {
+        return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
             @Override
             public Observable<RSRC> call() {
                 return FluentReadableResource.this.get();

@@ -97,8 +97,8 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
         return toResourceCallable();
     }
 
-    private ResourceCallable<DeletableResource<RESPONSE>, Observable<RESPONSE>> toResourceCallable() {
-        return new ResourceCallable<DeletableResource<RESPONSE>, Observable<RESPONSE>>(this) {
+    private DelegateObjectMethods.Callable<Observable<RESPONSE>> toResourceCallable() {
+        return new DelegateObjectMethods.Callable<Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call() {
                 return FluentDeletableResource.this.delete();

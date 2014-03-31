@@ -89,7 +89,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * this resource.
      */
     public Func1<RSRC, Observable<RESPONSE>> toFunction() {
-        return new ResourceFunction<WritableResource<RSRC, RESPONSE>, RSRC, Observable<RESPONSE>>(this) {
+        return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
                 return FluentWritableResource.this.write(newValue);

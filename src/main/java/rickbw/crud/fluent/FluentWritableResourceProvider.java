@@ -131,6 +131,15 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         };
     }
 
+    public Func1<KEY, FluentWritableResource<RSRC, RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, FluentWritableResource<RSRC, RESPONSE>>(this) {
+            @Override
+            public FluentWritableResource<RSRC, RESPONSE> call(final KEY key) {
+                return get(key);
+            }
+        };
+    }
+
     @Override
     public abstract FluentWritableResource<RSRC, RESPONSE> get(KEY key);
 
