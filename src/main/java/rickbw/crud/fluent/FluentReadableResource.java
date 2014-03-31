@@ -14,10 +14,13 @@
  */
 package rickbw.crud.fluent;
 
+import java.util.concurrent.Callable;
+
 import rickbw.crud.ReadableResource;
 import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
+import rx.functions.Func0;
 import rx.functions.Func1;
 
 
@@ -68,6 +71,35 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
     }
 
     // TODO: Expose other Observable methods
+
+    /**
+     * Return a function that, when called, will call {@link #get()}.
+     * The function object implements {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Func0<Observable<RSRC>> toFunction() {
+        return toResourceCallable();
+    }
+
+    /**
+     * Return a {@link Callable} that delegates to {@link #get()}.
+     * The {@code Callable} overrides {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Callable<Observable<RSRC>> toCallable() {
+        return toResourceCallable();
+    }
+
+    private ResourceCallable<ReadableResource<RSRC>, Observable<RSRC>> toResourceCallable() {
+        return new ResourceCallable<ReadableResource<RSRC>, Observable<RSRC>>(this) {
+            @Override
+            public Observable<RSRC> call() {
+                return FluentReadableResource.this.get();
+            }
+        };
+    }
 
 
     /**

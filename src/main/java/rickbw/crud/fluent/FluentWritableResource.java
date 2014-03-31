@@ -75,6 +75,21 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
     // TODO: Expose other Observable methods
 
+    /**
+     * Return a function that, when called, will call {@link #write(Object)}.
+     * The function object implements {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Func1<RSRC, Observable<RESPONSE>> toFunction() {
+        return new ResourceFunction<WritableResource<RSRC, RESPONSE>, RSRC, Observable<RESPONSE>>(this) {
+            @Override
+            public Observable<RESPONSE> call(final RSRC newValue) {
+                return FluentWritableResource.this.write(newValue);
+            }
+        };
+    }
+
 
     /**
      * Private superclass for the concrete nested classes here. It cannot be

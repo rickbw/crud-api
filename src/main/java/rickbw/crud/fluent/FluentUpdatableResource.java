@@ -55,6 +55,21 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
 
     // TODO: Expose other Observable methods
 
+    /**
+     * Return a function that, when called, will call {@link #update(Object)}.
+     * The function object implements {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Func1<UPDATE, Observable<RESPONSE>> toFunction() {
+        return new ResourceFunction<UpdatableResource<UPDATE, RESPONSE>, UPDATE, Observable<RESPONSE>>(this) {
+            @Override
+            public Observable<RESPONSE> call(final UPDATE update) {
+                return FluentUpdatableResource.this.update(update);
+            }
+        };
+    }
+
 
     /**
      * Private superclass for the concrete nested classes here. It cannot be

@@ -14,10 +14,13 @@
  */
 package rickbw.crud.fluent;
 
+import java.util.concurrent.Callable;
+
 import rickbw.crud.DeletableResource;
 import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
+import rx.functions.Func0;
 import rx.functions.Func1;
 
 
@@ -68,6 +71,35 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
     }
 
     // TODO: Expose other Observable methods
+
+    /**
+     * Return a function that, when called, will call {@link #delete()}.
+     * The function object implements {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Func0<Observable<RESPONSE>> toFunction() {
+        return toResourceCallable();
+    }
+
+    /**
+     * Return a {@link Callable} that delegates to {@link #delete()}.
+     * The {@code Callable} overrides {@link Object#equals(Object)},
+     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
+     * this resource.
+     */
+    public Callable<Observable<RESPONSE>> toCallable() {
+        return toResourceCallable();
+    }
+
+    private ResourceCallable<DeletableResource<RESPONSE>, Observable<RESPONSE>> toResourceCallable() {
+        return new ResourceCallable<DeletableResource<RESPONSE>, Observable<RESPONSE>>(this) {
+            @Override
+            public Observable<RESPONSE> call() {
+                return FluentDeletableResource.this.delete();
+            }
+        };
+    }
 
 
     /**
