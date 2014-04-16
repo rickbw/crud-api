@@ -52,12 +52,13 @@ public final class TextFileExample {
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
         final ReadableResource<String> inputLines = files.get(inputFile);
         final UpdatableResource<String, Void> outputLines = files.get(outputFile);
-        final ResourceMerger<String, String, Void> merger = ResourceMerger.withUpdater(
+        final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
                 inputLines,
+                lineToJson,
                 outputLines);
 
         System.out.println("Transforming from " + inputFile + " into " + outputFile + "...");
-        final Observable<Void> result = merger.merge(lineToJson);
+        final Observable<Void> result = merger.merge();
         result.toBlockingObservable().toFuture().get();
         System.out.println("Done!");
     }
