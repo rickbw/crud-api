@@ -22,6 +22,7 @@ import rickbw.crud.fluent.FluentReadableResource;
 import rickbw.crud.fluent.FluentUpdatableResource;
 import rickbw.crud.fluent.FluentWritableResource;
 import rx.Observable;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Function;
 import rx.operators.OperatorMerge;
@@ -108,6 +109,11 @@ public abstract class ResourceMerger<RESPONSE> {
     public abstract Observable<RESPONSE> merge();
 
     /**
+     * Expose this merger as a {@link Function}.
+     */
+    public abstract Func0<Observable<RESPONSE>> toFunction();
+
+    /**
      * Two mergers are considered to be equal if and only if their
      * constituent {@link Resource}s and {@link Function}s (if any) are equal.
      */
@@ -140,6 +146,13 @@ public abstract class ResourceMerger<RESPONSE> {
         /** @see #readerForObjectMethods */
         private final Object writerForObjectMethods;
 
+        private final Func0<Observable<RESPONSE>> asFunction = new Func0<Observable<RESPONSE>>() {
+            @Override
+            public Observable<RESPONSE> call() {
+                return merge();
+            }
+        };
+
         public MergerImpl(
                 final ReadableResource<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
@@ -161,6 +174,11 @@ public abstract class ResourceMerger<RESPONSE> {
         @Override
         public Observable<RESPONSE> merge() {
             return this.merger.get();
+        }
+
+        @Override
+        public Func0<Observable<RESPONSE>> toFunction() {
+            return this.asFunction;
         }
 
         @Override
