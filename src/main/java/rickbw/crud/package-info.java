@@ -61,10 +61,7 @@
  *  <li>The {@link rickbw.crud.util} package contains general utilities.</li>
  *  <li>The {@link rickbw.crud.pattern} package contains ready-to-
  *      implement combinations of Crud interfaces intended to meet the needs
- *      of certain data-access patterns out of the box. For example,
- *      {@link rickbw.crud.pattern.KeyValueResource} emulates a
- *      {@link java.util.Map} by combining read, write and delete operations
- *      while omitting (partial) update.</li>
+ *      of certain data-access patterns out of the box.</li>
  * </li>
  */
 package rickbw.crud;
