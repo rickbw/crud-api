@@ -64,6 +64,7 @@ the License.
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <rxjava.version>0.17.2</rxjava.version>
+        <guava.version>16.0.1</guava.version>
     </properties>
 
     <repositories>
@@ -79,6 +80,11 @@ the License.
             <groupId>com.netflix.rxjava</groupId>
             <artifactId>rxjava-core</artifactId>
             <version>${rxjava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>

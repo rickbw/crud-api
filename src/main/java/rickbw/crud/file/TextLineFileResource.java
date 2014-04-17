@@ -21,12 +21,13 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.common.base.Preconditions;
+
 import rickbw.crud.ReadableResource;
 import rickbw.crud.ReadableResourceProvider;
 import rickbw.crud.UpdatableResource;
 import rickbw.crud.UpdatableResourceProvider;
 import rickbw.crud.util.BooleanSubscription;
-import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;

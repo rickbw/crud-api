@@ -14,8 +14,9 @@
  */
 package rickbw.crud.fluent;
 
+import com.google.common.base.Preconditions;
+
 import rickbw.crud.UpdatableResourceProvider;
-import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.functions.Func1;
 

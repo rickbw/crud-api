@@ -16,9 +16,10 @@ package rickbw.crud.fluent;
 
 import java.util.concurrent.Callable;
 
+import com.google.common.base.Preconditions;
+
 import rickbw.crud.ReadableResource;
 import rickbw.crud.pattern.ResourceMerger;
-import rickbw.crud.util.Preconditions;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func0;

@@ -14,9 +14,10 @@
  */
 package rickbw.crud.fluent;
 
+import com.google.common.base.Preconditions;
+
 import rickbw.crud.Resource;
 import rickbw.crud.ResourceProvider;
-import rickbw.crud.util.Preconditions;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
