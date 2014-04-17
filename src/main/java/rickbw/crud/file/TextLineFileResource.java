@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import rickbw.crud.ReadableResource;
@@ -56,7 +57,40 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
         return Observable.create(new WriteLineOnSubscribe(update));
     }
 
-    private TextLineFileResource(final File file) {
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '(' + this.file + ')';
+    }
+
+    /**
+     * Caveat: If two resources of this class are created for two different
+     * representations of the same file -- for example, because of hard links
+     * or case differences on a case-insensitive file system -- this method
+     * may consider the two resources to be unequal.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TextLineFileResource other = (TextLineFileResource) obj;
+        // We could use File.getCanonicalFile() here, but it's expensive.
+        return this.file.equals(other.file);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 + this.file.hashCode();
+    }
+
+    @VisibleForTesting
+    /*package*/ TextLineFileResource(final File file) {
         this.file = Preconditions.checkNotNull(file);
     }
 
