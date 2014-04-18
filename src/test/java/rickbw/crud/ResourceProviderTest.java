@@ -12,37 +12,65 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
 
 /**
- * Just make sure this thing keeps compiling.
+ * A base class for all unit tests for {@link ResourceProvider}s.
  */
-public final class ResourceProviderTest {
+public abstract class ResourceProviderTest<KEY> {
 
-    public interface Readable extends ReadableResource<String> {
-        // empty
-    }
+    @Test
+    public void getDefaultKeyReturnsNonNullResource() {
+        // given:
+        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final KEY key = createDefaultKey();
 
-    public interface Writable extends WritableResource<Object, StringBuilder> {
-        // empty
-    }
+        // when:
+        final Resource resource = provider.get(key);
 
-    public interface ReadWritable extends Readable, Writable {
-        // empty
-    }
-
-    public interface Provider extends ReadableResourceProvider<Enum<?>, String>, WritableResourceProvider<Enum<?>, Object, StringBuilder> {
-        @Override
-        public abstract ReadWritable get(Enum<?> key);
+        // then:
+        assertNotNull(resource);
     }
 
     @Test
-    public void testNothing() {
-        // nothing to do
+    public void twoResourcesFromSameKeyAreEqual() {
+        // given:
+        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final KEY key = createDefaultKey();
+
+        // when:
+        final Resource resource1 = provider.get(key);
+        final Resource resource2 = provider.get(key);
+
+        // then:
+        assertEquals(resource1, resource2);
     }
+
+    @Test(expected=NullPointerException.class)
+    public void getNullKeyThrows() {
+        // given:
+        final ResourceProvider<KEY> provider = createDefaultProvider();
+
+        // when:
+        provider.get(null);
+    }
+
+    /**
+     * Create and return a new instance of the {@link ResourceProvider} class
+     * under test.
+     */
+    protected abstract ResourceProvider<KEY> createDefaultProvider();
+
+    /**
+     * Create and return a key that can be passed to the providers returned by
+     * {@link #createDefaultProvider()}.
+     */
+    protected abstract KEY createDefaultKey();
 
 }

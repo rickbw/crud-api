@@ -12,7 +12,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rickbw.crud;
 
 
@@ -28,7 +27,10 @@ package rickbw.crud;
 public interface ResourceProvider<KEY> {
 
     /**
-     * Get the {@link Resource} associated with the given key.
+     * Get the {@link Resource} associated with the given key. Resources
+     * returned for keys that are equal should themselves be equal. In no
+     * case should a resource be {@code null}; the absence of state should be
+     * handled by the {@code Resource} itself.
      *
      * This operation is assumed to be relatively cheap and in-memory.
      * Specifically, when dealing with remote and/or persistent Resources,
