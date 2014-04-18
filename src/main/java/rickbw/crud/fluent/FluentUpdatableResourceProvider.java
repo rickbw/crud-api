@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.UpdatableResourceProvider;
 import rx.Observable;
@@ -48,8 +48,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
     public <R> FluentUpdatableResourceProvider<KEY, UPDATE, R> mapResponse(
             final Func1<? super RESPONSE, ? extends R> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
+        Objects.requireNonNull(mapper, "null function");
         final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
             @Override
             public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
@@ -63,8 +62,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
     public <R> FluentUpdatableResourceProvider<KEY, UPDATE, R> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
+        Objects.requireNonNull(mapper, "null function");
         final FluentUpdatableResourceProvider<KEY, UPDATE, R> result = new FluentUpdatableResourceProvider<KEY, UPDATE, R>() {
             @Override
             public FluentUpdatableResource<UPDATE, R> get(final KEY key) {
@@ -78,8 +76,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
     public <U> FluentUpdatableResourceProvider<KEY, U, RESPONSE> adaptUpdate(
             final Func1<? super U, ? extends UPDATE> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentUpdatableResourceProvider<KEY, U, RESPONSE> result = new FluentUpdatableResourceProvider<KEY, U, RESPONSE>() {
             @Override
             public FluentUpdatableResource<U, RESPONSE> get(final KEY key) {
@@ -93,8 +90,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
 
     public <K> FluentUpdatableResourceProvider<K, UPDATE, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentUpdatableResourceProvider<K, UPDATE, RESPONSE> result = new FluentUpdatableResourceProvider<K, UPDATE, RESPONSE>() {
             @Override
             public FluentUpdatableResource<UPDATE, RESPONSE> get(final K key) {
@@ -106,7 +102,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
     }
 
     public <TO> FluentUpdatableResourceProvider<KEY, UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Preconditions.checkNotNull(bind, "null operator");
+        Objects.requireNonNull(bind, "null operator");
         return new FluentUpdatableResourceProvider<KEY, UPDATE, TO>() {
             @Override
             public FluentUpdatableResource<UPDATE, TO> get(final KEY key) {

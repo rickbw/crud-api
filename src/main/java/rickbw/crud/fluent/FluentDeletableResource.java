@@ -14,9 +14,8 @@
  */
 package rickbw.crud.fluent;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
-
-import com.google.common.base.Preconditions;
 
 import rickbw.crud.DeletableResource;
 import rx.Observable;
@@ -135,18 +134,12 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
                 return false;
             }
             final AbstractFluentDeletableResource<?, ?, ?> other = (AbstractFluentDeletableResource<?, ?, ?>) obj;
-            if (!this.state.equals(other.state)) {
-                return false;
-            }
-            return true;
+            return this.state.equals(other.state);
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + this.state.hashCode();
-            return result;
+            return 31 + this.state.hashCode();
         }
     }
 
@@ -177,7 +170,7 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
                 final DeletableResource<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
-            Preconditions.checkNotNull(mapper, "null function");
+            Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
@@ -216,7 +209,7 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
                 final DeletableResource<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);
-            Preconditions.checkNotNull(bind, "null operator");
+            Objects.requireNonNull(bind, "null operator");
         }
 
         @Override

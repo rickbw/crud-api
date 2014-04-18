@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.UpdatableResource;
 import rx.Observable;
@@ -104,18 +104,12 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
                 return false;
             }
             final AbstractFluentUpdatableResource<?, ?, ?, ?, ?> other = (AbstractFluentUpdatableResource<?, ?, ?, ?, ?>) obj;
-            if (!this.state.equals(other.state)) {
-                return false;
-            }
-            return true;
+            return this.state.equals(other.state);
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + this.state.hashCode();
-            return result;
+            return 31 + this.state.hashCode();
         }
     }
 
@@ -146,7 +140,7 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
                 final UpdatableResource<UPDATE, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
-            Preconditions.checkNotNull(mapper, "null function");
+            Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
@@ -165,7 +159,7 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
                 final UpdatableResource<UPDATE, FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
-            Preconditions.checkNotNull(mapper, "null function");
+            Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
@@ -184,7 +178,7 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
                 final UpdatableResource<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
             super(delegate, adapter);
-            Preconditions.checkNotNull(adapter, "null function");
+            Objects.requireNonNull(adapter, "null function");
         }
 
         @Override
@@ -203,7 +197,7 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
                 final UpdatableResource<UPDATE, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);
-            Preconditions.checkNotNull(bind, "null operator");
+            Objects.requireNonNull(bind, "null operator");
         }
 
         @Override

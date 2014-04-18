@@ -14,9 +14,8 @@
  */
 package rickbw.crud.util;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.common.base.Preconditions;
 
 import rx.Subscription;
 
@@ -32,7 +31,7 @@ public final class BooleanSubscription implements Subscription {
 
 
     public BooleanSubscription(final AtomicBoolean unsubscribed) {
-        this.unsubscribed = Preconditions.checkNotNull(unsubscribed);
+        this.unsubscribed = Objects.requireNonNull(unsubscribed);
     }
 
 

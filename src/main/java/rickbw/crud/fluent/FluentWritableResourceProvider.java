@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.WritableResource;
 import rickbw.crud.WritableResourceProvider;
@@ -42,8 +42,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
     public <RESP> FluentWritableResourceProvider<KEY, RSRC, RESP> mapResponse(
             final Func1<? super RESPONSE, ? extends RESP> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
+        Objects.requireNonNull(mapper, "null function");
         final FluentWritableResourceProvider<KEY, RSRC, RESP> result = new FluentWritableResourceProvider<KEY, RSRC, RESP>() {
             @Override
             public FluentWritableResource<RSRC, RESP> get(final KEY key) {
@@ -57,8 +56,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
     public <RC> FluentWritableResourceProvider<KEY, RC, RESPONSE> adaptNewValue(
             final Func1<? super RC, ? extends RSRC> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentWritableResourceProvider<KEY, RC, RESPONSE> result = new FluentWritableResourceProvider<KEY, RC, RESPONSE>() {
             @Override
             public FluentWritableResource<RC, RESPONSE> get(final KEY key) {
@@ -72,8 +70,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
 
     public <K> FluentWritableResourceProvider<K, RSRC, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentWritableResourceProvider<K, RSRC, RESPONSE> result = new FluentWritableResourceProvider<K, RSRC, RESPONSE>() {
             @Override
             public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
@@ -120,7 +117,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
     }
 
     public <TO> FluentWritableResourceProvider<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Preconditions.checkNotNull(bind, "null operator");
+        Objects.requireNonNull(bind, "null operator");
         return new FluentWritableResourceProvider<KEY, RSRC, TO>() {
             @Override
             public FluentWritableResource<RSRC, TO> get(final KEY key) {

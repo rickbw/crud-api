@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
@@ -42,8 +42,7 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
 
     public <R> FluentDeletableResourceProvider<KEY, R> mapResponse(
             final Func1<? super RESPONSE, ? extends R> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
+        Objects.requireNonNull(mapper, "null function");
         final FluentDeletableResourceProvider<KEY, R> result = new FluentDeletableResourceProvider<KEY, R>() {
             @Override
             public FluentDeletableResource<R> get(final KEY key) {
@@ -57,8 +56,7 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
 
     public <K> FluentDeletableResourceProvider<K, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentDeletableResourceProvider<K, RESPONSE> result = new FluentDeletableResourceProvider<K, RESPONSE>() {
             @Override
             public FluentDeletableResource<RESPONSE> get(final K key) {
@@ -104,7 +102,7 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
     }
 
     public <TO> FluentDeletableResourceProvider<KEY, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Preconditions.checkNotNull(bind, "null operator");
+        Objects.requireNonNull(bind, "null operator");
         return new FluentDeletableResourceProvider<KEY, TO>() {
             @Override
             public FluentDeletableResource<TO> get(final KEY key) {

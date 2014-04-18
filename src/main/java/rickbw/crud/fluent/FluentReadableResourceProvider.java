@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.ReadableResource;
 import rickbw.crud.ReadableResourceProvider;
@@ -42,8 +42,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
 
     public <R> FluentReadableResourceProvider<KEY, R> mapValue(
             final Func1<? super RSRC, ? extends R> mapper) {
-        Preconditions.checkNotNull(mapper, "null function");
-
+        Objects.requireNonNull(mapper, "null function");
         final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
             @Override
             public FluentReadableResource<R> get(final KEY key) {
@@ -57,8 +56,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
 
     public <K> FluentReadableResourceProvider<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
-        Preconditions.checkNotNull(adapter, "null function");
-
+        Objects.requireNonNull(adapter, "null function");
         final FluentReadableResourceProvider<K, RSRC> result = new FluentReadableResourceProvider<K, RSRC>() {
             @Override
             public FluentReadableResource<RSRC> get(final K key) {
@@ -104,7 +102,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
     }
 
     public <TO> FluentReadableResourceProvider<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
-        Preconditions.checkNotNull(bind, "null operator");
+        Objects.requireNonNull(bind, "null operator");
         return new FluentReadableResourceProvider<KEY, TO>() {
             @Override
             public FluentReadableResource<TO> get(final KEY key) {

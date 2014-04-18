@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.Resource;
 import rickbw.crud.ResourceProvider;
@@ -69,7 +69,7 @@ import rx.functions.Func1;
     }
 
     protected DelegateObjectMethods(final Object delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate);
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
 

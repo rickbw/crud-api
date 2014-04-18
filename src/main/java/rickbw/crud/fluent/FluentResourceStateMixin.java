@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import rickbw.crud.Resource;
 import rx.functions.Func1;
@@ -39,7 +39,7 @@ import rx.functions.Func1;
      *                  wrapping {@code Resource}. It may be null.
      */
     public FluentResourceStateMixin(final R delegate, final T auxiliary) {
-        this.delegate = Preconditions.checkNotNull(delegate);
+        this.delegate = Objects.requireNonNull(delegate);
         this.auxiliaryState = auxiliary;    // may be null
     }
 
@@ -78,13 +78,7 @@ import rx.functions.Func1;
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + this.delegate.hashCode();
-        result = prime * result + ((this.auxiliaryState == null)
-                ? 0
-                : this.auxiliaryState .hashCode());
-        return result;
+        return Objects.hash(this.delegate, this.auxiliaryState);
     }
 
 }

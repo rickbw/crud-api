@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 import rickbw.crud.ReadableResource;
 import rickbw.crud.ReadableResourceProvider;
@@ -91,7 +91,7 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
 
     @VisibleForTesting
     /*package*/ TextLineFileResource(final File file) {
-        this.file = Preconditions.checkNotNull(file);
+        this.file = Objects.requireNonNull(file);
     }
 
 
@@ -130,7 +130,7 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
         private final String update;
 
         private WriteLineOnSubscribe(final String update) {
-            this.update = Preconditions.checkNotNull(update);
+            this.update = Objects.requireNonNull(update);
         }
 
         @Override
