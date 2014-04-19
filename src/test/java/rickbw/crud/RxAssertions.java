@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2014 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
 package rickbw.crud;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -34,10 +35,20 @@ public final class RxAssertions {
     public static void assertObservablesEqual(
             final Observable<?> expected,
             final Observable<?> actual) {
-        final List<Object> expectedValues = Lists.newArrayList(expected.toBlockingObservable().toIterable());
-        final List<Object> actualValues = Lists.newArrayList(actual.toBlockingObservable().toIterable());
+        // Observables should never be null:
+        assertNotNull(expected);
+        assertNotNull(actual);
+
+        // materialize() to collapse exceptions and values together
+        final List<?> expectedValues = Lists.newArrayList(expected
+                .materialize()
+                .toBlockingObservable()
+                .toIterable());
+        final List<?> actualValues = Lists.newArrayList(actual
+                .materialize()
+                .toBlockingObservable()
+                .toIterable());
         assertEquals(expectedValues, actualValues);
-        // TODO
     }
 
     private RxAssertions() {

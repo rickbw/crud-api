@@ -34,6 +34,10 @@ import rx.functions.Func1;
  */
 public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
 
+    /**
+     * If the given resource is a {@code FluentDeletableResource}, return it.
+     * Otherwise, wrap it in a new instance.
+     */
     public static <RESPONSE> FluentDeletableResource<RESPONSE> from(final DeletableResource<RESPONSE> resource) {
         if (resource instanceof FluentDeletableResource<?>) {
             return (FluentDeletableResource<RESPONSE>) resource;
@@ -42,6 +46,16 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
         }
     }
 
+    /**
+     * Create and return a new resource that will transform the responses from
+     * this resource.
+     *
+     * If this method is called on two equal {@code FluentDeletableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentDeletableResource<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingDeletableResource<>(this, mapper);
     }
@@ -61,16 +75,26 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
      * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
+     * If this method is called on two equal {@code FluentDeletableResource}s,
+     * the results will be equal if the max retry counts are equal.
+     *
      * @param maxRetries    number of retry attempts before failing
      */
     public FluentDeletableResource<RESPONSE> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;    // no-op
+        } else if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
             return new RetryingDeletableResource<>(this, maxRetries);
         }
     }
 
+    /**
+     * Wrap this {@code FluentDeletableResource} in another one that will
+     * pass all observations through a given adapter {@link Observer}, as with
+     * {@link Observable#lift(rx.Observable.Operator)}.
+     */
     public <TO> FluentDeletableResource<TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         return new LiftingDeletableResource<>(this, bind);
     }
