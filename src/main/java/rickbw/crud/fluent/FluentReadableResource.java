@@ -36,6 +36,10 @@ import rx.functions.Func1;
  */
 public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
 
+    /**
+     * If the given resource is a {@code FluentReadableResource}, return it.
+     * Otherwise, wrap it in a new instance.
+     */
     public static <RSRC> FluentReadableResource<RSRC> from(final ReadableResource<RSRC> resource) {
         if (resource instanceof FluentReadableResource<?>) {
             return (FluentReadableResource<RSRC>) resource;
@@ -44,6 +48,16 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
     }
 
+    /**
+     * Create and return a new resource that will transform the state of
+     * this resource.
+     *
+     * If this method is called on two equal {@code FluentReadableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentReadableResource<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
         return new MappingReadableResource<>(this, mapper);
     }
@@ -63,16 +77,26 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
+     * If this method is called on two equal {@code FluentReadableResource}s,
+     * the results will be equal if the max retry counts are equal.
+     *
      * @param maxRetries    number of retry attempts before failing
      */
     public FluentReadableResource<RSRC> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;
+        } else if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
             return new RetryingReadableResource<>(this, maxRetries);
         }
     }
 
+    /**
+     * Wrap this {@code FluentReadableResource} in another one that will
+     * pass all observations through a given adapter {@link Observer}, as with
+     * {@link Observable#lift(rx.Observable.Operator)}.
+     */
     public <TO> FluentReadableResource<TO> lift(final Observable.Operator<TO, RSRC> bind) {
         return new LiftingReadableResource<>(this, bind);
     }
