@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import rickbw.crud.UpdatableResource;
 import rx.Observable;
+import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -31,6 +32,10 @@ import rx.functions.Func1;
  */
 public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements UpdatableResource<UPDATE, RESPONSE> {
 
+    /**
+     * If the given resource is a {@code FluentUpdatableResource}, return it.
+     * Otherwise, wrap it in a new instance.
+     */
     public static <UPDATE, RESPONSE> FluentUpdatableResource<UPDATE, RESPONSE> from(
             final UpdatableResource<UPDATE, RESPONSE> resource) {
         if (resource instanceof FluentUpdatableResource<?, ?>) {
@@ -40,21 +45,56 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
         }
     }
 
+    /**
+     * Create and return a new resource that will transform the responses from
+     * this resource.
+     *
+     * If this method is called on two equal {@code FluentUpdatableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentUpdatableResource<UPDATE, TO> mapResponse(
             final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingUpdatableResource<>(this, mapper);
     }
 
+    /**
+     * Create and return a new resource that will transform and flatten the
+     * responses from this resource.
+     *
+     * If this method is called on two equal {@code FluentUpdatableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentUpdatableResource<UPDATE, TO> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
         return new FlatMappingUpdatableResource<>(this, mapper);
     }
 
+    /**
+     * Create and return a new resource that will transform the input updates
+     * before passing them to this resource.
+     *
+     * If this method is called on two equal {@code FluentUpdatableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentUpdatableResource<TO, RESPONSE> adaptUpdate(
             final Func1<? super TO, ? extends UPDATE> adapter) {
         return new AdaptingUpdatableResource<>(this, adapter);
     }
 
+    /**
+     * Wrap this {@code FluentUpdatableResource} in another one that will
+     * pass all observations through a given adapter {@link Observer}, as with
+     * {@link Observable#lift(rx.Observable.Operator)}.
+     */
     public <TO> FluentUpdatableResource<UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         return new LiftingUpdatableResource<>(this, bind);
     }
