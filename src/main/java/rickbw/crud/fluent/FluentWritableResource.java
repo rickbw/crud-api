@@ -34,6 +34,10 @@ import rx.functions.Func1;
  */
 public abstract class FluentWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
+    /**
+     * If the given resource is a {@code FluentWritableResource}, return it.
+     * Otherwise, wrap it in a new instance.
+     */
     public static <RSRC, RESPONSE> FluentWritableResource<RSRC, RESPONSE> from(
             final WritableResource<RSRC, RESPONSE> resource) {
         if (resource instanceof FluentWritableResource<?, ?>) {
@@ -43,10 +47,30 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
         }
     }
 
+    /**
+     * Create and return a new resource that will transform the responses from
+     * this resource.
+     *
+     * If this method is called on two equal {@code FluentWritableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentWritableResource<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingWritableResource<>(this, mapper);
     }
 
+    /**
+     * Create and return a new resource that will transform the input resource
+     * states before passing them to this resource.
+     *
+     * If this method is called on two equal {@code FluentWritableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
     public <TO> FluentWritableResource<TO, RESPONSE> adaptNewValue(
             final Func1<? super TO, ? extends RSRC> adapter) {
         return new AdaptingWritableResource<>(this, adapter);
@@ -67,16 +91,26 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
+     * If this method is called on two equal {@code FluentWritableResource}s,
+     * the results will be equal if the max retry counts are equal.
+     *
      * @param maxRetries    number of retry attempts before failing
      */
     public FluentWritableResource<RSRC, RESPONSE> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;
+        } else if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
             return new RetryingWritableResource<>(this, maxRetries);
         }
     }
 
+    /**
+     * Wrap this {@code FluentWritableResource} in another one that will
+     * pass all observations through a given adapter {@link Observer}, as with
+     * {@link Observable#lift(rx.Observable.Operator)}.
+     */
     public <TO> FluentWritableResource<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         return new LiftingWritableResource<>(this, bind);
     }
