@@ -60,6 +60,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
         final FluentReadableResourceProvider<K, RSRC> result = new FluentReadableResourceProvider<K, RSRC>() {
             @Override
             public FluentReadableResource<RSRC> get(final K key) {
+                Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerProvider().get(transformedKey);
             }

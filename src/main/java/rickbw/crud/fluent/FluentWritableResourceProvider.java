@@ -74,6 +74,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         final FluentWritableResourceProvider<K, RSRC, RESPONSE> result = new FluentWritableResourceProvider<K, RSRC, RESPONSE>() {
             @Override
             public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
+                Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerProvider().get(transformedKey);
             }

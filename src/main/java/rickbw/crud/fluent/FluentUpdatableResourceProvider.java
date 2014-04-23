@@ -94,6 +94,7 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
         final FluentUpdatableResourceProvider<K, UPDATE, RESPONSE> result = new FluentUpdatableResourceProvider<K, UPDATE, RESPONSE>() {
             @Override
             public FluentUpdatableResource<UPDATE, RESPONSE> get(final K key) {
+                Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerProvider().get(transformedKey);
             }

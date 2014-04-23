@@ -16,16 +16,29 @@ package rickbw.crud.fluent;
 
 import java.util.Objects;
 
+import com.google.common.base.Function;
+
 import rickbw.crud.DeletableResource;
 import rickbw.crud.DeletableResourceProvider;
+import rickbw.crud.Resource;
+import rickbw.crud.ResourceProvider;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
+/**
+ * A set of fluent transformations and utilities on
+ * {@link DeletableResourceProvider}s.
+ */
 public abstract class FluentDeletableResourceProvider<KEY, RESPONSE>
 implements DeletableResourceProvider<KEY, RESPONSE> {
 
+    /**
+     * If the given {@link ResourceProvider} is already a
+     * {@link FluentDeletableResourceProvider}, return it. Otherwise, wrap it
+     * in a new instance.
+     */
     public static <KEY, RESPONSE> FluentDeletableResourceProvider<KEY, RESPONSE> from(
             final DeletableResourceProvider<KEY, RESPONSE> provider) {
         if (provider instanceof FluentDeletableResourceProvider<?, ?>) {
@@ -40,6 +53,9 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         }
     }
 
+    /**
+     * @see FluentDeletableResource#mapResponse(Func1)
+     */
     public <R> FluentDeletableResourceProvider<KEY, R> mapResponse(
             final Func1<? super RESPONSE, ? extends R> mapper) {
         Objects.requireNonNull(mapper, "null function");
@@ -54,12 +70,16 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         return result;
     }
 
+    /**
+     * Transform the key used to look up {@link DeletableResourceProvider}s.
+     */
     public <K> FluentDeletableResourceProvider<K, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
         final FluentDeletableResourceProvider<K, RESPONSE> result = new FluentDeletableResourceProvider<K, RESPONSE>() {
             @Override
             public FluentDeletableResource<RESPONSE> get(final K key) {
+                Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerProvider().get(transformedKey);
             }
@@ -83,6 +103,8 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
      * @param maxRetries    number of retry attempts before failing
+     *
+     * @see FluentDeletableResource#retry(int)
      */
     public FluentDeletableResourceProvider<KEY, RESPONSE> retry(final int maxRetries) {
         if (maxRetries == 0) {
@@ -101,6 +123,9 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         }
     }
 
+    /**
+     * @see FluentDeletableResource#lift(rx.Observable.Operator)
+     */
     public <TO> FluentDeletableResourceProvider<KEY, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         Objects.requireNonNull(bind, "null operator");
         return new FluentDeletableResourceProvider<KEY, TO>() {
@@ -113,6 +138,10 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         };
     }
 
+    /**
+     * Present this {@link ResourceProvider} as a {@link Function} from key
+     * to {@link Resource}.
+     */
     public Func1<KEY, FluentDeletableResource<RESPONSE>> toFunction() {
         return new DelegateObjectMethods.Function<KEY, FluentDeletableResource<RESPONSE>>(this) {
             @Override
