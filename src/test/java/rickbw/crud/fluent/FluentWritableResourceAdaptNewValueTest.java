@@ -29,7 +29,7 @@ public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResou
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Object, String> adapter = new Func1<Object, String>() {
         @Override
         public String call(final Object input) {
             return RESPONSE_PREFIX + input;
@@ -43,7 +43,7 @@ public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResou
         // given:
         final FluentWritableResource<Object, Object> resource = createDefaultResource();
         final Object original = createDefaultResourceState();
-        final String adapted = mapper.call(original);
+        final String adapted = adapter.call(original);
 
         // when:
         resource.write(original);
@@ -54,7 +54,7 @@ public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResou
 
     @Override
     protected FluentWritableResource<Object, Object> createDefaultResource() {
-        return super.createDefaultResource().<Object>adaptNewValue(mapper);
+        return super.createDefaultResource().<Object>adaptNewValue(adapter);
     }
 
 }

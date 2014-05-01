@@ -14,7 +14,7 @@
  */
 package rickbw.crud.fluent;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -44,14 +44,16 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
         // given:
         final FluentWritableResource<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
+        final String origResponse = "world";
+        final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>from(origResponse));
         final Observable<Object> response = resource.write(newValue);
 
         // then:
         final Object responseValue = response.toBlockingObservable().first();
-        assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
+        assertEquals(mappedResponse, responseValue);
     }
 
     @Override
