@@ -110,6 +110,7 @@ public abstract class ResourceMerger<RESPONSE> {
 
     /**
      * Expose this merger as a {@link Function}.
+     * The functions from two equal mergers will themselves be equal.
      */
     public abstract Func0<Observable<RESPONSE>> toFunction();
 
@@ -145,13 +146,7 @@ public abstract class ResourceMerger<RESPONSE> {
         private final Object readerForObjectMethods;
         /** @see #readerForObjectMethods */
         private final Object writerForObjectMethods;
-
-        private final Func0<Observable<RESPONSE>> asFunction = new Func0<Observable<RESPONSE>>() {
-            @Override
-            public Observable<RESPONSE> call() {
-                return merge();
-            }
-        };
+        private final Func0<Observable<RESPONSE>> asFunction;
 
         public MergerImpl(
                 final ReadableResource<RSRC> reader,
@@ -169,6 +164,7 @@ public abstract class ResourceMerger<RESPONSE> {
                     .lift(new OperatorMerge<RESPONSE>());
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
+            this.asFunction = new MergerFunction<RESPONSE>(this);
         }
 
         @Override
@@ -221,6 +217,44 @@ public abstract class ResourceMerger<RESPONSE> {
             result = prime * result + this.readerForObjectMethods.hashCode();
             result = prime * result + this.writerForObjectMethods.hashCode();
             return result;
+        }
+    }
+
+    private static final class MergerFunction<RESPONSE> implements Func0<Observable<RESPONSE>> {
+        private final ResourceMerger<RESPONSE> merger;
+
+        public MergerFunction(final ResourceMerger<RESPONSE> merger) {
+            this.merger = merger;
+        }
+
+        @Override
+        public Observable<RESPONSE> call() {
+            return this.merger.merge();
+        }
+
+        @Override
+        public String toString() {
+            return "Func0(" + this.merger + ')';
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final MergerFunction<?> other = (MergerFunction<?>) obj;
+            return this.merger.equals(other.merger);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 + this.merger.hashCode();
         }
     }
 
