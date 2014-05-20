@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rickbw.crud.file;
+package rickbw.crud.file.example;
 
 import java.io.File;
 import java.util.StringTokenizer;
