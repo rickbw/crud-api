@@ -55,7 +55,7 @@ public class FluentDeletableResourceProviderLiftTest extends FluentDeletableReso
         final Observable<Object> response = resource.delete();
 
         // then:
-        final Object actualResponseValue = response.toBlockingObservable().first();
+        final Object actualResponseValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
         assertEquals(expectedResponseValue, actualResponseValue);
         assertTrue(this.lifterCalled.get());    // after getting value

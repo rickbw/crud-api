@@ -53,7 +53,7 @@ public class FluentReadableResourceLiftTest extends FluentReadableResourceTest {
         final Observable<Object> response = resource.get();
 
         // then:
-        final Object actualResourceValue = response.toBlockingObservable().first();
+        final Object actualResourceValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
         assertEquals(expectedResourceValue, actualResourceValue);
         assertTrue(this.lifterCalled.get());    // after getting value

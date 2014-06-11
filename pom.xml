@@ -63,7 +63,7 @@ the License.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <rxjava.version>0.17.2</rxjava.version>
+        <rxjava.version>0.19.0</rxjava.version>
         <guava.version>16.0.1</guava.version>
 
         <junit.version>4.11</junit.version>

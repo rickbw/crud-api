@@ -64,7 +64,7 @@ public class ReadableTextLineFileResourceTest extends ReadableResourceTest<Strin
         final Observable<String> result = resource.get();
 
         // then:
-        final Iterator<String> actualLines = result.toBlockingObservable().getIterator();
+        final Iterator<String> actualLines = result.toBlocking().getIterator();
         for (final String expectedLine : lines) {
             assertEquals(expectedLine, actualLines.next());
         }

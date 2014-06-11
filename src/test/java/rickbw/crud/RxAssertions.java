@@ -45,11 +45,11 @@ public final class RxAssertions {
         // materialize() to collapse exceptions and values together
         final List<?> expectedValues = Lists.newArrayList(expected
                 .materialize()
-                .toBlockingObservable()
+                .toBlocking()
                 .toIterable());
         final List<?> actualValues = Lists.newArrayList(actual
                 .materialize()
-                .toBlockingObservable()
+                .toBlocking()
                 .toIterable());
         assertEquals(expectedValues, actualValues);
     }

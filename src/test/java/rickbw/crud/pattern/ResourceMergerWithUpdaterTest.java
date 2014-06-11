@@ -38,7 +38,7 @@ public class ResourceMergerWithUpdaterTest extends ResourceMergerTest {
 
         // then:
         assertObservablesEqual(this.mockUpdaterResponse, result);
-        verify(this.mockUpdater).update(super.mockReaderState.toBlockingObservable().single());
+        verify(this.mockUpdater).update(super.mockReaderState.toBlocking().single());
     }
 
     @Override

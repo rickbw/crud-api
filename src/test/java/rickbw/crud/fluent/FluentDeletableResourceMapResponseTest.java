@@ -49,7 +49,7 @@ public class FluentDeletableResourceMapResponseTest extends FluentDeletableResou
         final Observable<Object> response = resource.delete();
 
         // then:
-        final Object responseValue = response.toBlockingObservable().first();
+        final Object responseValue = response.toBlocking().first();
         assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
     }
 

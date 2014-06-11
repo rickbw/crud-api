@@ -59,7 +59,7 @@ public final class TextFileExample {
 
         System.out.println("Transforming from " + inputFile + " into " + outputFile + "...");
         final Observable<Void> result = merger.merge();
-        result.toBlockingObservable().toFuture().get();
+        result.toBlocking().toFuture().get();
         System.out.println("Done!");
     }
 

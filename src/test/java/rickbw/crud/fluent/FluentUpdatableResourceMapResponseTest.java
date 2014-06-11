@@ -50,7 +50,7 @@ public class FluentUpdatableResourceMapResponseTest extends FluentUpdatableResou
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final Object responseValue = response.toBlockingObservable().first();
+        final Object responseValue = response.toBlocking().first();
         assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
     }
 

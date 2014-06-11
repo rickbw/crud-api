@@ -52,7 +52,7 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
         final Observable<Object> response = resource.write(newValue);
 
         // then:
-        final Object responseValue = response.toBlockingObservable().first();
+        final Object responseValue = response.toBlocking().first();
         assertEquals(mappedResponse, responseValue);
     }
 

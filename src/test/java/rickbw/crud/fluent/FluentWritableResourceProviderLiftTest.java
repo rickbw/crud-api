@@ -55,7 +55,7 @@ public class FluentWritableResourceProviderLiftTest extends FluentWritableResour
         final Observable<Object> response = resource.write(expectedResponseValue);
 
         // then:
-        final Object actualResponseValue = response.toBlockingObservable().first();
+        final Object actualResponseValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
         assertEquals(expectedResponseValue, actualResponseValue);
         assertTrue(this.lifterCalled.get());    // after getting value

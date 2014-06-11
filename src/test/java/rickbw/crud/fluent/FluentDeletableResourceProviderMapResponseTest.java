@@ -48,7 +48,7 @@ extends FluentDeletableResourceProviderTest {
         final Observable<Object> response = resource.delete();
 
         // then:
-        final String responseString = (String) response.toBlockingObservable().single();
+        final String responseString = (String) response.toBlocking().single();
         assertTrue(responseString.startsWith(PREFIX));
     }
 

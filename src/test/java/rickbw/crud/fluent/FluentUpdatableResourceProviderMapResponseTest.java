@@ -51,7 +51,7 @@ extends FluentUpdatableResourceProviderTest {
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final String responseString = (String) response.toBlockingObservable().single();
+        final String responseString = (String) response.toBlocking().single();
         assertEquals(mappedResponse, responseString);
     }
 

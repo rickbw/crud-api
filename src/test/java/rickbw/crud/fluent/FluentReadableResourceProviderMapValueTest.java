@@ -48,7 +48,7 @@ extends FluentReadableResourceProviderTest {
         final Observable<Object> response = resource.get();
 
         // then:
-        final String responseString = (String) response.toBlockingObservable().single();
+        final String responseString = (String) response.toBlocking().single();
         assertTrue(responseString.startsWith(PREFIX));
     }
 

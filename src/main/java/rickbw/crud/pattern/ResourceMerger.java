@@ -25,7 +25,7 @@ import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Function;
-import rx.operators.OperatorMerge;
+import rx.internal.operators.OperatorMerge;
 
 
 /**

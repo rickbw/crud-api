@@ -53,7 +53,7 @@ public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<Str
         // when:
         for (int i = 0; i < numLines; ++i) {
             final Observable<Void> response = resource.update(expectedLine);
-            final Void responseValue = response.toBlockingObservable().single();
+            final Void responseValue = response.toBlocking().single();
             assertNull(responseValue);  // only possible value of Void
         }
 

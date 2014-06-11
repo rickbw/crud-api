@@ -51,7 +51,7 @@ extends FluentWritableResourceProviderTest {
         final Observable<Object> response = resource.write(value);
 
         // then:
-        final String responseString = (String) response.toBlockingObservable().single();
+        final String responseString = (String) response.toBlocking().single();
         assertEquals(mappedResponse, responseString);
     }
 

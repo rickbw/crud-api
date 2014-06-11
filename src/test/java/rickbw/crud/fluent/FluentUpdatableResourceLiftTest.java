@@ -54,7 +54,7 @@ public class FluentUpdatableResourceLiftTest extends FluentUpdatableResourceTest
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final Object actualResponseValue = response.toBlockingObservable().first();
+        final Object actualResponseValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
         assertEquals(expectedResponseValue, actualResponseValue);
         assertTrue(this.lifterCalled.get());    // after getting value

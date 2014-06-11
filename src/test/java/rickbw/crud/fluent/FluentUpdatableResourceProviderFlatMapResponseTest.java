@@ -48,7 +48,7 @@ extends FluentUpdatableResourceProviderTest {
         final Object key = createDefaultKey();
         final Object update = "Hello";
         final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse).toBlockingObservable().first();
+        final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
         when(super.mockResource.update(update)).thenReturn(Observable.<Object>from(origResponse));
@@ -56,7 +56,7 @@ extends FluentUpdatableResourceProviderTest {
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final Object responseValue = response.toBlockingObservable().first();
+        final Object responseValue = response.toBlocking().first();
         assertEquals(mappedResponse, responseValue);
     }
 
