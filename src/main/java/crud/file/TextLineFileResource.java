@@ -143,7 +143,6 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
             try (Writer writer = new FileWriter(TextLineFileResource.this.file, appendToFile)) {
                 final String line = (this.update.endsWith("\n")) ? this.update : this.update + "\n";
                 writer.write(line);
-                subscriber.onNext(null);
                 subscriber.onCompleted();
             } catch (final Throwable ex) {
                 subscriber.onError(ex);

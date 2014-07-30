@@ -15,6 +15,9 @@
 
 package crud;
 
+import rx.Observable;
+import rx.Observer;
+
 
 /**
  * A "resource" encapsulates a particular state. This is a marker interface
@@ -23,6 +26,14 @@ package crud;
  * A Resource is assumed to be relatively expensive to work with -- for
  * example, its state may need to be fetched from storage or transferred to
  * the program across a network.
+ *
+ * Resource methods return {@link Observable}s. Implementers are strongly
+ * advised <em>not</em> to emit {@code null} to those {@code Observable}s. If
+ * the intention is to indicate an absent value, the correct approach is to
+ * emit no values at all; {@link Observer#onCompleted()} will indicate
+ * completion. An intrinsically empty state, which can indicate only "empty"
+ * or "unknown because of error", may further be expressed with by the
+ * declaration idiom {@code Observable<Void>}.
  */
 public interface Resource {
 

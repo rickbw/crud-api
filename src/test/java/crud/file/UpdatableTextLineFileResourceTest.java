@@ -15,12 +15,14 @@
 package crud.file;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,8 +55,8 @@ public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<Str
         // when:
         for (int i = 0; i < numLines; ++i) {
             final Observable<Void> response = resource.update(expectedLine);
-            final Void responseValue = response.toBlocking().single();
-            assertNull(responseValue);  // only possible value of Void
+            final Iterator<?> it = response.toBlocking().getIterator();
+            assertFalse(it.hasNext());
         }
 
         // then:
