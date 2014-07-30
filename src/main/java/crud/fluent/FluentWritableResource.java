@@ -17,7 +17,6 @@ package crud.fluent;
 import java.util.Objects;
 
 import crud.WritableResource;
-import crud.pattern.ResourceMerger;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -25,12 +24,6 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link WritableResource}s.
- *
- * Note that this class lacks a {@code flatMap} operation, e.g.
- * {@link FluentUpdatableResource#flatMapResponse(Func1)}. This is because
- * the result of executing the flat-mapping function may violate the
- * abstraction of an an idempotent, write-only operation. Consider using
- * {@link ResourceMerger} instead.
  */
 public abstract class FluentWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
@@ -59,6 +52,23 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      */
     public <TO> FluentWritableResource<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingWritableResource<>(this, mapper);
+    }
+
+    /**
+     * Create and return a new resource that will transform and flatten the
+     * responses from this resource. Take care that the given function does
+     * not violate the idempotency requirement of
+     * {@link WritableResource#write(Object)}.
+     *
+     * If this method is called on two equal {@code FluentWritableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
+    public <TO> FluentWritableResource<RSRC, TO> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
+        return new FlatMappingWritableResource<>(this, mapper);
     }
 
     /**
@@ -199,6 +209,25 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             final Observable<TO> response = super.state.getDelegate()
                     .write(value)
                     .map(super.state.getAuxiliaryState());
+            return response;
+        }
+    }
+
+
+    private static final class FlatMappingWritableResource<RSRC, FROM, TO>
+    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingWritableResource(
+                final WritableResource<RSRC, FROM> delegate,
+                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
+            super(delegate, mapper);
+            Objects.requireNonNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> write(final RSRC update) {
+            final Observable<TO> response = super.state.getDelegate()
+                    .write(update)
+                    .flatMap(super.state.getAuxiliaryState());
             return response;
         }
     }

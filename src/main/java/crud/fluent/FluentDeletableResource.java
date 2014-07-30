@@ -26,11 +26,6 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link DeletableResource}s.
- *
- * Note that this class lacks a {@code flatMap} operation, e.g.
- * {@link FluentUpdatableResource#flatMapResponse(Func1)}. This is because
- * the result of executing the flat-mapping function may violate the
- * abstraction of an an idempotent, delete-only operation.
  */
 public abstract class FluentDeletableResource<RESPONSE> implements DeletableResource<RESPONSE> {
 
@@ -58,6 +53,23 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
      */
     public <TO> FluentDeletableResource<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingDeletableResource<>(this, mapper);
+    }
+
+    /**
+     * Create and return a new resource that will transform and flatten the
+     * responses from this resource. Take care that the given function does
+     * not violate the idempotency requirement of
+     * {@link DeletableResource#delete()}.
+     *
+     * If this method is called on two equal {@code FluentDeletableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
+    public <TO> FluentDeletableResource<TO> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
+        return new FlatMappingDeletableResource<>(this, mapper);
     }
 
     /**
@@ -202,6 +214,25 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
             final Observable<TO> response = super.state.getDelegate()
                     .delete()
                     .map(super.state.getAuxiliaryState());
+            return response;
+        }
+    }
+
+
+    private static final class FlatMappingDeletableResource<FROM, TO>
+    extends AbstractFluentDeletableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingDeletableResource(
+                final DeletableResource<FROM> delegate,
+                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
+            super(delegate, mapper);
+            Objects.requireNonNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> delete() {
+            final Observable<TO> response = super.state.getDelegate()
+                    .delete()
+                    .flatMap(super.state.getAuxiliaryState());
             return response;
         }
     }

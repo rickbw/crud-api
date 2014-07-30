@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import crud.ReadableResource;
-import crud.pattern.ResourceMerger;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func0;
@@ -27,12 +26,6 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link ReadableResource}s.
- *
- * Note that this class lacks a {@code flatMap} operation, e.g.
- * {@link FluentUpdatableResource#flatMapResponse(Func1)}. This is because
- * the result of executing the flat-mapping function may violate the
- * abstraction of an an idempotent, read-only operation. Consider using
- * {@link ResourceMerger} instead.
  */
 public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
 
@@ -60,6 +53,24 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      */
     public <TO> FluentReadableResource<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
         return new MappingReadableResource<>(this, mapper);
+    }
+
+    /**
+     * Create and return a new resource that will transform and flatten the
+     * responses from this resource. Take care that the given function does
+     * not violate the requirements of {@link ReadableResource#get()} calls:
+     * it must maintain idempotency, and it must not create observable side
+     * effects.
+     *
+     * If this method is called on two equal {@code FluentReadableResource}s,
+     * the results will be equal if the functions are equal. If equality
+     * behavior it important to you (for example, if you intend to keep
+     * resources in a {@code HashSet}), consider it in your function
+     * implementation.
+     */
+    public <TO> FluentReadableResource<TO> flatMapValue(
+            final Func1<? super RSRC, ? extends Observable<? extends TO>> mapper) {
+        return new FlatMappingReadableResource<>(this, mapper);
     }
 
     /**
@@ -205,6 +216,25 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
                     .get()
                     .map(super.state.getAuxiliaryState());
             return rsrc;
+        }
+    }
+
+
+    private static final class FlatMappingReadableResource<FROM, TO>
+    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingReadableResource(
+                final ReadableResource<FROM> delegate,
+                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
+            super(delegate, mapper);
+            Objects.requireNonNull(mapper, "null function");
+        }
+
+        @Override
+        public Observable<TO> get() {
+            final Observable<TO> response = super.state.getDelegate()
+                    .get()
+                    .flatMap(super.state.getAuxiliaryState());
+            return response;
         }
     }
 

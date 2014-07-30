@@ -25,7 +25,6 @@ import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Function;
-import rx.internal.operators.OperatorMerge;
 
 
 /**
@@ -151,17 +150,7 @@ public abstract class ResourceMerger<RESPONSE> {
         public MergerImpl(
                 final ReadableResource<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
-            this.merger = FluentReadableResource.from(reader)
-                    /* XXX: The mapValue() and the subsequent lift() are
-                     * equivalent to Observable.flatMap(). However, we don't want
-                     * to expose a flatMap() operation on ReadableResources, as
-                     * it encourages side effects that violate the requirements
-                     * for idempotence and non-modification. OperatorMerge is
-                     * something of an RxJava-internal class, so if it goes away
-                     * or changes, we will need a different implementation here.
-                     */
-                    .mapValue(writer)
-                    .lift(new OperatorMerge<RESPONSE>());
+            this.merger = FluentReadableResource.from(reader).flatMapValue(writer);
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
             this.asFunction = new MergerFunction<RESPONSE>(this);

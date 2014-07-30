@@ -70,6 +70,20 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
         return result;
     }
 
+    public <R> FluentDeletableResourceProvider<KEY, R> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
+        Objects.requireNonNull(mapper, "null function");
+        final FluentDeletableResourceProvider<KEY, R> result = new FluentDeletableResourceProvider<KEY, R>() {
+            @Override
+            public FluentDeletableResource<R> get(final KEY key) {
+                return outerProvider()
+                        .get(key)
+                        .flatMapResponse(mapper);
+            }
+        };
+        return result;
+    }
+
     /**
      * Transform the key used to look up {@link DeletableResourceProvider}s.
      */

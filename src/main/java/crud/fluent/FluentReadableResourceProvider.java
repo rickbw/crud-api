@@ -54,6 +54,20 @@ implements ReadableResourceProvider<KEY, RSRC> {
         return result;
     }
 
+    public <R> FluentReadableResourceProvider<KEY, R> flatMapValue(
+            final Func1<? super RSRC, ? extends Observable<? extends R>> mapper) {
+        Objects.requireNonNull(mapper, "null function");
+        final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
+            @Override
+            public FluentReadableResource<R> get(final KEY key) {
+                return outerProvider()
+                        .get(key)
+                        .flatMapValue(mapper);
+            }
+        };
+        return result;
+    }
+
     public <K> FluentReadableResourceProvider<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");

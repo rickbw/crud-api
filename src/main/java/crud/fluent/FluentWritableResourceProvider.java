@@ -54,6 +54,20 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         return result;
     }
 
+    public <R> FluentWritableResourceProvider<KEY, RSRC, R> flatMapResponse(
+            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
+        Objects.requireNonNull(mapper, "null function");
+        final FluentWritableResourceProvider<KEY, RSRC, R> result = new FluentWritableResourceProvider<KEY, RSRC, R>() {
+            @Override
+            public FluentWritableResource<RSRC, R> get(final KEY key) {
+                return outerProvider()
+                        .get(key)
+                        .flatMapResponse(mapper);
+            }
+        };
+        return result;
+    }
+
     public <RC> FluentWritableResourceProvider<KEY, RC, RESPONSE> adaptNewValue(
             final Func1<? super RC, ? extends RSRC> adapter) {
         Objects.requireNonNull(adapter, "null function");
