@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import crud.DeletableResource;
+import crud.pattern.ResourceBuilder;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func0;
@@ -131,6 +132,15 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
      */
     public Callable<Observable<RESPONSE>> toCallable() {
         return toResourceCallable();
+    }
+
+    /**
+     * @throws NullPointerException     If the given class is null.
+     * @throws IllegalArgumentException If the given class is not an interface.
+     */
+    public <R extends DeletableResource<RESPONSE>> ResourceBuilder<R> toBuilder(
+            final Class<R> rsrcClass) {
+        return ResourceBuilder.fromDeleter(rsrcClass, this);
     }
 
     private DelegateObjectMethods.Callable<Observable<RESPONSE>> toResourceCallable() {
