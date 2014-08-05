@@ -85,6 +85,16 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
     }
 
     /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentDeletableResourceProvider<KEY, TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
+    }
+
+    /**
      * Transform the key used to look up {@link DeletableResourceProvider}s.
      */
     public <K> FluentDeletableResourceProvider<K, RESPONSE> adaptKey(

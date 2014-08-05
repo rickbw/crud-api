@@ -68,6 +68,16 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         return result;
     }
 
+    /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentWritableResourceProvider<KEY, RSRC, TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
+    }
+
     public <RC> FluentWritableResourceProvider<KEY, RC, RESPONSE> adaptNewValue(
             final Func1<? super RC, ? extends RSRC> adapter) {
         Objects.requireNonNull(adapter, "null function");

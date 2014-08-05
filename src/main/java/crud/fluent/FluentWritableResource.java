@@ -73,6 +73,16 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
     }
 
     /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentWritableResource<RSRC, TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
+    }
+
+    /**
      * Create and return a new resource that will transform the input resource
      * states before passing them to this resource.
      *

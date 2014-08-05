@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import crud.UpdatableResourceProvider;
 import rx.Observable;
+import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -72,6 +73,16 @@ implements UpdatableResourceProvider<KEY, UPDATE, RESPONSE> {
             }
         };
         return result;
+    }
+
+    /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentUpdatableResourceProvider<KEY, UPDATE, TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
     }
 
     public <U> FluentUpdatableResourceProvider<KEY, U, RESPONSE> adaptUpdate(

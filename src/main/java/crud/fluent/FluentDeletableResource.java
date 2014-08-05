@@ -74,6 +74,16 @@ public abstract class FluentDeletableResource<RESPONSE> implements DeletableReso
     }
 
     /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentDeletableResource<TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
+    }
+
+    /**
      * Return a resource that will transparently retry calls to
      * {@link #delete()} that throw, as with {@link Observable#retry(int)}.
      * Specifically, any {@link Observable} returned by {@link #delete()}

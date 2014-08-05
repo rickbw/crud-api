@@ -77,6 +77,16 @@ public abstract class FluentUpdatableResource<UPDATE, RESPONSE> implements Updat
     }
 
     /**
+     * Swallow the response(s) on success, emitting only
+     * {@link Observer#onCompleted()}. Emit any error to
+     * {@link Observer#onError(Throwable)} as usual.
+     */
+    public <TO> FluentUpdatableResource<UPDATE, TO> flattenResponseToCompletion() {
+        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
+        return flatMapResponse(func);
+    }
+
+    /**
      * Create and return a new resource that will transform the input updates
      * before passing them to this resource.
      *
