@@ -17,14 +17,14 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.Resource;
-import crud.spi.ResourceProvider;
+import crud.spi.ResourceProviderSpec;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
 
 /**
  * A base class for {@link rx.functions.Function} facades around
- * {@link Resource}s and {@link ResourceProvider}s. It delegates the common
+ * {@link Resource}s and {@link ResourceProviderSpec}s. It delegates the common
  * {@link Object} methods {@link #toString()}, {@link #equals(Object)}, and
  * {@link #hashCode()} to its delegate. Its concrete subclasses
  * {@link Function} and {@link Callable} pull in {@code call} methods.

@@ -28,15 +28,15 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import crud.spi.ReadableResource;
-import crud.spi.ReadableResourceTest;
+import crud.spi.ReadableSpec;
+import crud.spi.ReadableSpecTest;
 import rx.Observable;
 
 
 /**
- * Test of the {@link ReadableResource} aspect of {@link TextLineFileResource}.
+ * Test of the {@link ReadableSpec} aspect of {@link TextLineFileResource}.
  */
-public class ReadableTextLineFileResourceTest extends ReadableResourceTest<String> {
+public class ReadableTextLineFileResourceTest extends ReadableSpecTest<String> {
 
     private static final ImmutableList<String> lines = ImmutableList.of(
             "foo=bar bax=quux",

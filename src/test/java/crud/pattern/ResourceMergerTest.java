@@ -24,14 +24,14 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableResource;
+import crud.spi.ReadableSpec;
 import rx.Observable;
 import rx.functions.Func0;
 
 
 public abstract class ResourceMergerTest {
 
-    protected final ReadableResource<Object> mockReader = mock(ReadableResource.class);
+    protected final ReadableSpec<Object> mockReader = mock(ReadableSpec.class);
     protected final Observable<Object> mockReaderState = Observable.<Object>just("Hello, World");
 
 
@@ -120,6 +120,6 @@ public abstract class ResourceMergerTest {
         assertObservablesEqual(mergeResults, functionResults);
     }
 
-    protected abstract ResourceMerger<Object> createDefaultMerger(ReadableResource<Object> reader);
+    protected abstract ResourceMerger<Object> createDefaultMerger(ReadableSpec<Object> reader);
 
 }

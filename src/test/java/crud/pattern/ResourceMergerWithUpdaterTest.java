@@ -23,14 +23,14 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableResource;
-import crud.spi.UpdatableResource;
+import crud.spi.ReadableSpec;
+import crud.spi.UpdatableSpec;
 import rx.Observable;
 
 
 public class ResourceMergerWithUpdaterTest extends ResourceMergerTest {
 
-    private final UpdatableResource<Object, Object> mockUpdater = mock(UpdatableResource.class);
+    private final UpdatableSpec<Object, Object> mockUpdater = mock(UpdatableSpec.class);
     private final Observable<Object> mockUpdaterResponse = Observable.<Object>just("Goodbye");
 
 
@@ -55,7 +55,7 @@ public class ResourceMergerWithUpdaterTest extends ResourceMergerTest {
     }
 
     @Override
-    protected ResourceMerger<Object> createDefaultMerger(final ReadableResource<Object> reader) {
+    protected ResourceMerger<Object> createDefaultMerger(final ReadableSpec<Object> reader) {
         return ResourceMerger.withUpdater(reader, this.mockUpdater);
     }
 

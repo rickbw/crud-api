@@ -14,13 +14,13 @@
  */
 package crud.pattern;
 
-import crud.rsrc.FluentReadableResource;
-import crud.rsrc.FluentUpdatableResource;
-import crud.rsrc.FluentWritableResource;
-import crud.spi.ReadableResource;
+import crud.rsrc.Readable;
+import crud.rsrc.Updatable;
+import crud.rsrc.Writable;
+import crud.spi.ReadableSpec;
 import crud.spi.Resource;
-import crud.spi.UpdatableResource;
-import crud.spi.WritableResource;
+import crud.spi.UpdatableSpec;
+import crud.spi.WritableSpec;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -32,73 +32,73 @@ import rx.functions.Function;
  * a function. For example, consider a reader representing an integer
  * quantity; that reader is both readable and writable. Suppose you want to
  * increment the value of that resource. Pass it to
- * {@link #mapToWriter(ReadableResource, Func1, WritableResource)}, as both
+ * {@link #mapToWriter(ReadableSpec, Func1, WritableSpec)}, as both
  * {@code reader} and {@code writer}, along with a {@link Func1} that adds one
  * to its input. Then call {@link #merge()}. The previous value will be
  * read, the function will be applied to it, and the result will be written
  * back.
  *
  * This class is provided as an alternative to flatMap operations on the
- * {@link FluentReadableResource} and {@link FluentWritableResource} types.
+ * {@link Readable} and {@link Writable} types.
  * In contrast to those hypothetical operations, this class makes explicit the
  * relationship between reading and writing, and encapsulates any side effects
  * in the caller-provided function.
  *
- * @see #withWriter(ReadableResource, WritableResource)
- * @see #withUpdater(ReadableResource, UpdatableResource)
+ * @see #withWriter(ReadableSpec, WritableSpec)
+ * @see #withUpdater(ReadableSpec, UpdatableSpec)
  */
 public abstract class ResourceMerger<RESPONSE> {
 
     /**
-     * Create a merger that will read from the given {@link ReadableResource}
-     * and write the results with {@link WritableResource#write(Object)}.
+     * Create a merger that will read from the given {@link ReadableSpec}
+     * and write the results with {@link WritableSpec#write(Object)}.
      *
-     * @see #mapToWriter(ReadableResource, Func1, WritableResource)
+     * @see #mapToWriter(ReadableSpec, Func1, WritableSpec)
      */
     public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withWriter(
-            final ReadableResource<RSRC> reader,
-            final WritableResource<RSRC, RESPONSE> writer) {
-        return new MergerImpl<>(reader, FluentWritableResource.from(writer).toFunction());
+            final ReadableSpec<RSRC> reader,
+            final WritableSpec<RSRC, RESPONSE> writer) {
+        return new MergerImpl<>(reader, Writable.from(writer).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableResource}
-     * and write the results with {@link UpdatableResource#update(Object)}.
+     * Create a merger that will read from the given {@link ReadableSpec}
+     * and write the results with {@link UpdatableSpec#update(Object)}.
      *
-     * @see #mapToUpdater(ReadableResource, Func1, UpdatableResource)
+     * @see #mapToUpdater(ReadableSpec, Func1, UpdatableSpec)
      */
     public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withUpdater(
-            final ReadableResource<RSRC> reader,
-            final UpdatableResource<RSRC, RESPONSE> updater) {
-        return new MergerImpl<>(reader, FluentUpdatableResource.from(updater).toFunction());
+            final ReadableSpec<RSRC> reader,
+            final UpdatableSpec<RSRC, RESPONSE> updater) {
+        return new MergerImpl<>(reader, Updatable.from(updater).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableResource},
+     * Create a merger that will read from the given {@link ReadableSpec},
      * apply the given transformation to the results, and then write them with
-     * {@link WritableResource#write(Object)}.
+     * {@link WritableSpec#write(Object)}.
      */
     public static <RRSRC, WRSRC, RESPONSE> ResourceMerger<RESPONSE> mapToWriter(
-            final ReadableResource<? extends RRSRC> reader,
+            final ReadableSpec<? extends RRSRC> reader,
             final Func1<? super RRSRC, ? extends WRSRC> mapper,
-            final WritableResource<WRSRC, RESPONSE> writer) {
+            final WritableSpec<WRSRC, RESPONSE> writer) {
         return new MergerImpl<>(
-                FluentReadableResource.from(reader).mapValue(mapper),
-                FluentWritableResource.from(writer).toFunction());
+                Readable.from(reader).mapValue(mapper),
+                Writable.from(writer).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableResource},
+     * Create a merger that will read from the given {@link ReadableSpec},
      * apply the given transformation to the results, and then write them with
-     * {@link UpdatableResource#update(Object)}.
+     * {@link UpdatableSpec#update(Object)}.
      */
     public static <RSRC, UPDATE, RESPONSE> ResourceMerger<RESPONSE> mapToUpdater(
-            final ReadableResource<? extends RSRC> reader,
+            final ReadableSpec<? extends RSRC> reader,
             final Func1<? super RSRC, ? extends UPDATE> mapper,
-            final UpdatableResource<UPDATE, RESPONSE> updater) {
+            final UpdatableSpec<UPDATE, RESPONSE> updater) {
         return new MergerImpl<>(
-                FluentReadableResource.from(reader).mapValue(mapper),
-                FluentUpdatableResource.from(updater).toFunction());
+                Readable.from(reader).mapValue(mapper),
+                Updatable.from(updater).toFunction());
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class ResourceMerger<RESPONSE> {
      * reflected in the public API.
      */
     private static final class MergerImpl<RSRC, RESPONSE> extends ResourceMerger<RESPONSE> {
-        private final FluentReadableResource<RESPONSE> merger;
+        private final Readable<RESPONSE> merger;
         /**
          * Kept around just for {@link #toString()}, {@link #equals(Object)},
          * and {@link #hashCode()}. The results of the former and latter could
@@ -148,9 +148,9 @@ public abstract class ResourceMerger<RESPONSE> {
         private final Func0<Observable<RESPONSE>> asFunction;
 
         public MergerImpl(
-                final ReadableResource<RSRC> reader,
+                final ReadableSpec<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
-            this.merger = FluentReadableResource.from(reader).flatMapValue(writer);
+            this.merger = Readable.from(reader).flatMapValue(writer);
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
             this.asFunction = new MergerFunction<RESPONSE>(this);

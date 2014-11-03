@@ -25,30 +25,30 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.reflect.Reflection;
 
-import crud.spi.DeletableResource;
-import crud.spi.ReadableResource;
+import crud.spi.DeletableSpec;
+import crud.spi.ReadableSpec;
 import crud.spi.Resource;
-import crud.spi.ResourceProvider;
-import crud.spi.UpdatableResource;
-import crud.spi.WritableResource;
+import crud.spi.ResourceProviderSpec;
+import crud.spi.UpdatableSpec;
+import crud.spi.WritableSpec;
 
 
 /**
  * Combines multiple {@link Resource}s of different types -- e.g. a
- * {@link ReadableResource} and a {@link WritableResource} -- into a new
+ * {@link ReadableSpec} and a {@link WritableSpec} -- into a new
  * {@code Resource} that implements multiple interfaces. This class is useful
- * within {@link ResourceProvider} implementations.
+ * within {@link ResourceProviderSpec} implementations.
  *
  * For example, suppose there is a custom {@code Resource} like this:
  * <pre><code>
- * public interface MyResource extends ReadableResource&lt;Foo&gt;, DeletableResource&lt;Bar&gt; {
+ * public interface MyResource extends ReadableSpec&lt;Foo&gt;, DeletableSpec&lt;Bar&gt; {
  *     // No further method declarations!
  * }
  * </code></pre>
  *
  * There are additional existing {@code Resource} implementations
- * {@code FooResource implements ReadableResource<Foo>} and
- * {@code BarResource implements DeletableResource<Bar>}, and {@code MyResource}
+ * {@code FooResource implements ReadableSpec<Foo>} and
+ * {@code BarResource implements DeletableSpec<Bar>}, and {@code MyResource}
  * can be implemented in terms of them. Do the following:
  * <pre><code>
  * MyResource myRsrc = ResourceBuilder
@@ -71,9 +71,9 @@ import crud.spi.WritableResource;
  *  <li>Any given "{@code with}" method may be called only once.</li>
  *  <li>The corresponding "{@code with}" method must be called for any
  *      {@code Resource} interface that "MyResource" extends. For example, if
- *      {@code MyResource extends ReadableResource}, either
- *      {@link #fromReader(Class, ReadableResource)} or
- *      {@link #withReader(Class, ReadableResource)} must be called, or
+ *      {@code MyResource extends ReadableSpec}, either
+ *      {@link #fromReader(Class, ReadableSpec)} or
+ *      {@link #withReader(Class, ReadableSpec)} must be called, or
  *      {@link #build()} will fail with an {@link IllegalStateException}.</li>
  * </ul>
  *
@@ -81,10 +81,10 @@ import crud.spi.WritableResource;
  * matter. Any may be provided in the initial "{@code from}" call, and the
  * others via "{@code with}" calls in any order.
  *
- * @see #fromReader(Class, ReadableResource)
- * @see #fromWriter(Class, WritableResource)
- * @see #fromUpdater(Class, UpdatableResource)
- * @see #fromDeleter(Class, DeletableResource)
+ * @see #fromReader(Class, ReadableSpec)
+ * @see #fromWriter(Class, WritableSpec)
+ * @see #fromUpdater(Class, UpdatableSpec)
+ * @see #fromDeleter(Class, DeletableSpec)
  */
 public class ResourceBuilder<R extends Resource> {
 
@@ -96,9 +96,9 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given class is not an interface.
      */
-    public static <TRC, R extends ReadableResource<? extends TRC>> ResourceBuilder<R> fromReader(
+    public static <TRC, R extends ReadableSpec<? extends TRC>> ResourceBuilder<R> fromReader(
             final Class<R> rsrcClass,
-            final ReadableResource<? extends TRC> reader) {
+            final ReadableSpec<? extends TRC> reader) {
         final ResourceBuilder<R> builder = new ResourceBuilder<>(rsrcClass).withReader(rsrcClass, reader);
         return builder;
     }
@@ -107,9 +107,9 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given class is not an interface.
      */
-    public static <TRC, TRP, R extends WritableResource<? super TRC, ? extends TRP>> ResourceBuilder<R> fromWriter(
+    public static <TRC, TRP, R extends WritableSpec<? super TRC, ? extends TRP>> ResourceBuilder<R> fromWriter(
             final Class<R> rsrcClass,
-            final WritableResource<? super TRC, ? extends TRP> writer) {
+            final WritableSpec<? super TRC, ? extends TRP> writer) {
         final ResourceBuilder<R> builder = new ResourceBuilder<>(rsrcClass).withWriter(rsrcClass, writer);
         return builder;
     }
@@ -118,9 +118,9 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given class is not an interface.
      */
-    public static <TUP, TRP, R extends UpdatableResource<? super TUP, ? extends TRP>> ResourceBuilder<R> fromUpdater(
+    public static <TUP, TRP, R extends UpdatableSpec<? super TUP, ? extends TRP>> ResourceBuilder<R> fromUpdater(
             final Class<R> rsrcClass,
-            final UpdatableResource<? super TUP, ? extends TRP> updater) {
+            final UpdatableSpec<? super TUP, ? extends TRP> updater) {
         final ResourceBuilder<R> builder = new ResourceBuilder<>(rsrcClass).withUpdater(rsrcClass, updater);
         return builder;
     }
@@ -129,9 +129,9 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given class is not an interface.
      */
-    public static <TRP, R extends DeletableResource<? extends TRP>> ResourceBuilder<R> fromDeleter(
+    public static <TRP, R extends DeletableSpec<? extends TRP>> ResourceBuilder<R> fromDeleter(
             final Class<R> rsrcClass,
-            final DeletableResource<? extends TRP> deleter) {
+            final DeletableSpec<? extends TRP> deleter) {
         final ResourceBuilder<R> builder = new ResourceBuilder<>(rsrcClass).withDeleter(rsrcClass, deleter);
         return builder;
     }
@@ -141,14 +141,14 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given {@link Class} is not the  same as the
      *              one provided in the initial "{@code from}" factory method.
-     * @throws IllegalStateException    If {@link #withReader(Class, ReadableResource)} or
-     *              {@link #fromReader(Class, ReadableResource)} was called previously.
+     * @throws IllegalStateException    If {@link #withReader(Class, ReadableSpec)} or
+     *              {@link #fromReader(Class, ReadableSpec)} was called previously.
      */
-    public <TRC, R2 extends ReadableResource<? extends TRC>> ResourceBuilder<R> withReader(
+    public <TRC, R2 extends ReadableSpec<? extends TRC>> ResourceBuilder<R> withReader(
             final Class<R2> readerClass,
-            final ReadableResource<? extends TRC> reader) {
+            final ReadableSpec<? extends TRC> reader) {
         Preconditions.checkArgument(this.rsrcClass == readerClass, "Resource class mismatch");
-        put(ReadableResource.class, reader);
+        put(ReadableSpec.class, reader);
         return this;
     }
 
@@ -156,14 +156,14 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given {@link Class} is not the  same as the
      *              one provided in the initial "{@code from}" factory method.
-     * @throws IllegalStateException    If {@link #withWriter(Class, WritableResource)} or
-     *              {@link #fromWriter(Class, WritableResource)} was called previously.
+     * @throws IllegalStateException    If {@link #withWriter(Class, WritableSpec)} or
+     *              {@link #fromWriter(Class, WritableSpec)} was called previously.
      */
-    public <TRC, TRP, R2 extends WritableResource<? super TRC, ? extends TRP>> ResourceBuilder<R> withWriter(
+    public <TRC, TRP, R2 extends WritableSpec<? super TRC, ? extends TRP>> ResourceBuilder<R> withWriter(
             final Class<R2> writerClass,
-            final WritableResource<? super TRC, ? extends TRP> writer) {
+            final WritableSpec<? super TRC, ? extends TRP> writer) {
         Preconditions.checkArgument(this.rsrcClass == writerClass, "Resource class mismatch");
-        put(WritableResource.class, writer);
+        put(WritableSpec.class, writer);
         return this;
     }
 
@@ -171,14 +171,14 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given {@link Class} is not the  same as the
      *              one provided in the initial "{@code from}" factory method.
-     * @throws IllegalStateException    If {@link #withUpdater(Class, UpdatableResource)} or
-     *              {@link #fromUpdater(Class, UpdatableResource)} was called previously.
+     * @throws IllegalStateException    If {@link #withUpdater(Class, UpdatableSpec)} or
+     *              {@link #fromUpdater(Class, UpdatableSpec)} was called previously.
      */
-    public <TUP, TRP, R2 extends UpdatableResource<? super TUP, ? extends TRP>> ResourceBuilder<R> withUpdater(
+    public <TUP, TRP, R2 extends UpdatableSpec<? super TUP, ? extends TRP>> ResourceBuilder<R> withUpdater(
             final Class<R2> updaterClass,
-            final UpdatableResource<? super TUP, ? extends TRP> updater) {
+            final UpdatableSpec<? super TUP, ? extends TRP> updater) {
         Preconditions.checkArgument(this.rsrcClass == updaterClass, "Resource class mismatch");
-        put(UpdatableResource.class, updater);
+        put(UpdatableSpec.class, updater);
         return this;
     }
 
@@ -186,43 +186,43 @@ public class ResourceBuilder<R extends Resource> {
      * @throws NullPointerException     If either argument is null.
      * @throws IllegalArgumentException If the given {@link Class} is not the  same as the
      *              one provided in the initial "{@code from}" factory method.
-     * @throws IllegalStateException    If {@link #withDeleter(Class, DeletableResource)} or
-     *              {@link #fromDeleter(Class, DeletableResource)} was called previously.
+     * @throws IllegalStateException    If {@link #withDeleter(Class, DeletableSpec)} or
+     *              {@link #fromDeleter(Class, DeletableSpec)} was called previously.
      */
-    public <TRP, R2 extends DeletableResource<? extends TRP>> ResourceBuilder<R> withDeleter(
+    public <TRP, R2 extends DeletableSpec<? extends TRP>> ResourceBuilder<R> withDeleter(
             final Class<R2> deleterClass,
-            final DeletableResource<? extends TRP> deleter) {
+            final DeletableSpec<? extends TRP> deleter) {
         Preconditions.checkArgument(this.rsrcClass == deleterClass, "Resource class mismatch");
-        put(DeletableResource.class, deleter);
+        put(DeletableSpec.class, deleter);
         return this;
     }
 
 
     /**
      * Combine the one-or-more delegates {@link Resource}s provided in
-     * {@link #withReader(Class, ReadableResource)},  {@link #withWriter(Class, WritableResource)},
+     * {@link #withReader(Class, ReadableSpec)},  {@link #withWriter(Class, WritableSpec)},
      * etc. into a single  {@link Resource} of the type provided when this {@link ResourceBuilder}
      * was originally created.
      *
      * @throws IllegalStateException    If the configured {@code Resource} interface ("{@code FooResource}")
-     *              extends an interface (e.g. {@link ReadableResource}), but no delegate was configured for it.
+     *              extends an interface (e.g. {@link ReadableSpec}), but no delegate was configured for it.
      */
     public R build() {
         Preconditions.checkState(
-                ReadableResource.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(ReadableResource.class),
-                "%s is a ReadableResource, but no implementation set",
+                ReadableSpec.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(ReadableSpec.class),
+                "%s is a ReadableSpec, but no implementation set",
                 this.rsrcClass);
         Preconditions.checkState(
-                WritableResource.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(WritableResource.class),
-                "%s is a WritableResource, but no implementation set",
+                WritableSpec.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(WritableSpec.class),
+                "%s is a WritableSpec, but no implementation set",
                 this.rsrcClass);
         Preconditions.checkState(
-                UpdatableResource.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(UpdatableResource.class),
-                "%s is a UpdatableResource, but no implementation set",
+                UpdatableSpec.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(UpdatableSpec.class),
+                "%s is a UpdatableSpec, but no implementation set",
                 this.rsrcClass);
         Preconditions.checkState(
-                DeletableResource.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(DeletableResource.class),
-                "%s is a DeletableResource, but no implementation set",
+                DeletableSpec.class.isAssignableFrom(this.rsrcClass) && !this.rsrcMap.containsKey(DeletableSpec.class),
+                "%s is a DeletableSpec, but no implementation set",
                 this.rsrcClass);
 
         final Object proxy = Reflection.newProxy(this.rsrcClass, new ResourceDelegationInvocationHandler());

@@ -27,15 +27,15 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.UpdatableResource;
-import crud.spi.UpdatableResourceTest;
+import crud.spi.UpdatableSpec;
+import crud.spi.UpdatableSpecTest;
 import rx.Observable;
 
 
 /**
- * Test of the {@link UpdatableResource} aspect of {@link TextLineFileResource}.
+ * Test of the {@link UpdatableSpec} aspect of {@link TextLineFileResource}.
  */
-public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<String, Void> {
+public class UpdatableTextLineFileResourceTest extends UpdatableSpecTest<String, Void> {
 
     private File file;
 
@@ -48,7 +48,7 @@ public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<Str
     @Test
     public void linesWritten() throws IOException {
         // given:
-        final UpdatableResource<String, Void> resource = createDefaultResource();
+        final UpdatableSpec<String, Void> resource = createDefaultResource();
         final String expectedLine = createDefaultUpdate();
         final int numLines = 3;
 

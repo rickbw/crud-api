@@ -17,9 +17,9 @@
  *  resources support all operations, the operations are composable, defined
  *  in separate interfaces designed to work together. For example, a resource
  *  that supports reading and writing, but not deletion, would implement
- *  {@link crud.spi.ReadableResource} and
- *  {@link crud.spi.WritableResource} but not
- *  {@link crud.spi.DeletableResource}.</li>
+ *  {@link crud.spi.ReadableSpec} and
+ *  {@link crud.spi.WritableSpec} but not
+ *  {@link crud.spi.DeletableSpec}.</li>
  *
  *  <li><em>Concurrency</em>: The API encourages asynchronous implementations.
  *  It encapsulates asynchrony using Rx-Java and its {@link rx.Observable}
@@ -32,14 +32,14 @@
  *
  * There are two primary abstractions in the API:
  * {@link crud.spi.Resource}s and
- * {@link crud.spi.ResourceProvider}s. The former encapsulates the
+ * {@link crud.spi.ResourceProviderSpec}s. The former encapsulates the
  * I/O operations on state, and hence uses a reactive style. There are four
  * derived interfaces, one for each CRUD operation:
  * <ul>
- *  <li>{@link crud.spi.ReadableResource}</li>
- *  <li>{@link crud.spi.WritableResource}</li>
- *  <li>{@link crud.spi.UpdatableResource}</li>
- *  <li>{@link crud.spi.DeletableResource}</li>
+ *  <li>{@link crud.spi.ReadableSpec}</li>
+ *  <li>{@link crud.spi.WritableSpec}</li>
+ *  <li>{@link crud.spi.UpdatableSpec}</li>
+ *  <li>{@link crud.spi.DeletableSpec}</li>
  * </ul>
  *
  * The latter abstraction, the resource providers, provide local (i.e.
@@ -47,12 +47,12 @@
  * lookup idiom, where keys are generic and may be simple -- e.g. a URL -- or
  * arbitrarily complex -- e.g. a database query -- depending on the underlying
  * data-access technology. There are four derived
- * {@link crud.spi.ResourceProvider} interfaces:
+ * {@link crud.spi.ResourceProviderSpec} interfaces:
  * <ul>
- *  <li>{@link crud.spi.ReadableResourceProvider}</li>
- *  <li>{@link crud.spi.WritableResourceProvider}</li>
- *  <li>{@link crud.spi.UpdatableResourceProvider}</li>
- *  <li>{@link crud.spi.DeletableResourceProvider}</li>
+ *  <li>{@link crud.spi.ReadableProviderSpec}</li>
+ *  <li>{@link crud.spi.WritableProviderSpec}</li>
+ *  <li>{@link crud.spi.UpdatableProviderSpec}</li>
+ *  <li>{@link crud.spi.DeletableProviderSpec}</li>
  * </ul>
  *
  * In addition to these core abstractions, this library provides a number of

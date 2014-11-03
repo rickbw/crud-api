@@ -20,18 +20,18 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import crud.spi.Resource;
-import crud.spi.ResourceProvider;
+import crud.spi.ResourceProviderSpec;
 
 
 /**
- * A base class for all unit tests for {@link ResourceProvider}s.
+ * A base class for all unit tests for {@link ResourceProviderSpec}s.
  */
 public abstract class ResourceProviderTest<KEY> {
 
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceProviderSpec<KEY> provider = createDefaultProvider();
         final KEY key = createDefaultKey();
 
         // when:
@@ -44,7 +44,7 @@ public abstract class ResourceProviderTest<KEY> {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceProviderSpec<KEY> provider = createDefaultProvider();
         final KEY key = createDefaultKey();
 
         // when:
@@ -58,17 +58,17 @@ public abstract class ResourceProviderTest<KEY> {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceProviderSpec<KEY> provider = createDefaultProvider();
 
         // when:
         provider.get(null);
     }
 
     /**
-     * Create and return a new instance of the {@link ResourceProvider} class
+     * Create and return a new instance of the {@link ResourceProviderSpec} class
      * under test.
      */
-    protected abstract ResourceProvider<KEY> createDefaultProvider();
+    protected abstract ResourceProviderSpec<KEY> createDefaultProvider();
 
     /**
      * Create and return a key that can be passed to the providers returned by
