@@ -12,28 +12,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.file;
+package crud.spi;
 
-import java.io.File;
-import java.io.IOException;
-
-import crud.spi.ResourceProviderTest;
+import crud.spi.UpdatableResource;
 
 
-public class TextLineFileResourceProviderTest extends ResourceProviderTest<File> {
-
-    @Override
-    protected TextLineFileResource.Provider createDefaultProvider() {
-        return TextLineFileResource.provider();
-    }
+/**
+ * A base class for all unit test classes that operate on
+ * {@link UpdatableResource}s. It tests basic contracts that should hold true
+ * for all implementations.
+ */
+public abstract class UpdatableResourceTest<UPDATE, RESP> extends ResourceTest {
 
     @Override
-    protected File createDefaultKey() {
-        try {
-            return File.createTempFile(getClass().getSimpleName(), null);
-        } catch (final IOException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
+    protected abstract UpdatableResource<UPDATE, RESP> createDefaultResource();
+
+    /**
+     * Create an object suitable for being written to the resources returned
+     * by {@link #createDefaultResource()}.
+     */
+    protected abstract UPDATE createDefaultUpdate();
 
 }

@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.ReadableResource;
-import crud.UpdatableResource;
+import crud.spi.ReadableResource;
+import crud.spi.UpdatableResource;
 import rx.Observable;
 
 

@@ -17,10 +17,10 @@ package crud.file.example;
 import java.io.File;
 import java.util.StringTokenizer;
 
-import crud.ReadableResource;
-import crud.UpdatableResource;
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
+import crud.spi.ReadableResource;
+import crud.spi.UpdatableResource;
 import rx.Observable;
 import rx.functions.Func1;
 

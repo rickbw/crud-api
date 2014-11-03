@@ -14,13 +14,13 @@
  */
 package crud.pattern;
 
-import crud.ReadableResource;
-import crud.Resource;
-import crud.UpdatableResource;
-import crud.WritableResource;
-import crud.fluent.FluentReadableResource;
-import crud.fluent.FluentUpdatableResource;
-import crud.fluent.FluentWritableResource;
+import crud.rsrc.FluentReadableResource;
+import crud.rsrc.FluentUpdatableResource;
+import crud.rsrc.FluentWritableResource;
+import crud.spi.ReadableResource;
+import crud.spi.Resource;
+import crud.spi.UpdatableResource;
+import crud.spi.WritableResource;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;

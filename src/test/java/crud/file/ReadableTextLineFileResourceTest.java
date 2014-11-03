@@ -28,8 +28,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import crud.ReadableResource;
-import crud.ReadableResourceTest;
+import crud.spi.ReadableResource;
+import crud.spi.ReadableResourceTest;
 import rx.Observable;
 
 

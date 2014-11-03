@@ -25,12 +25,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.reflect.Reflection;
 
-import crud.DeletableResource;
-import crud.ReadableResource;
-import crud.Resource;
-import crud.ResourceProvider;
-import crud.UpdatableResource;
-import crud.WritableResource;
+import crud.spi.DeletableResource;
+import crud.spi.ReadableResource;
+import crud.spi.Resource;
+import crud.spi.ResourceProvider;
+import crud.spi.UpdatableResource;
+import crud.spi.WritableResource;
 
 
 /**

@@ -22,7 +22,7 @@ the License.
 
     <groupId>rickbw</groupId>
     <artifactId>crud-api</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Crud API</name>
