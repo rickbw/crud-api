@@ -46,7 +46,7 @@ extends FluentWritableResourceProviderTest {
         final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.write(value)).thenReturn(Observable.<Object>from(origResponse));
+        when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
         final FluentWritableResource<Object, Object> resource = provider.get(key);
         final Observable<Object> response = resource.write(value);
 

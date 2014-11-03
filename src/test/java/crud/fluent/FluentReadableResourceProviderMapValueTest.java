@@ -43,7 +43,7 @@ extends FluentReadableResourceProviderTest {
         final Object key = createDefaultKey();
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockResource.get()).thenReturn(Observable.<Object>just("world"));
         final FluentReadableResource<Object> resource = provider.get(key);
         final Observable<Object> response = resource.get();
 

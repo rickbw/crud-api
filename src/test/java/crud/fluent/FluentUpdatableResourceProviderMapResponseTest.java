@@ -46,7 +46,7 @@ extends FluentUpdatableResourceProviderTest {
         final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.update(update)).thenReturn(Observable.<Object>from(origResponse));
+        when(super.mockResource.update(update)).thenReturn(Observable.<Object>just(origResponse));
         final FluentUpdatableResource<Object, Object> resource = provider.get(key);
         final Observable<Object> response = resource.update(update);
 

@@ -60,7 +60,7 @@ public class FluentReadableResourceRetryTest extends FluentReadableResourceTest 
     public void retryUntilSuccess() {
         // given:
         final FluentReadableResource<Object> resource = createDefaultResource();
-        final Observable<Object> firstAttemptAndAllRetries = Observable.from(ImmutableList.of(
+        final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
                 Notification.createOnError(new RuntimeException("1st retry")),
                 Notification.createOnNext(SUCCESS_RESPONSE),

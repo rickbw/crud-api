@@ -35,7 +35,7 @@ public class FluentUpdatableResourceFlatMapResponseTest extends FluentUpdatableR
         @Override
         public Observable<Object> call(final Object input) {
             final Object transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -47,7 +47,7 @@ public class FluentUpdatableResourceFlatMapResponseTest extends FluentUpdatableR
         final Object update = createDefaultUpdate();
 
         // when:
-        when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.update(update);
 
         // then:

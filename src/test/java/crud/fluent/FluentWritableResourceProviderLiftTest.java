@@ -50,7 +50,7 @@ public class FluentWritableResourceProviderLiftTest extends FluentWritableResour
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.write(expectedResponseValue)).thenReturn(Observable.<Object>from(expectedResponseValue));
+        when(super.mockResource.write(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
         final FluentWritableResource<Object, Object> resource = provider.get(key);
         final Observable<Object> response = resource.write(expectedResponseValue);
 

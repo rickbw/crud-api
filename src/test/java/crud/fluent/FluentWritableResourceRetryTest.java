@@ -61,7 +61,7 @@ public class FluentWritableResourceRetryTest extends FluentWritableResourceTest 
         // given:
         final FluentWritableResource<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
-        final Observable<Object> firstAttemptAndAllRetries = Observable.from(ImmutableList.of(
+        final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
                 Notification.createOnError(new RuntimeException("1st retry")),
                 Notification.createOnNext(SUCCESS_RESPONSE),

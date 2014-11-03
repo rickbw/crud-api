@@ -30,9 +30,8 @@ import rx.Observable;
 
 public class ResourceMergerWithWriterTest extends ResourceMergerTest {
 
-    @SuppressWarnings("unchecked")
     private final WritableResource<Object, Object> mockWriter = mock(WritableResource.class);
-    private final Observable<Object> mockWriterResponse = Observable.<Object>from("Goodbye");
+    private final Observable<Object> mockWriterResponse = Observable.<Object>just("Goodbye");
 
 
     @Override

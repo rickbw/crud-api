@@ -35,7 +35,7 @@ public class FluentReadableResourceFlatMapValueTest extends FluentReadableResour
         @Override
         public Observable<Object> call(final Object input) {
             final Object transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -46,7 +46,7 @@ public class FluentReadableResourceFlatMapValueTest extends FluentReadableResour
         final FluentReadableResource<Object> resource = createDefaultResource();
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.get();
 
         // then:

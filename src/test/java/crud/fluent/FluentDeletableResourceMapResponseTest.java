@@ -45,7 +45,7 @@ public class FluentDeletableResourceMapResponseTest extends FluentDeletableResou
         final FluentDeletableResource<Object> resource = createDefaultResource();
 
         // when:
-        when(super.mockDelegate.delete()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.delete()).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.delete();
 
         // then:

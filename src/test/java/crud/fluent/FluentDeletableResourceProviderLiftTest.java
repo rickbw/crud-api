@@ -50,7 +50,7 @@ public class FluentDeletableResourceProviderLiftTest extends FluentDeletableReso
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.delete()).thenReturn(Observable.<Object>from(expectedResponseValue));
+        when(super.mockResource.delete()).thenReturn(Observable.<Object>just(expectedResponseValue));
         final FluentDeletableResource<Object> resource = provider.get(key);
         final Observable<Object> response = resource.delete();
 

@@ -35,7 +35,7 @@ public class FluentWritableResourceFlatMapResponseTest extends FluentWritableRes
         @Override
         public Observable<Object> call(final Object input) {
             final Object transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -47,7 +47,7 @@ public class FluentWritableResourceFlatMapResponseTest extends FluentWritableRes
         final Object newValue = createDefaultResourceState();
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.write(newValue);
 
         // then:

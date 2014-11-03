@@ -43,7 +43,7 @@ extends FluentDeletableResourceProviderTest {
         final Object key = createDefaultKey();
 
         // when:
-        when(super.mockResource.delete()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockResource.delete()).thenReturn(Observable.<Object>just("world"));
         final FluentDeletableResource<Object> resource = provider.get(key);
         final Observable<Object> response = resource.delete();
 

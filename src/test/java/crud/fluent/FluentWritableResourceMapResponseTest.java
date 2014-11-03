@@ -48,7 +48,7 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
         final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>from(origResponse));
+        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
         final Observable<Object> response = resource.write(newValue);
 
         // then:

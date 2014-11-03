@@ -45,7 +45,7 @@ public class FluentReadableResourceMapValueTest extends FluentReadableResourceTe
         final FluentReadableResource<Object> resource = createDefaultResource();
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.get();
 
         // then:

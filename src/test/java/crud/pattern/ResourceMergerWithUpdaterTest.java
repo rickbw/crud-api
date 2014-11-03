@@ -30,9 +30,8 @@ import rx.Observable;
 
 public class ResourceMergerWithUpdaterTest extends ResourceMergerTest {
 
-    @SuppressWarnings("unchecked")
     private final UpdatableResource<Object, Object> mockUpdater = mock(UpdatableResource.class);
-    private final Observable<Object> mockUpdaterResponse = Observable.<Object>from("Goodbye");
+    private final Observable<Object> mockUpdaterResponse = Observable.<Object>just("Goodbye");
 
 
     @Override

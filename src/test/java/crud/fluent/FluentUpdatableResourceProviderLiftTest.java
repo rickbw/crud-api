@@ -50,7 +50,7 @@ public class FluentUpdatableResourceProviderLiftTest extends FluentUpdatableReso
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.update(expectedResponseValue)).thenReturn(Observable.<Object>from(expectedResponseValue));
+        when(super.mockResource.update(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
         final FluentUpdatableResource<Object, Object> resource = provider.get(key);
         final Observable<Object> response = resource.update(expectedResponseValue);
 

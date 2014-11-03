@@ -58,7 +58,7 @@ extends FluentDeletableResourceProviderTest {
         // given:
         final FluentDeletableResourceProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<Object> firstAttemptAndAllRetries = Observable.from(ImmutableList.of(
+        final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
                 Notification.createOnError(new RuntimeException("1st retry")),
                 Notification.createOnNext(SUCCESS_RESPONSE),

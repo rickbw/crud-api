@@ -36,7 +36,7 @@ extends FluentDeletableResourceProviderTest {
         @Override
         public Observable<String> call(final Object input) {
             final String transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -50,7 +50,7 @@ extends FluentDeletableResourceProviderTest {
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
-        when(super.mockResource.delete()).thenReturn(Observable.<Object>from(origResponse));
+        when(super.mockResource.delete()).thenReturn(Observable.<Object>just(origResponse));
         final FluentDeletableResource<Object> resource = provider.get(key);
         final Observable<Object> response = resource.delete();
 

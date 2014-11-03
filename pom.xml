@@ -22,7 +22,7 @@ the License.
 
     <groupId>rickbw</groupId>
     <artifactId>crud-api</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Crud API</name>
@@ -63,7 +63,7 @@ the License.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <rxjava.version>0.19.0</rxjava.version>
+        <rxjava.version>1.0.0-rc.9</rxjava.version>
         <guava.version>16.0.1</guava.version>
 
         <junit.version>4.11</junit.version>
@@ -80,8 +80,8 @@ the License.
 
     <dependencies>
         <dependency>
-            <groupId>com.netflix.rxjava</groupId>
-            <artifactId>rxjava-core</artifactId>
+            <groupId>io.reactivex</groupId>
+            <artifactId>rxjava</artifactId>
             <version>${rxjava.version}</version>
         </dependency>
         <dependency>

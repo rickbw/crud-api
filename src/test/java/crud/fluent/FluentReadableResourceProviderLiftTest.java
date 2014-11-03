@@ -50,7 +50,7 @@ public class FluentReadableResourceProviderLiftTest extends FluentReadableResour
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>from(expectedResponseValue));
+        when(super.mockResource.get()).thenReturn(Observable.<Object>just(expectedResponseValue));
         final FluentReadableResource<Object> resource = provider.get(key);
         final Observable<Object> response = resource.get();
 

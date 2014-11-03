@@ -46,7 +46,7 @@ public class FluentUpdatableResourceMapResponseTest extends FluentUpdatableResou
         final Object update = createDefaultUpdate();
 
         // when:
-        when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.update(update);
 
         // then:

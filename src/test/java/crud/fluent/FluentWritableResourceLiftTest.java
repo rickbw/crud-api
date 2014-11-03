@@ -50,7 +50,7 @@ public class FluentWritableResourceLiftTest extends FluentWritableResourceTest {
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>from(expectedResponseValue));
+        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
         final Observable<Object> response = resource.write(newValue);
 
         // then:

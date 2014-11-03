@@ -31,9 +31,8 @@ import rx.functions.Func0;
 
 public abstract class ResourceMergerTest {
 
-    @SuppressWarnings("unchecked")
     protected final ReadableResource<Object> mockReader = mock(ReadableResource.class);
-    protected final Observable<Object> mockReaderState = Observable.<Object>from("Hello, World");
+    protected final Observable<Object> mockReaderState = Observable.<Object>just("Hello, World");
 
 
     @Before

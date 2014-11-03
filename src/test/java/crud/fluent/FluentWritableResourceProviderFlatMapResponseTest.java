@@ -36,7 +36,7 @@ extends FluentWritableResourceProviderTest {
         @Override
         public Observable<String> call(final Object input) {
             final String transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -51,7 +51,7 @@ extends FluentWritableResourceProviderTest {
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
-        when(super.mockResource.write(newValue)).thenReturn(Observable.<Object>from(origResponse));
+        when(super.mockResource.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
         final FluentWritableResource<Object, Object> resource = provider.get(key);
         final Observable<Object> response = resource.write(newValue);
 

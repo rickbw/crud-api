@@ -35,7 +35,7 @@ public class FluentDeletableResourceFlatMapResponseTest extends FluentDeletableR
         @Override
         public Observable<Object> call(final Object input) {
             final Object transformed = RESPONSE_PREFIX + input;
-            return Observable.from(transformed);
+            return Observable.just(transformed);
         }
     };
 
@@ -46,7 +46,7 @@ public class FluentDeletableResourceFlatMapResponseTest extends FluentDeletableR
         final FluentDeletableResource<Object> resource = createDefaultResource();
 
         // when:
-        when(super.mockDelegate.delete()).thenReturn(Observable.<Object>from("world"));
+        when(super.mockDelegate.delete()).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.delete();
 
         // then:
