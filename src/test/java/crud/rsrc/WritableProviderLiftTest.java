@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
-import crud.rsrc.WritableProvider;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -53,7 +51,7 @@ public class WritableProviderLiftTest extends WritableProviderTest {
 
         // when:
         when(super.mockResource.write(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Writable<Object, Object> resource = provider.get(key);
+        final Writable<Object, Object> resource = provider.writer(key);
         final Observable<Object> response = resource.write(expectedResponseValue);
 
         // then:

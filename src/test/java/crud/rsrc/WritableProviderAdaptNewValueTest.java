@@ -18,8 +18,6 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
-import crud.rsrc.WritableProvider;
 import rx.functions.Func1;
 
 
@@ -45,7 +43,7 @@ extends WritableProviderTest {
         final String adaptedValue = adapter.call(origValue);
 
         // when:
-        final Writable<Object, Object> resource = provider.get(key);
+        final Writable<Object, Object> resource = provider.writer(key);
         resource.write(origValue);
 
         // then:

@@ -67,7 +67,7 @@ extends ReadableProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
-        final Readable<Object> resource = provider.get(key);
+        final Readable<Object> resource = provider.reader(key);
         final Observable<Object> response = resource.get();
         final Object value = response.toBlocking().single();
 
@@ -87,7 +87,7 @@ extends ReadableProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
-        final Readable<Object> resource = provider.get(key);
+        final Readable<Object> resource = provider.reader(key);
         final Observable<Object> response = resource.get();
         response.toBlocking().single();
     }

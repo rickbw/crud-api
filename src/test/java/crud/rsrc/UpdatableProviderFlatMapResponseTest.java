@@ -19,8 +19,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Updatable;
-import crud.rsrc.UpdatableProvider;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -54,7 +52,7 @@ extends UpdatableProviderTest {
 
         // when:
         when(super.mockResource.update(update)).thenReturn(Observable.<Object>just(origResponse));
-        final Updatable<Object, Object> resource = provider.get(key);
+        final Updatable<Object, Object> resource = provider.updater(key);
         final Observable<Object> response = resource.update(update);
 
         // then:

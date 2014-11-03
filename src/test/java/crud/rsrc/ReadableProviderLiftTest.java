@@ -51,7 +51,7 @@ public class ReadableProviderLiftTest extends ReadableProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Readable<Object> resource = provider.get(key);
+        final Readable<Object> resource = provider.reader(key);
         final Observable<Object> response = resource.get();
 
         // then:

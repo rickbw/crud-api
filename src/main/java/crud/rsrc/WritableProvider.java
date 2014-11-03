@@ -33,8 +33,8 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         } else {
             return new WritableProvider<KEY, RSRC, RESPONSE>() {
                 @Override
-                public Writable<RSRC, RESPONSE> get(final KEY key) {
-                    return Writable.from(provider.get(key));
+                public Writable<RSRC, RESPONSE> writer(final KEY key) {
+                    return Writable.from(provider.writer(key));
                 }
             };
         }
@@ -45,9 +45,9 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final WritableProvider<KEY, RSRC, RESP> result = new WritableProvider<KEY, RSRC, RESP>() {
             @Override
-            public Writable<RSRC, RESP> get(final KEY key) {
+            public Writable<RSRC, RESP> writer(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .writer(key)
                         .mapResponse(mapper);
             }
         };
@@ -59,9 +59,9 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final WritableProvider<KEY, RSRC, R> result = new WritableProvider<KEY, RSRC, R>() {
             @Override
-            public Writable<RSRC, R> get(final KEY key) {
+            public Writable<RSRC, R> writer(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .writer(key)
                         .flatMapResponse(mapper);
             }
         };
@@ -83,9 +83,9 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final WritableProvider<KEY, RC, RESPONSE> result = new WritableProvider<KEY, RC, RESPONSE>() {
             @Override
-            public Writable<RC, RESPONSE> get(final KEY key) {
+            public Writable<RC, RESPONSE> writer(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .writer(key)
                         .<RC>adaptNewValue(adapter);
             }
         };
@@ -97,10 +97,10 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final WritableProvider<K, RSRC, RESPONSE> result = new WritableProvider<K, RSRC, RESPONSE>() {
             @Override
-            public Writable<RSRC, RESPONSE> get(final K key) {
+            public Writable<RSRC, RESPONSE> writer(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerProvider().writer(transformedKey);
             }
         };
         return result;
@@ -132,9 +132,9 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         } else {
             return new WritableProvider<KEY, RSRC, RESPONSE>() {
                 @Override
-                public Writable<RSRC, RESPONSE> get(final KEY key) {
+                public Writable<RSRC, RESPONSE> writer(final KEY key) {
                     return outerProvider()
-                            .get(key)
+                            .writer(key)
                             .retry(maxRetries);
                 }
             };
@@ -145,9 +145,9 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(bind, "null operator");
         return new WritableProvider<KEY, RSRC, TO>() {
             @Override
-            public Writable<RSRC, TO> get(final KEY key) {
+            public Writable<RSRC, TO> writer(final KEY key) {
                 final Writable<RSRC, TO> resource = outerProvider()
-                        .get(key)
+                        .writer(key)
                         .lift(bind);
                 return resource;
             }
@@ -158,13 +158,13 @@ implements WritableProviderSpec<KEY, RSRC, RESPONSE> {
         return new DelegateObjectMethods.Function<KEY, Writable<RSRC, RESPONSE>>(this) {
             @Override
             public Writable<RSRC, RESPONSE> call(final KEY key) {
-                return get(key);
+                return writer(key);
             }
         };
     }
 
     @Override
-    public abstract Writable<RSRC, RESPONSE> get(KEY key);
+    public abstract Writable<RSRC, RESPONSE> writer(KEY key);
 
     private WritableProvider<KEY, RSRC, RESPONSE> outerProvider() {
         return this;

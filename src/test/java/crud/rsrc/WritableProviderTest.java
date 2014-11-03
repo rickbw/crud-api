@@ -14,7 +14,9 @@
  */
 package crud.rsrc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,7 +26,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ResourceProviderTest;
+import crud.spi.Resource;
 import crud.spi.WritableProviderSpec;
 import crud.spi.WritableSpec;
 import rx.Observable;
@@ -37,7 +39,7 @@ import rx.functions.Func1;
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class WritableProviderTest extends ResourceProviderTest<Object> {
+public class WritableProviderTest {
 
     protected final WritableSpec<Object, Object> mockResource = mock(WritableSpec.class);
 
@@ -47,8 +49,44 @@ public class WritableProviderTest extends ResourceProviderTest<Object> {
     @Before
     public void setup() {
         when(this.mockResource.write(any())).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockProvider.writer(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.writer(null)).thenThrow(new NullPointerException("mock"));
+    }
+
+    @Test
+    public void getDefaultKeyReturnsNonNullResource() {
+        // given:
+        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource = provider.writer(key);
+
+        // then:
+        assertNotNull(resource);
+    }
+
+    @Test
+    public void twoResourcesFromSameKeyAreEqual() {
+        // given:
+        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource1 = provider.writer(key);
+        final Resource resource2 = provider.writer(key);
+
+        // then:
+        assertEquals(resource1, resource2);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void getNullKeyThrows() {
+        // given:
+        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+
+        // when:
+        provider.writer(null);
     }
 
     @Test
@@ -82,10 +120,10 @@ public class WritableProviderTest extends ResourceProviderTest<Object> {
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        provider.writer(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).writer(key);
     }
 
     @Test
@@ -99,15 +137,13 @@ public class WritableProviderTest extends ResourceProviderTest<Object> {
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).writer(key);
     }
 
-    @Override
     protected WritableProvider<Object, Object, Object> createDefaultProvider() {
         return WritableProvider.from(this.mockProvider);
     }
 
-    @Override
     protected Object createDefaultKey() {
         return "Hello, World";
     }

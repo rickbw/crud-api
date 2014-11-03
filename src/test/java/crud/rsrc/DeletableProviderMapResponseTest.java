@@ -44,7 +44,7 @@ extends DeletableProviderTest {
 
         // when:
         when(super.mockResource.delete()).thenReturn(Observable.<Object>just("world"));
-        final Deletable<Object> resource = provider.get(key);
+        final Deletable<Object> resource = provider.deleter(key);
         final Observable<Object> response = resource.delete();
 
         // then:

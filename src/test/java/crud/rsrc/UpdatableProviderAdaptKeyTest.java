@@ -15,8 +15,6 @@
 package crud.rsrc;
 
 import static org.mockito.Mockito.verify;
-import crud.rsrc.Updatable;
-import crud.rsrc.UpdatableProvider;
 import rx.functions.Func1;
 
 
@@ -41,10 +39,10 @@ extends UpdatableProviderTest {
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.get(origKey);
+        provider.updater(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).updater(transformedKey);
     }
 
     @Override
@@ -59,7 +57,7 @@ extends UpdatableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).updater(transformedKey);
     }
 
     @Override

@@ -40,8 +40,8 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         } else {
             return new UpdatableProvider<KEY, UPDATE, RESPONSE>() {
                 @Override
-                public Updatable<UPDATE, RESPONSE> get(final KEY key) {
-                    return Updatable.from(provider.get(key));
+                public Updatable<UPDATE, RESPONSE> updater(final KEY key) {
+                    return Updatable.from(provider.updater(key));
                 }
             };
         }
@@ -52,9 +52,9 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final UpdatableProvider<KEY, UPDATE, R> result = new UpdatableProvider<KEY, UPDATE, R>() {
             @Override
-            public Updatable<UPDATE, R> get(final KEY key) {
+            public Updatable<UPDATE, R> updater(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .updater(key)
                         .mapResponse(mapper);
             }
         };
@@ -66,9 +66,9 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final UpdatableProvider<KEY, UPDATE, R> result = new UpdatableProvider<KEY, UPDATE, R>() {
             @Override
-            public Updatable<UPDATE, R> get(final KEY key) {
+            public Updatable<UPDATE, R> updater(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .updater(key)
                         .flatMapResponse(mapper);
             }
         };
@@ -90,9 +90,9 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final UpdatableProvider<KEY, U, RESPONSE> result = new UpdatableProvider<KEY, U, RESPONSE>() {
             @Override
-            public Updatable<U, RESPONSE> get(final KEY key) {
+            public Updatable<U, RESPONSE> updater(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .updater(key)
                         .adaptUpdate(adapter);
             }
         };
@@ -104,10 +104,10 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final UpdatableProvider<K, UPDATE, RESPONSE> result = new UpdatableProvider<K, UPDATE, RESPONSE>() {
             @Override
-            public Updatable<UPDATE, RESPONSE> get(final K key) {
+            public Updatable<UPDATE, RESPONSE> updater(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerProvider().updater(transformedKey);
             }
         };
         return result;
@@ -117,9 +117,9 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         Objects.requireNonNull(bind, "null operator");
         return new UpdatableProvider<KEY, UPDATE, TO>() {
             @Override
-            public Updatable<UPDATE, TO> get(final KEY key) {
+            public Updatable<UPDATE, TO> updater(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .updater(key)
                         .lift(bind);
             }
         };
@@ -129,13 +129,13 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         return new DelegateObjectMethods.Function<KEY, Updatable<UPDATE, RESPONSE>>(this) {
             @Override
             public Updatable<UPDATE, RESPONSE> call(final KEY key) {
-                return get(key);
+                return updater(key);
             }
         };
     }
 
     @Override
-    public abstract Updatable<UPDATE, RESPONSE> get(KEY key);
+    public abstract Updatable<UPDATE, RESPONSE> updater(KEY key);
 
     private UpdatableProvider<KEY, UPDATE, RESPONSE> outerProvider() {
         return this;

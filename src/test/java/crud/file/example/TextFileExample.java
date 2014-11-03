@@ -50,8 +50,8 @@ public final class TextFileExample {
         }
 
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
-        final ReadableSpec<String> inputLines = files.get(inputFile);
-        final UpdatableSpec<String, Void> outputLines = files.get(outputFile);
+        final ReadableSpec<String> inputLines = files.reader(inputFile);
+        final UpdatableSpec<String, Void> outputLines = files.updater(outputFile);
         final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
                 inputLines,
                 lineToJson,

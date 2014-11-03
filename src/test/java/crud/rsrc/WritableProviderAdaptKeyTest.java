@@ -15,8 +15,6 @@
 package crud.rsrc;
 
 import static org.mockito.Mockito.verify;
-import crud.rsrc.Writable;
-import crud.rsrc.WritableProvider;
 import rx.functions.Func1;
 
 
@@ -41,10 +39,10 @@ extends WritableProviderTest {
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.get(origKey);
+        provider.writer(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).writer(transformedKey);
     }
 
     @Override
@@ -59,7 +57,7 @@ extends WritableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).writer(transformedKey);
     }
 
     @Override

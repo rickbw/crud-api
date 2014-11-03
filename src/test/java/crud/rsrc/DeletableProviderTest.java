@@ -14,7 +14,9 @@
  */
 package crud.rsrc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,7 +28,7 @@ import org.junit.Test;
 
 import crud.spi.DeletableProviderSpec;
 import crud.spi.DeletableSpec;
-import crud.spi.ResourceProviderTest;
+import crud.spi.Resource;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -37,7 +39,7 @@ import rx.functions.Func1;
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class DeletableProviderTest extends ResourceProviderTest<Object> {
+public class DeletableProviderTest {
 
     protected final DeletableSpec<Object> mockResource = mock(DeletableSpec.class);
 
@@ -47,8 +49,44 @@ public class DeletableProviderTest extends ResourceProviderTest<Object> {
     @Before
     public void setup() {
         when(this.mockResource.delete()).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockProvider.deleter(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.deleter(null)).thenThrow(new NullPointerException("mock"));
+    }
+
+    @Test
+    public void getDefaultKeyReturnsNonNullResource() {
+        // given:
+        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource = provider.deleter(key);
+
+        // then:
+        assertNotNull(resource);
+    }
+
+    @Test
+    public void twoResourcesFromSameKeyAreEqual() {
+        // given:
+        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource1 = provider.deleter(key);
+        final Resource resource2 = provider.deleter(key);
+
+        // then:
+        assertEquals(resource1, resource2);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void getNullKeyThrows() {
+        // given:
+        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+
+        // when:
+        provider.deleter(null);
     }
 
     @Test
@@ -82,10 +120,10 @@ public class DeletableProviderTest extends ResourceProviderTest<Object> {
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        provider.deleter(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).deleter(key);
     }
 
     @Test
@@ -99,15 +137,13 @@ public class DeletableProviderTest extends ResourceProviderTest<Object> {
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).deleter(key);
     }
 
-    @Override
     protected DeletableProvider<Object, Object> createDefaultProvider() {
         return DeletableProvider.from(this.mockProvider);
     }
 
-    @Override
     protected Object createDefaultKey() {
         return "Hello, World";
     }

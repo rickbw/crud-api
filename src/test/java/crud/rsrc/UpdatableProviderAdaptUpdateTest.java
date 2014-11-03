@@ -18,8 +18,6 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 
-import crud.rsrc.Updatable;
-import crud.rsrc.UpdatableProvider;
 import rx.functions.Func1;
 
 
@@ -45,7 +43,7 @@ extends UpdatableProviderTest {
         final String adaptedUpdate = adapter.call(origUpdate);
 
         // when:
-        final Updatable<Object, Object> resource = provider.get(key);
+        final Updatable<Object, Object> resource = provider.updater(key);
         resource.update(origUpdate);
 
         // then:

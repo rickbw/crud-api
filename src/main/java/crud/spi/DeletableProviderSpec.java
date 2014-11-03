@@ -23,9 +23,23 @@ package crud.spi;
  * @see UpdatableProviderSpec
  * @see DeletableSpec
  */
-public interface DeletableProviderSpec<KEY, RESPONSE> extends ResourceProviderSpec<KEY> {
+public interface DeletableProviderSpec<KEY, RESPONSE> extends ResourceProviderSpec {
 
-    @Override
-    public abstract DeletableSpec<RESPONSE> get(KEY key);
+    /**
+     * Get the {@link DeletableSpec} associated with the given key. Resources
+     * returned for keys that are equal should themselves be equal. In no
+     * case should a resource be {@code null}; the absence of state should be
+     * handled by the {@code Resource} itself.
+     *
+     * This operation is assumed to be relatively cheap and in-memory.
+     * Specifically, when dealing with remote and/or persistent Resources,
+     * implementers should locate expensive operations -- such as transferring
+     * data across a network -- within the Resource implementations
+     * themselves, and leave the ResourceProviders to simply prepare the
+     * necessary objects.
+     *
+     * @throws NullPointerException if the given key is null.
+     */
+    DeletableSpec<RESPONSE> deleter(KEY key);
 
 }

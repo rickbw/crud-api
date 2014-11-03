@@ -33,8 +33,8 @@ implements ReadableProviderSpec<KEY, RSRC> {
         } else {
             return new ReadableProvider<KEY, RSRC>() {
                 @Override
-                public Readable<RSRC> get(final KEY key) {
-                    return Readable.from(provider.get(key));
+                public Readable<RSRC> reader(final KEY key) {
+                    return Readable.from(provider.reader(key));
                 }
             };
         }
@@ -45,9 +45,9 @@ implements ReadableProviderSpec<KEY, RSRC> {
         Objects.requireNonNull(mapper, "null function");
         final ReadableProvider<KEY, R> result = new ReadableProvider<KEY, R>() {
             @Override
-            public Readable<R> get(final KEY key) {
+            public Readable<R> reader(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .reader(key)
                         .mapValue(mapper);
             }
         };
@@ -59,9 +59,9 @@ implements ReadableProviderSpec<KEY, RSRC> {
         Objects.requireNonNull(mapper, "null function");
         final ReadableProvider<KEY, R> result = new ReadableProvider<KEY, R>() {
             @Override
-            public Readable<R> get(final KEY key) {
+            public Readable<R> reader(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .reader(key)
                         .flatMapValue(mapper);
             }
         };
@@ -73,10 +73,10 @@ implements ReadableProviderSpec<KEY, RSRC> {
         Objects.requireNonNull(adapter, "null function");
         final ReadableProvider<K, RSRC> result = new ReadableProvider<K, RSRC>() {
             @Override
-            public Readable<RSRC> get(final K key) {
+            public Readable<RSRC> reader(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerProvider().reader(transformedKey);
             }
         };
         return result;
@@ -107,9 +107,9 @@ implements ReadableProviderSpec<KEY, RSRC> {
         } else {
             return new ReadableProvider<KEY, RSRC>() {
                 @Override
-                public Readable<RSRC> get(final KEY key) {
+                public Readable<RSRC> reader(final KEY key) {
                     return outerProvider()
-                            .get(key)
+                            .reader(key)
                             .retry(maxRetries);
                 }
             };
@@ -120,9 +120,9 @@ implements ReadableProviderSpec<KEY, RSRC> {
         Objects.requireNonNull(bind, "null operator");
         return new ReadableProvider<KEY, TO>() {
             @Override
-            public Readable<TO> get(final KEY key) {
+            public Readable<TO> reader(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .reader(key)
                         .lift(bind);
             }
         };
@@ -132,13 +132,13 @@ implements ReadableProviderSpec<KEY, RSRC> {
         return new DelegateObjectMethods.Function<KEY, Readable<RSRC>>(this) {
             @Override
             public Readable<RSRC> call(final KEY key) {
-                return get(key);
+                return reader(key);
             }
         };
     }
 
     @Override
-    public abstract Readable<RSRC> get(KEY key);
+    public abstract Readable<RSRC> reader(KEY key);
 
     private ReadableProvider<KEY, RSRC> outerProvider() {
         return this;

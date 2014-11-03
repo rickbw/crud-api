@@ -21,8 +21,6 @@ import java.util.ConcurrentModificationException;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
-import crud.rsrc.WritableProvider;
 import rx.Observable;
 
 
@@ -70,7 +68,7 @@ extends WritableProviderTest {
 
         // when:
         when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final Writable<Object, Object> resource = provider.get(key);
+        final Writable<Object, Object> resource = provider.writer(key);
         final Observable<Object> response = resource.write(inputValue);
 
         // then:
@@ -91,7 +89,7 @@ extends WritableProviderTest {
 
         // when:
         when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final Writable<Object, Object> resource = provider.get(key);
+        final Writable<Object, Object> resource = provider.writer(key);
         final Observable<Object> response = resource.write(inputValue);
         response.toBlocking().single();
     }

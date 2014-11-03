@@ -19,8 +19,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
-import crud.rsrc.WritableProvider;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -54,7 +52,7 @@ extends WritableProviderTest {
 
         // when:
         when(super.mockResource.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
-        final Writable<Object, Object> resource = provider.get(key);
+        final Writable<Object, Object> resource = provider.writer(key);
         final Observable<Object> response = resource.write(newValue);
 
         // then:

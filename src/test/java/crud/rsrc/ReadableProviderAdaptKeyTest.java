@@ -39,10 +39,10 @@ extends ReadableProviderTest {
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.get(origKey);
+        provider.reader(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).reader(transformedKey);
     }
 
     @Override
@@ -57,7 +57,7 @@ extends ReadableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).reader(transformedKey);
     }
 
     @Override

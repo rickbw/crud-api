@@ -14,7 +14,9 @@
  */
 package crud.rsrc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,7 +26,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ResourceProviderTest;
+import crud.spi.Resource;
 import crud.spi.UpdatableProviderSpec;
 import crud.spi.UpdatableSpec;
 import rx.Observable;
@@ -37,7 +39,7 @@ import rx.functions.Func1;
  * Those layered behaviors (like transformations) are covered in test classes
  * of their own.
  */
-public class UpdatableProviderTest extends ResourceProviderTest<Object> {
+public class UpdatableProviderTest {
 
     protected final UpdatableSpec<Object, Object> mockResource = mock(UpdatableSpec.class);
 
@@ -47,8 +49,44 @@ public class UpdatableProviderTest extends ResourceProviderTest<Object> {
     @Before
     public void setup() {
         when(this.mockResource.update(any())).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockProvider.updater(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.updater(null)).thenThrow(new NullPointerException("mock"));
+    }
+
+    @Test
+    public void getDefaultKeyReturnsNonNullResource() {
+        // given:
+        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource = provider.updater(key);
+
+        // then:
+        assertNotNull(resource);
+    }
+
+    @Test
+    public void twoResourcesFromSameKeyAreEqual() {
+        // given:
+        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource1 = provider.updater(key);
+        final Resource resource2 = provider.updater(key);
+
+        // then:
+        assertEquals(resource1, resource2);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void getNullKeyThrows() {
+        // given:
+        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+
+        // when:
+        provider.updater(null);
     }
 
     @Test
@@ -82,10 +120,10 @@ public class UpdatableProviderTest extends ResourceProviderTest<Object> {
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        provider.updater(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).updater(key);
     }
 
     @Test
@@ -99,15 +137,13 @@ public class UpdatableProviderTest extends ResourceProviderTest<Object> {
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).updater(key);
     }
 
-    @Override
     protected UpdatableProvider<Object, Object, Object> createDefaultProvider() {
         return UpdatableProvider.from(this.mockProvider);
     }
 
-    @Override
     protected Object createDefaultKey() {
         return "Hello, World";
     }

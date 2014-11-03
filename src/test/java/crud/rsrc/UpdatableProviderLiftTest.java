@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import crud.rsrc.Updatable;
-import crud.rsrc.UpdatableProvider;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -53,7 +51,7 @@ public class UpdatableProviderLiftTest extends UpdatableProviderTest {
 
         // when:
         when(super.mockResource.update(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Updatable<Object, Object> resource = provider.get(key);
+        final Updatable<Object, Object> resource = provider.updater(key);
         final Observable<Object> response = resource.update(expectedResponseValue);
 
         // then:

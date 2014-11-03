@@ -100,7 +100,12 @@ implements ReadableSpec<String>,
     implements ReadableProviderSpec<File, String>,
                UpdatableProviderSpec<File, String, Void> {
         @Override
-        public TextLineFileResource get(final File file) {
+        public TextLineFileResource reader(final File file) {
+            return new TextLineFileResource(file);
+        }
+
+        @Override
+        public TextLineFileResource updater(final File file) {
             return new TextLineFileResource(file);
         }
 

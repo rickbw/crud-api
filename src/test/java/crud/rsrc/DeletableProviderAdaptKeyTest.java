@@ -39,10 +39,10 @@ extends DeletableProviderTest {
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.get(origKey);
+        provider.deleter(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).deleter(transformedKey);
     }
 
     @Override
@@ -57,7 +57,7 @@ extends DeletableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockProvider).deleter(transformedKey);
     }
 
     @Override

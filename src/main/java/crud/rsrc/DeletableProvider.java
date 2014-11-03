@@ -46,8 +46,8 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         } else {
             return new DeletableProvider<KEY, RESPONSE>() {
                 @Override
-                public Deletable<RESPONSE> get(final KEY key) {
-                    return Deletable.from(provider.get(key));
+                public Deletable<RESPONSE> deleter(final KEY key) {
+                    return Deletable.from(provider.deleter(key));
                 }
             };
         }
@@ -61,9 +61,9 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final DeletableProvider<KEY, R> result = new DeletableProvider<KEY, R>() {
             @Override
-            public Deletable<R> get(final KEY key) {
+            public Deletable<R> deleter(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .deleter(key)
                         .mapResponse(mapper);
             }
         };
@@ -75,9 +75,9 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final DeletableProvider<KEY, R> result = new DeletableProvider<KEY, R>() {
             @Override
-            public Deletable<R> get(final KEY key) {
+            public Deletable<R> deleter(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .deleter(key)
                         .flatMapResponse(mapper);
             }
         };
@@ -102,10 +102,10 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final DeletableProvider<K, RESPONSE> result = new DeletableProvider<K, RESPONSE>() {
             @Override
-            public Deletable<RESPONSE> get(final K key) {
+            public Deletable<RESPONSE> deleter(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerProvider().deleter(transformedKey);
             }
         };
         return result;
@@ -138,9 +138,9 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         } else {
             return new DeletableProvider<KEY, RESPONSE>() {
                 @Override
-                public Deletable<RESPONSE> get(final KEY key) {
+                public Deletable<RESPONSE> deleter(final KEY key) {
                     return outerProvider()
-                            .get(key)
+                            .deleter(key)
                             .retry(maxRetries);
                 }
             };
@@ -154,9 +154,9 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         Objects.requireNonNull(bind, "null operator");
         return new DeletableProvider<KEY, TO>() {
             @Override
-            public Deletable<TO> get(final KEY key) {
+            public Deletable<TO> deleter(final KEY key) {
                 return outerProvider()
-                        .get(key)
+                        .deleter(key)
                         .lift(bind);
             }
         };
@@ -170,13 +170,13 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
         return new DelegateObjectMethods.Function<KEY, Deletable<RESPONSE>>(this) {
             @Override
             public Deletable<RESPONSE> call(final KEY key) {
-                return get(key);
+                return deleter(key);
             }
         };
     }
 
     @Override
-    public abstract Deletable<RESPONSE> get(KEY key);
+    public abstract Deletable<RESPONSE> deleter(KEY key);
 
     private DeletableProvider<KEY, RESPONSE> outerProvider() {
         return this;

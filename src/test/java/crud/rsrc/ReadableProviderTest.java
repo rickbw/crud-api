@@ -14,7 +14,9 @@
  */
 package crud.rsrc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,7 +28,7 @@ import org.junit.Test;
 
 import crud.spi.ReadableProviderSpec;
 import crud.spi.ReadableSpec;
-import crud.spi.ResourceProviderTest;
+import crud.spi.Resource;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -37,7 +39,7 @@ import rx.functions.Func1;
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class ReadableProviderTest extends ResourceProviderTest<Object> {
+public class ReadableProviderTest {
 
     protected final ReadableSpec<Object> mockResource = mock(ReadableSpec.class);
 
@@ -47,8 +49,44 @@ public class ReadableProviderTest extends ResourceProviderTest<Object> {
     @Before
     public void setup() {
         when(this.mockResource.get()).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockProvider.reader(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.reader(null)).thenThrow(new NullPointerException("mock"));
+    }
+
+    @Test
+    public void getDefaultKeyReturnsNonNullResource() {
+        // given:
+        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final ReadableSpec<Object> resource = provider.reader(key);
+
+        // then:
+        assertNotNull(resource);
+    }
+
+    @Test
+    public void twoResourcesFromSameKeyAreEqual() {
+        // given:
+        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+
+        // when:
+        final Resource resource1 = provider.reader(key);
+        final Resource resource2 = provider.reader(key);
+
+        // then:
+        assertEquals(resource1, resource2);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void getNullKeyThrows() {
+        // given:
+        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+
+        // when:
+        provider.reader(null);
     }
 
     @Test
@@ -82,10 +120,10 @@ public class ReadableProviderTest extends ResourceProviderTest<Object> {
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        provider.reader(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).reader(key);
     }
 
     @Test
@@ -99,15 +137,13 @@ public class ReadableProviderTest extends ResourceProviderTest<Object> {
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockProvider).reader(key);
     }
 
-    @Override
     protected ReadableProvider<Object, Object> createDefaultProvider() {
         return ReadableProvider.from(this.mockProvider);
     }
 
-    @Override
     protected Object createDefaultKey() {
         return "Hello, World";
     }
