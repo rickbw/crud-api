@@ -19,8 +19,8 @@ import java.util.StringTokenizer;
 
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
-import crud.spi.ReadableSpec;
-import crud.spi.UpdatableSpec;
+import crud.rsrc.Readable;
+import crud.rsrc.Updatable;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -50,8 +50,8 @@ public final class TextFileExample {
         }
 
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
-        final ReadableSpec<String> inputLines = files.reader(inputFile);
-        final UpdatableSpec<String, Void> outputLines = files.updater(outputFile);
+        final Readable<String> inputLines = files.reader(inputFile);
+        final Updatable<String, Void> outputLines = files.updater(outputFile);
         final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
                 inputLines,
                 lineToJson,

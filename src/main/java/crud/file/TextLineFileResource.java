@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import crud.rsrc.Readable;
+import crud.rsrc.Updatable;
 import crud.spi.ReadableProviderSpec;
 import crud.spi.ReadableSpec;
 import crud.spi.UpdatableProviderSpec;
@@ -100,13 +102,13 @@ implements ReadableSpec<String>,
     implements ReadableProviderSpec<File, String>,
                UpdatableProviderSpec<File, String, Void> {
         @Override
-        public TextLineFileResource reader(final File file) {
-            return new TextLineFileResource(file);
+        public Readable<String> reader(final File file) {
+            return Readable.from(new TextLineFileResource(file));
         }
 
         @Override
-        public TextLineFileResource updater(final File file) {
-            return new TextLineFileResource(file);
+        public Updatable<String, Void> updater(final File file) {
+            return Updatable.from(new TextLineFileResource(file));
         }
 
         private Provider() {
