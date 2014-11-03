@@ -16,7 +16,6 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.pattern.ResourceBuilder;
 import crud.spi.UpdatableSpec;
 import rx.Observable;
 import rx.Observer;
@@ -125,15 +124,6 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
                 return Updatable.this.update(update);
             }
         };
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends UpdatableSpec<UPDATE, RESPONSE>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromUpdater(rsrcClass, this);
     }
 
 

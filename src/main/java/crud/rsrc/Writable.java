@@ -16,7 +16,6 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.pattern.ResourceBuilder;
 import crud.spi.WritableSpec;
 import rx.Observable;
 import rx.Observer;
@@ -151,15 +150,6 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
                 return Writable.this.write(newValue);
             }
         };
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends WritableSpec<RSRC, RESPONSE>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromWriter(rsrcClass, this);
     }
 
 

@@ -17,7 +17,6 @@ package crud.rsrc;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-import crud.pattern.ResourceBuilder;
 import crud.spi.DeletableSpec;
 import rx.Observable;
 import rx.Observer;
@@ -142,15 +141,6 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      */
     public Callable<Observable<RESPONSE>> toCallable() {
         return toResourceCallable();
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends DeletableSpec<RESPONSE>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromDeleter(rsrcClass, this);
     }
 
     private DelegateObjectMethods.Callable<Observable<RESPONSE>> toResourceCallable() {

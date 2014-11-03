@@ -17,7 +17,6 @@ package crud.rsrc;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-import crud.pattern.ResourceBuilder;
 import crud.spi.ReadableSpec;
 import rx.Observable;
 import rx.Observer;
@@ -133,15 +132,6 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
      */
     public Callable<Observable<RSRC>> toCallable() {
         return toResourceCallable();
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends ReadableSpec<RSRC>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromReader(rsrcClass, this);
     }
 
     private DelegateObjectMethods.Callable<Observable<RSRC>> toResourceCallable() {
