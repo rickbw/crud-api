@@ -47,7 +47,7 @@ public class WritableLiftTest extends WritableTest {
     public void lifterCalled() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final Observable<Object> newValue = createDefaultResourceState();
         final String expectedResponseValue = "Response!";
 
         // when:

@@ -14,10 +14,13 @@
  */
 package crud.rsrc;
 
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import rx.Observable;
 import rx.functions.Func1;
 
 
@@ -39,15 +42,18 @@ extends WritableProviderTest {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String origValue = "World!";
-        final String adaptedValue = adapter.call(origValue);
+        final Observable<String> origValue = Observable.just("World!");
+        final Observable<String> adaptedValue = origValue.map(adapter);
 
         // when:
         final Settable<Object, Object> resource = provider.setter(key);
         resource.set(origValue);
 
         // then:
-        verify(super.mockResource).set(adaptedValue);
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(super.mockResource).set(captor.capture());
+        assertObservablesEqual(adaptedValue, adaptedValue);
     }
 
     @Override

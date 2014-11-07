@@ -47,7 +47,7 @@ public class WritableProviderLiftTest extends WritableProviderTest {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String expectedResponseValue = "Response!";
+        final Observable<String> expectedResponseValue = Observable.just("Response!");
 
         // when:
         when(super.mockResource.set(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));

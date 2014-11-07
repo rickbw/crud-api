@@ -14,11 +14,13 @@
  */
 package crud.rsrc;
 
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import crud.rsrc.Settable;
+import rx.Observable;
 import rx.functions.Func1;
 
 
@@ -43,14 +45,18 @@ public class WritableAdaptNewValueTest extends WritableTest {
     public void fluentResourceCallsDelegate() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object original = createDefaultResourceState();
-        final String adapted = adapter.call(original);
+        final Observable<Object> original = createDefaultResourceState();
+        final Observable<String> adapted = original.map(adapter);
 
         // when:
         resource.set(original);
 
         // then:
-        verify(this.mockDelegate).set(adapted);
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(this.mockDelegate).set(captor.capture());
+        final Observable<String> actual = captor.getValue();
+        assertObservablesEqual(adapted, actual);
     }
 
     @Override

@@ -85,7 +85,7 @@ extends WritableProviderTest {
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
                 new ConcurrentModificationException("throw over and over"));
-        final String inputValue = "Hello";    // arbitrary
+        final Observable<String> inputValue = Observable.just("Hello"); // arbitrary
 
         // when:
         when(super.mockResource.set(inputValue)).thenReturn(firstAttemptAndAllRetries);

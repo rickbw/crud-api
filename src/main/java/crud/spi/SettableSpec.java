@@ -33,9 +33,10 @@ import rx.Observable;
 public interface SettableSpec<RSRC, RESPONSE> extends Resource {
 
     /**
-     * Replace the value of the resource with the given value. If the resource
+     * Replace the value of the resource with the value(s) emitted by the
+     * given {@link Observable}. If the resource
      * previously had no value, it will be initialized with the provided
-     * value. The operation may return one or more responses via the
+     * value(s). The operation may return one or more responses via the
      * given {@link Observable} as the request is acted upon.
      *
      * This operation is idempotent.
@@ -48,6 +49,6 @@ public interface SettableSpec<RSRC, RESPONSE> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    public abstract Observable<RESPONSE> set(RSRC newValue);
+    Observable<RESPONSE> set(Observable<? extends RSRC> newValue);
 
 }

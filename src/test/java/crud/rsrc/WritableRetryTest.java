@@ -61,7 +61,7 @@ public class WritableRetryTest extends WritableTest {
     public void retryUntilSuccess() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final Observable<Object> newValue = createDefaultResourceState();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
                 Notification.createOnError(new RuntimeException("1st retry")),
@@ -83,7 +83,7 @@ public class WritableRetryTest extends WritableTest {
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final Observable<Object> newValue = createDefaultResourceState();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
                 new ConcurrentModificationException("throw over and over"));

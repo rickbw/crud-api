@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Settable;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -45,7 +44,7 @@ public class WritableFlatMapResponseTest extends WritableTest {
     public void transformationApplied() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final Observable<Object> newValue = createDefaultResourceState();
 
         // when:
         when(super.mockDelegate.set(newValue)).thenReturn(Observable.<Object>just("world"));

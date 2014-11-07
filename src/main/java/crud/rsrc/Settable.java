@@ -58,7 +58,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * Create and return a new resource that will transform and flatten the
      * responses from this resource. Take care that the given function does
      * not violate the idempotency requirement of
-     * {@link SettableSpec#set(Object)}.
+     * {@link SettableSpec#set(Observable)}.
      *
      * If this method is called on two equal {@code Settable}s,
      * the results will be equal if the functions are equal. If equality
@@ -98,8 +98,8 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #set(Object)} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #set(Object)}
+     * {@link #set(Observable)} that throw, as with {@link Observable#retry(long)}.
+     * Specifically, any {@link Observable} returned by {@link #set(Observable)}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
      * that {@code onError} call.
@@ -138,7 +138,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     // TODO: Expose other Observable methods
 
     /**
-     * Return a function that, when called, will call {@link #set(Object)}.
+     * Return a function that, when called, will call {@link #set(Observable)}.
      * The function object implements {@link Object#equals(Object)},
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
@@ -147,7 +147,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
-                return Settable.this.set(newValue);
+                return Settable.this.set(Observable.just(newValue));
             }
         };
     }
@@ -197,7 +197,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<RESPONSE> set(final RSRC newValue) {
+        public Observable<RESPONSE> set(final Observable<? extends RSRC> newValue) {
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .set(newValue);
             return response;
@@ -215,7 +215,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<TO> set(final RSRC value) {
+        public Observable<TO> set(final Observable<? extends RSRC> value) {
             final Observable<TO> response = super.state.getDelegate()
                     .set(value)
                     .map(super.state.getAuxiliaryState());
@@ -234,7 +234,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<TO> set(final RSRC update) {
+        public Observable<TO> set(final Observable<? extends RSRC> update) {
             final Observable<TO> response = super.state.getDelegate()
                     .set(update)
                     .flatMap(super.state.getAuxiliaryState());
@@ -253,8 +253,8 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<RESPONSE> set(final TO value) {
-            final FROM transformed = super.state.getAuxiliaryState().call(value);
+        public Observable<RESPONSE> set(final Observable<? extends TO> value) {
+            final Observable<FROM> transformed = value.map(super.state.getAuxiliaryState());
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .set(transformed);
             return response;
@@ -274,7 +274,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<RESPONSE> set(final RSRC newResourceState) {
+        public Observable<RESPONSE> set(final Observable<? extends RSRC> newResourceState) {
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .set(newResourceState)
                     .retry(super.state.getAuxiliaryState());
@@ -293,7 +293,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<TO> set(final RSRC newResourceState) {
+        public Observable<TO> set(final Observable<? extends RSRC> newResourceState) {
             final Observable<TO> response = super.state.getDelegate()
                     .set(newResourceState)
                     .lift(super.state.getAuxiliaryState());

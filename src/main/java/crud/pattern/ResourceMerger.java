@@ -51,7 +51,7 @@ public abstract class ResourceMerger<RESPONSE> {
 
     /**
      * Create a merger that will read from the given {@link GettableSpec}
-     * and write the results with {@link SettableSpec#set(Object)}.
+     * and write the results with {@link SettableSpec#set(Observable)}.
      *
      * @see #mapToWriter(GettableSpec, Func1, SettableSpec)
      */
@@ -76,7 +76,7 @@ public abstract class ResourceMerger<RESPONSE> {
     /**
      * Create a merger that will read from the given {@link GettableSpec},
      * apply the given transformation to the results, and then write them with
-     * {@link SettableSpec#set(Object)}.
+     * {@link SettableSpec#set(Observable)}.
      */
     public static <RRSRC, WRSRC, RESPONSE> ResourceMerger<RESPONSE> mapToWriter(
             final GettableSpec<? extends RRSRC> reader,

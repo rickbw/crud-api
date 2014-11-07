@@ -108,9 +108,9 @@ implements SettableProviderSpec<KEY, RSRC, RESPONSE> {
 
     /**
      * Return a resource provider, the resource from which will transparently
-     * retry calls to {@link SettableSpec#set(Object)} that throw, as
+     * retry calls to {@link SettableSpec#set(Observable)} that throw, as
      * with {@link Observable#retry(long)}. Specifically, any
-     * {@link Observable} returned by {@link SettableSpec#set(Object)}
+     * {@link Observable} returned by {@link SettableSpec#set(Observable)}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
      * that {@code onError} call.

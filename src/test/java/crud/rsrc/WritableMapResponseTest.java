@@ -44,7 +44,7 @@ public class WritableMapResponseTest extends WritableTest {
     public void transformationApplied() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final Observable<Object> newValue = createDefaultResourceState();
         final String origResponse = "world";
         final String mappedResponse = mapper.call(origResponse);
 

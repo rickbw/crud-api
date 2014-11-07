@@ -18,7 +18,6 @@ import static crud.RxAssertions.assertObservablesEqual;
 
 import org.junit.Test;
 
-import crud.spi.SettableSpec;
 import rx.Observable;
 
 
@@ -39,7 +38,7 @@ public abstract class WritableSpecTest<RSRC, RESP> extends ResourceTest {
     public void responsesFromRepeatedWritesAreTheSame() {
         // given:
         final SettableSpec<RSRC, RESP> resource = createDefaultResource();
-        final RSRC newValue = createDefaultResourceState();
+        final Observable<RSRC> newValue = createDefaultResourceState();
 
         // when:
         final Observable<RESP> result1 = resource.set(newValue);
@@ -56,6 +55,6 @@ public abstract class WritableSpecTest<RSRC, RESP> extends ResourceTest {
      * Create an object suitable for being written to the resources returned
      * by {@link #createDefaultResource()}.
      */
-    protected abstract RSRC createDefaultResourceState();
+    protected abstract Observable<RSRC> createDefaultResourceState();
 
 }

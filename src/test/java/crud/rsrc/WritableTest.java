@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.WritableSpecTest;
 import crud.spi.SettableSpec;
+import crud.spi.WritableSpecTest;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -43,7 +43,7 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
 
     @Before
     public void setup() {
-        when(this.mockDelegate.set(any())).thenReturn(Observable.empty());
+        when(this.mockDelegate.set(any(Observable.class))).thenReturn(Observable.empty());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     public void fluentResourceCallsDelegate() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
-        final Object newState = createDefaultResourceState();
+        final Observable<Object> newState = createDefaultResourceState();
 
         // when:
         resource.set(newState);
@@ -138,8 +138,8 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     }
 
     @Override
-    protected Object createDefaultResourceState() {
-        return "Hello, World";
+    protected Observable<Object> createDefaultResourceState() {
+        return Observable.<Object>just("Hello, World");
     }
 
 }

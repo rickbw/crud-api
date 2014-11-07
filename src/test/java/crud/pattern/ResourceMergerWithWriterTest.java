@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import crud.spi.GettableSpec;
 import crud.spi.SettableSpec;
@@ -38,7 +39,7 @@ public class ResourceMergerWithWriterTest extends ResourceMergerTest {
     @Before
     public void setup() {
         super.setup();
-        when(this.mockWriter.set(any())).thenReturn(this.mockWriterResponse);
+        when(this.mockWriter.set(any(Observable.class))).thenReturn(this.mockWriterResponse);
     }
 
     @Test
@@ -51,7 +52,11 @@ public class ResourceMergerWithWriterTest extends ResourceMergerTest {
 
         // then:
         assertObservablesEqual(this.mockWriterResponse, result);
-        verify(this.mockWriter).set(super.mockReaderState.toBlocking().single());
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(this.mockWriter).set(captor.capture());
+        final Observable<?> actual = captor.getValue();
+        assertObservablesEqual(super.mockReaderState, actual);
     }
 
     @Override

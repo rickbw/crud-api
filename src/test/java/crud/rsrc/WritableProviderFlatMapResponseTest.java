@@ -46,7 +46,7 @@ extends WritableProviderTest {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Object newValue = "Hello";
+        final Observable<Object> newValue = Observable.<Object>just("Hello");
         final String origResponse = "world";
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 

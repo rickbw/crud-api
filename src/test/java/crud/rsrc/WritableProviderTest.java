@@ -48,7 +48,7 @@ public class WritableProviderTest {
 
     @Before
     public void setup() {
-        when(this.mockResource.set(any())).thenReturn(Observable.empty());
+        when(this.mockResource.set(any(Observable.class))).thenReturn(Observable.empty());
         when(this.mockProvider.setter(any())).thenReturn(this.mockResource);
         when(this.mockProvider.setter(null)).thenThrow(new NullPointerException("mock"));
     }
