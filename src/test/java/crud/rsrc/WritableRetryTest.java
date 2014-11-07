@@ -21,12 +21,12 @@ import java.util.ConcurrentModificationException;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
+import crud.rsrc.Settable;
 import rx.Observable;
 
 
 /**
- * Tests the nested subclass of {@link Writable} that handles
+ * Tests the nested subclass of {@link Settable} that handles
  * retries.
  */
 public class WritableRetryTest extends WritableTest {
@@ -38,10 +38,10 @@ public class WritableRetryTest extends WritableTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final Writable<Object, Object> expected = super.createDefaultResource();
+        final Settable<Object, Object> expected = super.createDefaultResource();
 
         // when:
-        final Writable<Object, Object> actual = expected.retry(0);
+        final Settable<Object, Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -50,7 +50,7 @@ public class WritableRetryTest extends WritableTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final Writable<Object, Object> provider = super.createDefaultResource();
+        final Settable<Object, Object> provider = super.createDefaultResource();
 
         // when:
         provider.retry(-1);
@@ -60,7 +60,7 @@ public class WritableRetryTest extends WritableTest {
     @Test
     public void retryUntilSuccess() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
@@ -82,20 +82,20 @@ public class WritableRetryTest extends WritableTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
                 new ConcurrentModificationException("throw over and over"));
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(firstAttemptAndAllRetries);
-        final Observable<Object> response = resource.write(newValue);
+        when(super.mockDelegate.set(newValue)).thenReturn(firstAttemptAndAllRetries);
+        final Observable<Object> response = resource.set(newValue);
         response.toBlocking().single();
     }
 
     @Override
-    protected Writable<Object, Object> createDefaultResource() {
+    protected Settable<Object, Object> createDefaultResource() {
         return super.createDefaultResource().retry(NUM_RETRIES);
     }
 

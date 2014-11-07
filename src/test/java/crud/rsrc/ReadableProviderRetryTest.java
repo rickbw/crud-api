@@ -34,10 +34,10 @@ extends ReadableProviderTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final ReadableProvider<Object, Object> expected = super.createDefaultProvider();
+        final GettableProvider<Object, Object> expected = super.createDefaultProvider();
 
         // when:
-        final ReadableProvider<Object, Object> actual = expected.retry(0);
+        final GettableProvider<Object, Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -46,7 +46,7 @@ extends ReadableProviderTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final ReadableProvider<Object, Object> provider = super.createDefaultProvider();
+        final GettableProvider<Object, Object> provider = super.createDefaultProvider();
 
         // when:
         provider.retry(-1);
@@ -56,7 +56,7 @@ extends ReadableProviderTest {
     @Test
     public void retryUntilSuccess() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
@@ -67,7 +67,7 @@ extends ReadableProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
-        final Readable<Object> resource = provider.reader(key);
+        final Gettable<Object> resource = provider.reader(key);
         final Observable<Object> response = resource.get();
         final Object value = response.toBlocking().single();
 
@@ -79,7 +79,7 @@ extends ReadableProviderTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
@@ -87,13 +87,13 @@ extends ReadableProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
-        final Readable<Object> resource = provider.reader(key);
+        final Gettable<Object> resource = provider.getter(key);
         final Observable<Object> response = resource.get();
         response.toBlocking().single();
     }
 
     @Override
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
+    protected GettableProvider<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().retry(NUM_RETRIES);
     }
 

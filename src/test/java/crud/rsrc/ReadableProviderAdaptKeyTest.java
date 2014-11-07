@@ -34,22 +34,22 @@ extends ReadableProviderTest {
     @Override
     public void fluentProviderCallsDelegate() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.reader(origKey);
+        provider.getter(origKey);
 
         // then:
-        verify(this.mockProvider).reader(transformedKey);
+        verify(this.mockProvider).getter(transformedKey);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Readable<Object>> function = provider.toFunction();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Gettable<Object>> function = provider.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
@@ -57,11 +57,11 @@ extends ReadableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).reader(transformedKey);
+        verify(this.mockProvider).getter(transformedKey);
     }
 
     @Override
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
+    protected GettableProvider<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 

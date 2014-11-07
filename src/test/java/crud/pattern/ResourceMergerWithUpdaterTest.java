@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableSpec;
+import crud.spi.GettableSpec;
 import crud.spi.UpdatableSpec;
 import rx.Observable;
 
@@ -55,7 +55,7 @@ public class ResourceMergerWithUpdaterTest extends ResourceMergerTest {
     }
 
     @Override
-    protected ResourceMerger<Object> createDefaultMerger(final ReadableSpec<Object> reader) {
+    protected ResourceMerger<Object> createDefaultMerger(final GettableSpec<Object> reader) {
         return ResourceMerger.withUpdater(reader, this.mockUpdater);
     }
 

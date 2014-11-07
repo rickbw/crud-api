@@ -17,8 +17,8 @@
  *  resources support all operations, the operations are composable, defined
  *  in separate interfaces designed to work together. For example, a resource
  *  that supports reading and writing, but not deletion, would implement
- *  {@link crud.spi.ReadableSpec} and
- *  {@link crud.spi.WritableSpec} but not
+ *  {@link crud.spi.GettableSpec} and
+ *  {@link crud.spi.SettableSpec} but not
  *  {@link crud.spi.DeletableSpec}.</li>
  *
  *  <li><em>Concurrency</em>: The API encourages asynchronous implementations.
@@ -36,8 +36,8 @@
  * I/O operations on state, and hence uses a reactive style. There are four
  * derived interfaces, one for each CRUD operation:
  * <ul>
- *  <li>{@link crud.spi.ReadableSpec}</li>
- *  <li>{@link crud.spi.WritableSpec}</li>
+ *  <li>{@link crud.spi.GettableSpec}</li>
+ *  <li>{@link crud.spi.SettableSpec}</li>
  *  <li>{@link crud.spi.UpdatableSpec}</li>
  *  <li>{@link crud.spi.DeletableSpec}</li>
  * </ul>
@@ -49,8 +49,8 @@
  * data-access technology. There are four derived
  * {@link crud.spi.ResourceProviderSpec} interfaces:
  * <ul>
- *  <li>{@link crud.spi.ReadableProviderSpec}</li>
- *  <li>{@link crud.spi.WritableProviderSpec}</li>
+ *  <li>{@link crud.spi.GettableProviderSpec}</li>
+ *  <li>{@link crud.spi.SettableProviderSpec}</li>
  *  <li>{@link crud.spi.UpdatableProviderSpec}</li>
  *  <li>{@link crud.spi.DeletableProviderSpec}</li>
  * </ul>

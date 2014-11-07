@@ -16,67 +16,67 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.spi.ReadableProviderSpec;
-import crud.spi.ReadableSpec;
+import crud.spi.GettableProviderSpec;
+import crud.spi.GettableSpec;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
-public abstract class ReadableProvider<KEY, RSRC>
-implements ReadableProviderSpec<KEY, RSRC> {
+public abstract class GettableProvider<KEY, RSRC>
+implements GettableProviderSpec<KEY, RSRC> {
 
-    public static <KEY, RSRC> ReadableProvider<KEY, RSRC> from(
-            final ReadableProviderSpec<KEY, RSRC> provider) {
-        if (provider instanceof ReadableProvider<?, ?>) {
-            return (ReadableProvider<KEY, RSRC>) provider;
+    public static <KEY, RSRC> GettableProvider<KEY, RSRC> from(
+            final GettableProviderSpec<KEY, RSRC> provider) {
+        if (provider instanceof GettableProvider<?, ?>) {
+            return (GettableProvider<KEY, RSRC>) provider;
         } else {
-            return new ReadableProvider<KEY, RSRC>() {
+            return new GettableProvider<KEY, RSRC>() {
                 @Override
-                public Readable<RSRC> reader(final KEY key) {
-                    return Readable.from(provider.reader(key));
+                public Gettable<RSRC> getter(final KEY key) {
+                    return Gettable.from(provider.getter(key));
                 }
             };
         }
     }
 
-    public <R> ReadableProvider<KEY, R> mapValue(
+    public <R> GettableProvider<KEY, R> mapValue(
             final Func1<? super RSRC, ? extends R> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final ReadableProvider<KEY, R> result = new ReadableProvider<KEY, R>() {
+        final GettableProvider<KEY, R> result = new GettableProvider<KEY, R>() {
             @Override
-            public Readable<R> reader(final KEY key) {
+            public Gettable<R> getter(final KEY key) {
                 return outerProvider()
-                        .reader(key)
+                        .getter(key)
                         .mapValue(mapper);
             }
         };
         return result;
     }
 
-    public <R> ReadableProvider<KEY, R> flatMapValue(
+    public <R> GettableProvider<KEY, R> flatMapValue(
             final Func1<? super RSRC, ? extends Observable<? extends R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final ReadableProvider<KEY, R> result = new ReadableProvider<KEY, R>() {
+        final GettableProvider<KEY, R> result = new GettableProvider<KEY, R>() {
             @Override
-            public Readable<R> reader(final KEY key) {
+            public Gettable<R> getter(final KEY key) {
                 return outerProvider()
-                        .reader(key)
+                        .getter(key)
                         .flatMapValue(mapper);
             }
         };
         return result;
     }
 
-    public <K> ReadableProvider<K, RSRC> adaptKey(
+    public <K> GettableProvider<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final ReadableProvider<K, RSRC> result = new ReadableProvider<K, RSRC>() {
+        final GettableProvider<K, RSRC> result = new GettableProvider<K, RSRC>() {
             @Override
-            public Readable<RSRC> reader(final K key) {
+            public Gettable<RSRC> getter(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().reader(transformedKey);
+                return outerProvider().getter(transformedKey);
             }
         };
         return result;
@@ -84,9 +84,9 @@ implements ReadableProviderSpec<KEY, RSRC> {
 
     /**
      * Return a resource provider, the resource from which will transparently
-     * retry calls to {@link ReadableSpec#get()} that throw, as with
+     * retry calls to {@link GettableSpec#get()} that throw, as with
      * {@link Observable#retry(long)}. Specifically, any {@link Observable}
-     * returned by {@link ReadableSpec#get()} will re-subscribe up to
+     * returned by {@link GettableSpec#get()} will re-subscribe up to
      * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
      * called, rather than propagating that {@code onError} call.
      *
@@ -99,48 +99,48 @@ implements ReadableProviderSpec<KEY, RSRC> {
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public ReadableProvider<KEY, RSRC> retry(final int maxRetries) {
+    public GettableProvider<KEY, RSRC> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;    // no-op
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new ReadableProvider<KEY, RSRC>() {
+            return new GettableProvider<KEY, RSRC>() {
                 @Override
-                public Readable<RSRC> reader(final KEY key) {
+                public Gettable<RSRC> getter(final KEY key) {
                     return outerProvider()
-                            .reader(key)
+                            .getter(key)
                             .retry(maxRetries);
                 }
             };
         }
     }
 
-    public <TO> ReadableProvider<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
+    public <TO> GettableProvider<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
         Objects.requireNonNull(bind, "null operator");
-        return new ReadableProvider<KEY, TO>() {
+        return new GettableProvider<KEY, TO>() {
             @Override
-            public Readable<TO> reader(final KEY key) {
+            public Gettable<TO> getter(final KEY key) {
                 return outerProvider()
-                        .reader(key)
+                        .getter(key)
                         .lift(bind);
             }
         };
     }
 
-    public Func1<KEY, Readable<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, Readable<RSRC>>(this) {
+    public Func1<KEY, Gettable<RSRC>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, Gettable<RSRC>>(this) {
             @Override
-            public Readable<RSRC> call(final KEY key) {
-                return reader(key);
+            public Gettable<RSRC> call(final KEY key) {
+                return getter(key);
             }
         };
     }
 
     @Override
-    public abstract Readable<RSRC> reader(KEY key);
+    public abstract Gettable<RSRC> getter(KEY key);
 
-    private ReadableProvider<KEY, RSRC> outerProvider() {
+    private GettableProvider<KEY, RSRC> outerProvider() {
         return this;
     }
 

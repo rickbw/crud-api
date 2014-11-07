@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import crud.rsrc.Readable;
+import crud.rsrc.Gettable;
 import crud.rsrc.Updatable;
-import crud.spi.ReadableProviderSpec;
-import crud.spi.ReadableSpec;
+import crud.spi.GettableProviderSpec;
+import crud.spi.GettableSpec;
 import crud.spi.UpdatableProviderSpec;
 import crud.spi.UpdatableSpec;
 import crud.util.BooleanSubscription;
@@ -40,8 +40,7 @@ import rx.Subscriber;
  * Provides all the lines of a text file, one at a time.
  */
 public class TextLineFileResource
-implements ReadableSpec<String>,
-           UpdatableSpec<String, Void> {
+implements GettableSpec<String>, UpdatableSpec<String, Void> {
 
     private final File file;
 
@@ -99,11 +98,10 @@ implements ReadableSpec<String>,
 
 
     public static class Provider
-    implements ReadableProviderSpec<File, String>,
-               UpdatableProviderSpec<File, String, Void> {
+    implements GettableProviderSpec<File, String>, UpdatableProviderSpec<File, String, Void> {
         @Override
-        public Readable<String> reader(final File file) {
-            return Readable.from(new TextLineFileResource(file));
+        public Gettable<String> getter(final File file) {
+            return Gettable.from(new TextLineFileResource(file));
         }
 
         @Override

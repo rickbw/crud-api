@@ -24,7 +24,7 @@ import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Readable} that handles
+ * Tests the nested subclass of {@link Gettable} that handles
  * transforming responses.
  */
 public class ReadableFlatMapValueTest extends ReadableTest {
@@ -43,7 +43,7 @@ public class ReadableFlatMapValueTest extends ReadableTest {
     @Test
     public void transformationApplied() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
 
         // when:
         when(super.mockDelegate.get()).thenReturn(Observable.<Object>just("world"));
@@ -55,7 +55,7 @@ public class ReadableFlatMapValueTest extends ReadableTest {
     }
 
     @Override
-    protected Readable<Object> createDefaultResource() {
+    protected Gettable<Object> createDefaultResource() {
         return super.createDefaultResource().<Object>flatMapValue(mapper);
     }
 

@@ -28,8 +28,8 @@ import rx.Observable;
  *        result of the update. It may or may not be the same as the type of
  *        the resource itself.
  *
- * @see ReadableSpec
- * @see WritableSpec
+ * @see GettableSpec
+ * @see SettableSpec
  * @see DeletableSpec
  * @see UpdatableProviderSpec
  */

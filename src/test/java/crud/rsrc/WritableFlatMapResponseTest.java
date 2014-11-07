@@ -19,13 +19,13 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
+import crud.rsrc.Settable;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Writable} that handles
+ * Tests the nested subclass of {@link Settable} that handles
  * transforming responses.
  */
 public class WritableFlatMapResponseTest extends WritableTest {
@@ -44,12 +44,12 @@ public class WritableFlatMapResponseTest extends WritableTest {
     @Test
     public void transformationApplied() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just("world"));
-        final Observable<Object> response = resource.write(newValue);
+        when(super.mockDelegate.set(newValue)).thenReturn(Observable.<Object>just("world"));
+        final Observable<Object> response = resource.set(newValue);
 
         // then:
         final Object responseValue = response.toBlocking().first();
@@ -57,7 +57,7 @@ public class WritableFlatMapResponseTest extends WritableTest {
     }
 
     @Override
-    protected Writable<Object, Object> createDefaultResource() {
+    protected Settable<Object, Object> createDefaultResource() {
         return super.createDefaultResource().<Object>flatMapResponse(mapper);
     }
 

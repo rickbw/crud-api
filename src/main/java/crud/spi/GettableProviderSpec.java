@@ -16,17 +16,17 @@ package crud.spi;
 
 
 /**
- * Look up a {@link WritableSpec} based on a given key.
+ * Look up a {@link GettableSpec} based on a given key.
  *
- * @see ReadableProviderSpec
  * @see DeletableProviderSpec
+ * @see SettableProviderSpec
  * @see UpdatableProviderSpec
- * @see WritableSpec
+ * @see GettableSpec
  */
-public interface WritableProviderSpec<KEY, RSRC, RESPONSE> extends ResourceProviderSpec {
+public interface GettableProviderSpec<KEY, RSRC> extends ResourceProviderSpec {
 
     /**
-     * Get the {@link UpdatableSpec} associated with the given key. Resources
+     * Get the {@link GettableSpec} associated with the given key. Resources
      * returned for keys that are equal should themselves be equal. In no
      * case should a resource be {@code null}; the absence of state should be
      * handled by the {@code Resource} itself.
@@ -40,6 +40,6 @@ public interface WritableProviderSpec<KEY, RSRC, RESPONSE> extends ResourceProvi
      *
      * @throws NullPointerException if the given key is null.
      */
-    WritableSpec<RSRC, RESPONSE> writer(KEY key);
+    GettableSpec<RSRC> getter(KEY key);
 
 }

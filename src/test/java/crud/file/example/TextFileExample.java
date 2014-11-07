@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
-import crud.rsrc.Readable;
+import crud.rsrc.Gettable;
 import crud.rsrc.Updatable;
 import rx.Observable;
 import rx.functions.Func1;
@@ -50,7 +50,7 @@ public final class TextFileExample {
         }
 
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
-        final Readable<String> inputLines = files.reader(inputFile);
+        final Gettable<String> inputLines = files.getter(inputFile);
         final Updatable<String, Void> outputLines = files.updater(outputFile);
         final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
                 inputLines,

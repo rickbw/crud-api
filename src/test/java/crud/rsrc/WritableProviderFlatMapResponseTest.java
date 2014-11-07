@@ -24,7 +24,7 @@ import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Writable} that handles
+ * Tests the nested subclass of {@link Settable} that handles
  * transforming responses.
  */
 public class WritableProviderFlatMapResponseTest
@@ -44,16 +44,16 @@ extends WritableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final Object newValue = "Hello";
         final String origResponse = "world";
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
-        when(super.mockResource.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
-        final Writable<Object, Object> resource = provider.writer(key);
-        final Observable<Object> response = resource.write(newValue);
+        when(super.mockResource.set(newValue)).thenReturn(Observable.<Object>just(origResponse));
+        final Settable<Object, Object> resource = provider.setter(key);
+        final Observable<Object> response = resource.set(newValue);
 
         // then:
         final Object responseValue = response.toBlocking().first();
@@ -61,7 +61,7 @@ extends WritableProviderTest {
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>flatMapResponse(mapper);
     }
 

@@ -39,12 +39,12 @@ extends ReadableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
         when(super.mockResource.get()).thenReturn(Observable.<Object>just("world"));
-        final Readable<Object> resource = provider.reader(key);
+        final Gettable<Object> resource = provider.getter(key);
         final Observable<Object> response = resource.get();
 
         // then:
@@ -53,7 +53,7 @@ extends ReadableProviderTest {
     }
 
     @Override
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
+    protected GettableProvider<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>mapValue(mapper);
     }
 

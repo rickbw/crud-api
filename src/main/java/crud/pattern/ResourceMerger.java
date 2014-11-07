@@ -14,13 +14,13 @@
  */
 package crud.pattern;
 
-import crud.rsrc.Readable;
+import crud.rsrc.Gettable;
 import crud.rsrc.Updatable;
-import crud.rsrc.Writable;
-import crud.spi.ReadableSpec;
+import crud.rsrc.Settable;
+import crud.spi.GettableSpec;
 import crud.spi.Resource;
 import crud.spi.UpdatableSpec;
-import crud.spi.WritableSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -32,72 +32,72 @@ import rx.functions.Function;
  * a function. For example, consider a reader representing an integer
  * quantity; that reader is both readable and writable. Suppose you want to
  * increment the value of that resource. Pass it to
- * {@link #mapToWriter(ReadableSpec, Func1, WritableSpec)}, as both
+ * {@link #mapToWriter(GettableSpec, Func1, SettableSpec)}, as both
  * {@code reader} and {@code writer}, along with a {@link Func1} that adds one
  * to its input. Then call {@link #merge()}. The previous value will be
  * read, the function will be applied to it, and the result will be written
  * back.
  *
  * This class is provided as an alternative to flatMap operations on the
- * {@link Readable} and {@link Writable} types.
+ * {@link Gettable} and {@link Settable} types.
  * In contrast to those hypothetical operations, this class makes explicit the
  * relationship between reading and writing, and encapsulates any side effects
  * in the caller-provided function.
  *
- * @see #withWriter(ReadableSpec, WritableSpec)
- * @see #withUpdater(ReadableSpec, UpdatableSpec)
+ * @see #withWriter(GettableSpec, SettableSpec)
+ * @see #withUpdater(GettableSpec, UpdatableSpec)
  */
 public abstract class ResourceMerger<RESPONSE> {
 
     /**
-     * Create a merger that will read from the given {@link ReadableSpec}
-     * and write the results with {@link WritableSpec#write(Object)}.
+     * Create a merger that will read from the given {@link GettableSpec}
+     * and write the results with {@link SettableSpec#set(Object)}.
      *
-     * @see #mapToWriter(ReadableSpec, Func1, WritableSpec)
+     * @see #mapToWriter(GettableSpec, Func1, SettableSpec)
      */
     public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withWriter(
-            final ReadableSpec<RSRC> reader,
-            final WritableSpec<RSRC, RESPONSE> writer) {
-        return new MergerImpl<>(reader, Writable.from(writer).toFunction());
+            final GettableSpec<RSRC> reader,
+            final SettableSpec<RSRC, RESPONSE> writer) {
+        return new MergerImpl<>(reader, Settable.from(writer).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableSpec}
+     * Create a merger that will read from the given {@link GettableSpec}
      * and write the results with {@link UpdatableSpec#update(Object)}.
      *
-     * @see #mapToUpdater(ReadableSpec, Func1, UpdatableSpec)
+     * @see #mapToUpdater(GettableSpec, Func1, UpdatableSpec)
      */
     public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withUpdater(
-            final ReadableSpec<RSRC> reader,
+            final GettableSpec<RSRC> reader,
             final UpdatableSpec<RSRC, RESPONSE> updater) {
         return new MergerImpl<>(reader, Updatable.from(updater).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableSpec},
+     * Create a merger that will read from the given {@link GettableSpec},
      * apply the given transformation to the results, and then write them with
-     * {@link WritableSpec#write(Object)}.
+     * {@link SettableSpec#set(Object)}.
      */
     public static <RRSRC, WRSRC, RESPONSE> ResourceMerger<RESPONSE> mapToWriter(
-            final ReadableSpec<? extends RRSRC> reader,
+            final GettableSpec<? extends RRSRC> reader,
             final Func1<? super RRSRC, ? extends WRSRC> mapper,
-            final WritableSpec<WRSRC, RESPONSE> writer) {
+            final SettableSpec<WRSRC, RESPONSE> writer) {
         return new MergerImpl<>(
-                Readable.from(reader).mapValue(mapper),
-                Writable.from(writer).toFunction());
+                Gettable.from(reader).mapValue(mapper),
+                Settable.from(writer).toFunction());
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableSpec},
+     * Create a merger that will read from the given {@link GettableSpec},
      * apply the given transformation to the results, and then write them with
      * {@link UpdatableSpec#update(Object)}.
      */
     public static <RSRC, UPDATE, RESPONSE> ResourceMerger<RESPONSE> mapToUpdater(
-            final ReadableSpec<? extends RSRC> reader,
+            final GettableSpec<? extends RSRC> reader,
             final Func1<? super RSRC, ? extends UPDATE> mapper,
             final UpdatableSpec<UPDATE, RESPONSE> updater) {
         return new MergerImpl<>(
-                Readable.from(reader).mapValue(mapper),
+                Gettable.from(reader).mapValue(mapper),
                 Updatable.from(updater).toFunction());
     }
 
@@ -135,7 +135,7 @@ public abstract class ResourceMerger<RESPONSE> {
      * reflected in the public API.
      */
     private static final class MergerImpl<RSRC, RESPONSE> extends ResourceMerger<RESPONSE> {
-        private final Readable<RESPONSE> merger;
+        private final Gettable<RESPONSE> merger;
         /**
          * Kept around just for {@link #toString()}, {@link #equals(Object)},
          * and {@link #hashCode()}. The results of the former and latter could
@@ -148,9 +148,9 @@ public abstract class ResourceMerger<RESPONSE> {
         private final Func0<Observable<RESPONSE>> asFunction;
 
         public MergerImpl(
-                final ReadableSpec<RSRC> reader,
+                final GettableSpec<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
-            this.merger = Readable.from(reader).flatMapValue(writer);
+            this.merger = Gettable.from(reader).flatMapValue(writer);
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
             this.asFunction = new MergerFunction<RESPONSE>(this);

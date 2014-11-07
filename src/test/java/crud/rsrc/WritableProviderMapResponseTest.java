@@ -39,16 +39,16 @@ extends WritableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final String value = "Hello";
         final String origResponse = "world";
         final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
-        final Writable<Object, Object> resource = provider.writer(key);
-        final Observable<Object> response = resource.write(value);
+        when(super.mockResource.set(value)).thenReturn(Observable.<Object>just(origResponse));
+        final Settable<Object, Object> resource = provider.setter(key);
+        final Observable<Object> response = resource.set(value);
 
         // then:
         final String responseString = (String) response.toBlocking().single();
@@ -56,7 +56,7 @@ extends WritableProviderTest {
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>mapResponse(mapper);
     }
 

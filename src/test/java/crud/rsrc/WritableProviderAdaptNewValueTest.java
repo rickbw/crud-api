@@ -37,21 +37,21 @@ extends WritableProviderTest {
     @Test
     public void passAdaptedValueToResource() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final String origValue = "World!";
         final String adaptedValue = adapter.call(origValue);
 
         // when:
-        final Writable<Object, Object> resource = provider.writer(key);
-        resource.write(origValue);
+        final Settable<Object, Object> resource = provider.setter(key);
+        resource.set(origValue);
 
         // then:
-        verify(super.mockResource).write(adaptedValue);
+        verify(super.mockResource).set(adaptedValue);
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptNewValue(adapter);
     }
 

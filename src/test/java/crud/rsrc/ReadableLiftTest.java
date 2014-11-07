@@ -27,7 +27,7 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link Readable} that handles
+ * Tests the nested subclass of {@link Gettable} that handles
  * lifting subscriptions.
  */
 public class ReadableLiftTest extends ReadableTest {
@@ -45,7 +45,7 @@ public class ReadableLiftTest extends ReadableTest {
     @Test
     public void lifterCalled() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
         final String expectedResourceValue = "Response!";
 
         // when:
@@ -60,7 +60,7 @@ public class ReadableLiftTest extends ReadableTest {
     }
 
     @Override
-    protected Readable<Object> createDefaultResource() {
+    protected Gettable<Object> createDefaultResource() {
         return super.createDefaultResource().lift(this.lifter);
     }
 

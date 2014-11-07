@@ -28,13 +28,13 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import crud.spi.ReadableSpec;
+import crud.spi.GettableSpec;
 import crud.spi.ReadableSpecTest;
 import rx.Observable;
 
 
 /**
- * Test of the {@link ReadableSpec} aspect of {@link TextLineFileResource}.
+ * Test of the {@link GettableSpec} aspect of {@link TextLineFileResource}.
  */
 public class ReadableTextLineFileResourceTest extends ReadableSpecTest<String> {
 

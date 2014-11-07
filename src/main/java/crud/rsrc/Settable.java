@@ -16,25 +16,25 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.spi.WritableSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link WritableSpec}s.
+ * A set of fluent transformations on {@link SettableSpec}s.
  */
-public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RESPONSE> {
+public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RESPONSE> {
 
     /**
-     * If the given resource is a {@code Writable}, return it.
+     * If the given resource is a {@code Settable}, return it.
      * Otherwise, wrap it in a new instance.
      */
-    public static <RSRC, RESPONSE> Writable<RSRC, RESPONSE> from(
-            final WritableSpec<RSRC, RESPONSE> resource) {
-        if (resource instanceof Writable<?, ?>) {
-            return (Writable<RSRC, RESPONSE>) resource;
+    public static <RSRC, RESPONSE> Settable<RSRC, RESPONSE> from(
+            final SettableSpec<RSRC, RESPONSE> resource) {
+        if (resource instanceof Settable<?, ?>) {
+            return (Settable<RSRC, RESPONSE>) resource;
         } else {
             return new DelegatingWritableResource<>(resource);
         }
@@ -44,13 +44,13 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * Create and return a new resource that will transform the responses from
      * this resource.
      *
-     * If this method is called on two equal {@code Writable}s,
+     * If this method is called on two equal {@code Settable}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Writable<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
+    public <TO> Settable<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
         return new MappingWritableResource<>(this, mapper);
     }
 
@@ -58,15 +58,15 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * Create and return a new resource that will transform and flatten the
      * responses from this resource. Take care that the given function does
      * not violate the idempotency requirement of
-     * {@link WritableSpec#write(Object)}.
+     * {@link SettableSpec#set(Object)}.
      *
-     * If this method is called on two equal {@code Writable}s,
+     * If this method is called on two equal {@code Settable}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Writable<RSRC, TO> flatMapResponse(
+    public <TO> Settable<RSRC, TO> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
         return new FlatMappingWritableResource<>(this, mapper);
     }
@@ -76,7 +76,7 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * {@link Observer#onCompleted()}. Emit any error to
      * {@link Observer#onError(Throwable)} as usual.
      */
-    public <TO> Writable<RSRC, TO> flattenResponseToCompletion() {
+    public <TO> Settable<RSRC, TO> flattenResponseToCompletion() {
         final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
         return flatMapResponse(func);
     }
@@ -85,21 +85,21 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * Create and return a new resource that will transform the input resource
      * states before passing them to this resource.
      *
-     * If this method is called on two equal {@code Writable}s,
+     * If this method is called on two equal {@code Settable}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Writable<TO, RESPONSE> adaptNewValue(
+    public <TO> Settable<TO, RESPONSE> adaptNewValue(
             final Func1<? super TO, ? extends RSRC> adapter) {
         return new AdaptingWritableResource<>(this, adapter);
     }
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #write(Object)} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #write(Object)}
+     * {@link #set(Object)} that throw, as with {@link Observable#retry(long)}.
+     * Specifically, any {@link Observable} returned by {@link #set(Object)}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
      * that {@code onError} call.
@@ -111,12 +111,12 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
-     * If this method is called on two equal {@code Writable}s,
+     * If this method is called on two equal {@code Settable}s,
      * the results will be equal if the max retry counts are equal.
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public Writable<RSRC, RESPONSE> retry(final int maxRetries) {
+    public Settable<RSRC, RESPONSE> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;
         } else if (maxRetries < 0) {
@@ -127,18 +127,18 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     }
 
     /**
-     * Wrap this {@code Writable} in another one that will
+     * Wrap this {@code Settable} in another one that will
      * pass all observations through a given adapter {@link Observer}, as with
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
-    public <TO> Writable<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+    public <TO> Settable<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         return new LiftingWritableResource<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
 
     /**
-     * Return a function that, when called, will call {@link #write(Object)}.
+     * Return a function that, when called, will call {@link #set(Object)}.
      * The function object implements {@link Object#equals(Object)},
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
@@ -147,7 +147,7 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
         return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
-                return Writable.this.write(newValue);
+                return Settable.this.set(newValue);
             }
         };
     }
@@ -159,11 +159,11 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
      * parameters that should not be public.
      */
     private static abstract class AbstractFluentWritableResource<FROMRS, TORS, FROMRP, TORP, T>
-    extends Writable<TORS, TORP> {
-        protected final ResourceStateMixin<WritableSpec<FROMRS, FROMRP>, T> state;
+    extends Settable<TORS, TORP> {
+        protected final ResourceStateMixin<SettableSpec<FROMRS, FROMRP>, T> state;
 
         protected AbstractFluentWritableResource(
-                final WritableSpec<FROMRS, FROMRP> delegate,
+                final SettableSpec<FROMRS, FROMRP> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
         }
@@ -192,14 +192,14 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
 
     private static final class DelegatingWritableResource<RSRC, RESPONSE>
     extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
-        public DelegatingWritableResource(final WritableSpec<RSRC, RESPONSE> delegate) {
+        public DelegatingWritableResource(final SettableSpec<RSRC, RESPONSE> delegate) {
             super(delegate, null);
         }
 
         @Override
-        public Observable<RESPONSE> write(final RSRC newValue) {
+        public Observable<RESPONSE> set(final RSRC newValue) {
             final Observable<RESPONSE> response = super.state.getDelegate()
-                    .write(newValue);
+                    .set(newValue);
             return response;
         }
     }
@@ -208,16 +208,16 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     private static final class MappingWritableResource<RSRC, FROM, TO>
     extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
         public MappingWritableResource(
-                final WritableSpec<RSRC, FROM> delegate,
+                final SettableSpec<RSRC, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
-        public Observable<TO> write(final RSRC value) {
+        public Observable<TO> set(final RSRC value) {
             final Observable<TO> response = super.state.getDelegate()
-                    .write(value)
+                    .set(value)
                     .map(super.state.getAuxiliaryState());
             return response;
         }
@@ -227,16 +227,16 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     private static final class FlatMappingWritableResource<RSRC, FROM, TO>
     extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
         private FlatMappingWritableResource(
-                final WritableSpec<RSRC, FROM> delegate,
+                final SettableSpec<RSRC, FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
-        public Observable<TO> write(final RSRC update) {
+        public Observable<TO> set(final RSRC update) {
             final Observable<TO> response = super.state.getDelegate()
-                    .write(update)
+                    .set(update)
                     .flatMap(super.state.getAuxiliaryState());
             return response;
         }
@@ -246,17 +246,17 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     private static final class AdaptingWritableResource<FROM, TO, RESPONSE>
     extends AbstractFluentWritableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
         private AdaptingWritableResource(
-                final WritableSpec<FROM, RESPONSE> delegate,
+                final SettableSpec<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
             super(delegate, adapter);
             Objects.requireNonNull(adapter, "null function");
         }
 
         @Override
-        public Observable<RESPONSE> write(final TO value) {
+        public Observable<RESPONSE> set(final TO value) {
             final FROM transformed = super.state.getAuxiliaryState().call(value);
             final Observable<RESPONSE> response = super.state.getDelegate()
-                    .write(transformed);
+                    .set(transformed);
             return response;
         }
     }
@@ -265,7 +265,7 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     private static final class RetryingWritableResource<RSRC, RESPONSE>
     extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
         public RetryingWritableResource(
-                final WritableSpec<RSRC, RESPONSE> delegate,
+                final SettableSpec<RSRC, RESPONSE> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
             if (maxRetries <= 0) {
@@ -274,9 +274,9 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<RESPONSE> write(final RSRC newResourceState) {
+        public Observable<RESPONSE> set(final RSRC newResourceState) {
             final Observable<RESPONSE> response = super.state.getDelegate()
-                    .write(newResourceState)
+                    .set(newResourceState)
                     .retry(super.state.getAuxiliaryState());
             return response;
         }
@@ -286,16 +286,16 @@ public abstract class Writable<RSRC, RESPONSE> implements WritableSpec<RSRC, RES
     private static final class LiftingWritableResource<RSRC, FROM, TO>
     extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingWritableResource(
-                final WritableSpec<RSRC, FROM> delegate,
+                final SettableSpec<RSRC, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);
             Objects.requireNonNull(bind, "null operator");
         }
 
         @Override
-        public Observable<TO> write(final RSRC newResourceState) {
+        public Observable<TO> set(final RSRC newResourceState) {
             final Observable<TO> response = super.state.getDelegate()
-                    .write(newResourceState)
+                    .set(newResourceState)
                     .lift(super.state.getAuxiliaryState());
             return response;
         }

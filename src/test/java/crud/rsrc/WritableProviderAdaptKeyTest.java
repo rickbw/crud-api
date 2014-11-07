@@ -34,22 +34,22 @@ extends WritableProviderTest {
     @Override
     public void fluentProviderCallsDelegate() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.writer(origKey);
+        provider.setter(origKey);
 
         // then:
-        verify(this.mockProvider).writer(transformedKey);
+        verify(this.mockProvider).setter(transformedKey);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Writable<Object, Object>> function = provider.toFunction();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Settable<Object, Object>> function = provider.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
@@ -57,11 +57,11 @@ extends WritableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).writer(transformedKey);
+        verify(this.mockProvider).setter(transformedKey);
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 

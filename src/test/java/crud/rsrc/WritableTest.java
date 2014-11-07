@@ -26,30 +26,30 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.spi.WritableSpecTest;
-import crud.spi.WritableSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link Writable} that don't require
+ * Tests those methods of {@link Settable} that don't require
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
 public class WritableTest extends WritableSpecTest<Object, Object> {
 
-    protected final WritableSpec<Object, Object> mockDelegate = mock(WritableSpec.class);
+    protected final SettableSpec<Object, Object> mockDelegate = mock(SettableSpec.class);
 
 
     @Before
     public void setup() {
-        when(this.mockDelegate.write(any())).thenReturn(Observable.empty());
+        when(this.mockDelegate.set(any())).thenReturn(Observable.empty());
     }
 
     @Test
     public void fluentResourceNotEqualDelegate() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -60,23 +60,23 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     @Test
     public void fluentResourceCallsDelegate() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object newState = createDefaultResourceState();
 
         // when:
-        resource.write(newState);
+        resource.set(newState);
 
         // then:
-        verify(this.mockDelegate).write(newState);
+        verify(this.mockDelegate).set(newState);
     }
 
     @Test
     public void fromFluentResourceReturnsSameObject() {
         // given:
-        final Writable<Object, Object> origRsrc = createDefaultResource();
+        final Settable<Object, Object> origRsrc = createDefaultResource();
 
         // when:
-        final Writable<Object, Object> wrappedRsrc = Writable.from(origRsrc);
+        final Settable<Object, Object> wrappedRsrc = Settable.from(origRsrc);
 
         // then:
         assertSame(origRsrc, wrappedRsrc);
@@ -85,8 +85,8 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     @Test
     public void equalResourcesHaveEqualFunctions() {
         // given:
-        final Writable<Object, Object> resource1 = createDefaultResource();
-        final Writable<Object, Object> resource2 = createDefaultResource();
+        final Settable<Object, Object> resource1 = createDefaultResource();
+        final Settable<Object, Object> resource2 = createDefaultResource();
 
         // when:
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
@@ -103,8 +103,8 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     @Test
     public void equalFunctionsHaveEqualStrings() {
         // given:
-        final Writable<Object, Object> resource1 = createDefaultResource();
-        final Writable<Object, Object> resource2 = createDefaultResource();
+        final Settable<Object, Object> resource1 = createDefaultResource();
+        final Settable<Object, Object> resource2 = createDefaultResource();
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
         final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
 
@@ -119,8 +119,8 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     @Test
     public void equalFunctionsHaveEqualHashcodes() {
         // given:
-        final Writable<Object, Object> resource1 = createDefaultResource();
-        final Writable<Object, Object> resource2 = createDefaultResource();
+        final Settable<Object, Object> resource1 = createDefaultResource();
+        final Settable<Object, Object> resource2 = createDefaultResource();
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
         final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
 
@@ -133,8 +133,8 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     }
 
     @Override
-    protected Writable<Object, Object> createDefaultResource() {
-        return Writable.from(this.mockDelegate);
+    protected Settable<Object, Object> createDefaultResource() {
+        return Settable.from(this.mockDelegate);
     }
 
     @Override

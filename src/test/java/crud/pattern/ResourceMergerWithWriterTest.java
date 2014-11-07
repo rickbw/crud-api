@@ -23,14 +23,14 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableSpec;
-import crud.spi.WritableSpec;
+import crud.spi.GettableSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 
 
 public class ResourceMergerWithWriterTest extends ResourceMergerTest {
 
-    private final WritableSpec<Object, Object> mockWriter = mock(WritableSpec.class);
+    private final SettableSpec<Object, Object> mockWriter = mock(SettableSpec.class);
     private final Observable<Object> mockWriterResponse = Observable.<Object>just("Goodbye");
 
 
@@ -38,7 +38,7 @@ public class ResourceMergerWithWriterTest extends ResourceMergerTest {
     @Before
     public void setup() {
         super.setup();
-        when(this.mockWriter.write(any())).thenReturn(this.mockWriterResponse);
+        when(this.mockWriter.set(any())).thenReturn(this.mockWriterResponse);
     }
 
     @Test
@@ -51,11 +51,11 @@ public class ResourceMergerWithWriterTest extends ResourceMergerTest {
 
         // then:
         assertObservablesEqual(this.mockWriterResponse, result);
-        verify(this.mockWriter).write(super.mockReaderState.toBlocking().single());
+        verify(this.mockWriter).set(super.mockReaderState.toBlocking().single());
     }
 
     @Override
-    protected ResourceMerger<Object> createDefaultMerger(final ReadableSpec<Object> reader) {
+    protected ResourceMerger<Object> createDefaultMerger(final GettableSpec<Object> reader) {
         return ResourceMerger.withWriter(reader, this.mockWriter);
     }
 

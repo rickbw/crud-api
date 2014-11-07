@@ -27,19 +27,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.spi.ReadableSpecTest;
-import crud.spi.ReadableSpec;
+import crud.spi.GettableSpec;
 import rx.Observable;
 import rx.functions.Func0;
 
 
 /**
- * Tests those methods of {@link Readable} that don't require
+ * Tests those methods of {@link Gettable} that don't require
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
 public class ReadableTest extends ReadableSpecTest<Object> {
 
-    protected final ReadableSpec<Object> mockDelegate = mock(ReadableSpec.class);
+    protected final GettableSpec<Object> mockDelegate = mock(GettableSpec.class);
 
 
     @Before
@@ -50,7 +50,7 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void fluentResourceNotEqualDelegate() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -61,7 +61,7 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void fluentResourceCallsDelegate() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
 
         // when:
         resource.get();
@@ -73,10 +73,10 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void fromFluentResourceReturnsSameObject() {
         // given:
-        final Readable<Object> origRsrc = createDefaultResource();
+        final Gettable<Object> origRsrc = createDefaultResource();
 
         // when:
-        final Readable<Object> wrappedRsrc = Readable.from(origRsrc);
+        final Gettable<Object> wrappedRsrc = Gettable.from(origRsrc);
 
         // then:
         assertSame(origRsrc, wrappedRsrc);
@@ -85,8 +85,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalResourcesHaveEqualFunctions() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
 
         // when:
         final Func0<Observable<Object>> function1 = resource1.toFunction();
@@ -103,8 +103,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalFunctionsHaveEqualStrings() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
         final Func0<Observable<Object>> function1 = resource1.toFunction();
         final Func0<Observable<Object>> function2 = resource2.toFunction();
 
@@ -119,8 +119,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalFunctionsHaveEqualHashcodes() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
         final Func0<Observable<Object>> function1 = resource1.toFunction();
         final Func0<Observable<Object>> function2 = resource2.toFunction();
 
@@ -135,8 +135,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalResourcesHaveEqualCallables() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -151,8 +151,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalCallablesHaveEqualStrings() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -167,8 +167,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     @Test
     public void equalCallablesHaveEqualHashcodes() {
         // given:
-        final Readable<Object> resource1 = createDefaultResource();
-        final Readable<Object> resource2 = createDefaultResource();
+        final Gettable<Object> resource1 = createDefaultResource();
+        final Gettable<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -182,8 +182,8 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     }
 
     @Override
-    protected Readable<Object> createDefaultResource() {
-        return Readable.from(this.mockDelegate);
+    protected Gettable<Object> createDefaultResource() {
+        return Gettable.from(this.mockDelegate);
     }
 
 }

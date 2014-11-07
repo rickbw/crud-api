@@ -25,12 +25,12 @@ import rx.Observable;
  * @param <RESPONSE>    The type of the response(s) that may be returned as
  *        a result of the change in the value.
  *
- * @see ReadableSpec
+ * @see GettableSpec
  * @see UpdatableSpec
  * @see DeletableSpec
- * @see WritableProviderSpec
+ * @see SettableProviderSpec
  */
-public interface WritableSpec<RSRC, RESPONSE> extends Resource {
+public interface SettableSpec<RSRC, RESPONSE> extends Resource {
 
     /**
      * Replace the value of the resource with the given value. If the resource
@@ -48,6 +48,6 @@ public interface WritableSpec<RSRC, RESPONSE> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    public abstract Observable<RESPONSE> write(RSRC newValue);
+    public abstract Observable<RESPONSE> set(RSRC newValue);
 
 }

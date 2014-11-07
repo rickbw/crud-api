@@ -18,12 +18,12 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
+import crud.rsrc.Settable;
 import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Writable} that handles
+ * Tests the nested subclass of {@link Settable} that handles
  * transforming responses.
  */
 public class WritableAdaptNewValueTest extends WritableTest {
@@ -42,19 +42,19 @@ public class WritableAdaptNewValueTest extends WritableTest {
     @Test
     public void fluentResourceCallsDelegate() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object original = createDefaultResourceState();
         final String adapted = adapter.call(original);
 
         // when:
-        resource.write(original);
+        resource.set(original);
 
         // then:
-        verify(this.mockDelegate).write(adapted);
+        verify(this.mockDelegate).set(adapted);
     }
 
     @Override
-    protected Writable<Object, Object> createDefaultResource() {
+    protected Settable<Object, Object> createDefaultResource() {
         return super.createDefaultResource().<Object>adaptNewValue(adapter);
     }
 

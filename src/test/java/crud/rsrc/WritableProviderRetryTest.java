@@ -34,10 +34,10 @@ extends WritableProviderTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final WritableProvider<Object, Object, Object> expected = super.createDefaultProvider();
+        final SettableProvider<Object, Object, Object> expected = super.createDefaultProvider();
 
         // when:
-        final WritableProvider<Object, Object, Object> actual = expected.retry(0);
+        final SettableProvider<Object, Object, Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -46,7 +46,7 @@ extends WritableProviderTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = super.createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = super.createDefaultProvider();
 
         // when:
         provider.retry(-1);
@@ -56,7 +56,7 @@ extends WritableProviderTest {
     @Test
     public void retryUntilSuccess() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
@@ -68,7 +68,7 @@ extends WritableProviderTest {
 
         // when:
         when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final Writable<Object, Object> resource = provider.writer(key);
+        final Settable<Object, Object> resource = provider.writer(key);
         final Observable<Object> response = resource.write(inputValue);
 
         // then:
@@ -80,7 +80,7 @@ extends WritableProviderTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
@@ -88,14 +88,14 @@ extends WritableProviderTest {
         final String inputValue = "Hello";    // arbitrary
 
         // when:
-        when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final Writable<Object, Object> resource = provider.writer(key);
-        final Observable<Object> response = resource.write(inputValue);
+        when(super.mockResource.set(inputValue)).thenReturn(firstAttemptAndAllRetries);
+        final Settable<Object, Object> resource = provider.setter(key);
+        final Observable<Object> response = resource.set(inputValue);
         response.toBlocking().single();
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().retry(NUM_RETRIES);
     }
 

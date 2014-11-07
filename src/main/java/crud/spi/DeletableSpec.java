@@ -23,8 +23,8 @@ import rx.Observable;
  *
  * @param <RESPONSE>    The type of the deletion response(s), if any.
  *
- * @see ReadableSpec
- * @see WritableSpec
+ * @see GettableSpec
+ * @see SettableSpec
  * @see UpdatableSpec
  * @see DeletableProviderSpec
  */

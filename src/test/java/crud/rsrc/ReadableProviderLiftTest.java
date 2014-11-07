@@ -27,7 +27,7 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link ReadableProvider} that
+ * Tests the nested subclass of {@link GettableProvider} that
  * handles lifting subscriptions.
  */
 public class ReadableProviderLiftTest extends ReadableProviderTest {
@@ -45,13 +45,13 @@ public class ReadableProviderLiftTest extends ReadableProviderTest {
     @Test
     public void lifterCalled() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final String expectedResponseValue = "Response!";
 
         // when:
         when(super.mockResource.get()).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Readable<Object> resource = provider.reader(key);
+        final Gettable<Object> resource = provider.getter(key);
         final Observable<Object> response = resource.get();
 
         // then:
@@ -62,7 +62,7 @@ public class ReadableProviderLiftTest extends ReadableProviderTest {
     }
 
     @Override
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
+    protected GettableProvider<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().lift(this.lifter);
     }
 

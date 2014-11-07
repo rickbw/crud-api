@@ -27,7 +27,7 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link WritableProvider} that
+ * Tests the nested subclass of {@link SettableProvider} that
  * handles lifting subscriptions.
  */
 public class WritableProviderLiftTest extends WritableProviderTest {
@@ -45,14 +45,14 @@ public class WritableProviderLiftTest extends WritableProviderTest {
     @Test
     public void lifterCalled() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.write(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Writable<Object, Object> resource = provider.writer(key);
-        final Observable<Object> response = resource.write(expectedResponseValue);
+        when(super.mockResource.set(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
+        final Settable<Object, Object> resource = provider.setter(key);
+        final Observable<Object> response = resource.set(expectedResponseValue);
 
         // then:
         final Object actualResponseValue = response.toBlocking().first();
@@ -62,7 +62,7 @@ public class WritableProviderLiftTest extends WritableProviderTest {
     }
 
     @Override
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().lift(this.lifter);
     }
 

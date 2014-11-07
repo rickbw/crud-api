@@ -26,41 +26,41 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableProviderSpec;
-import crud.spi.ReadableSpec;
+import crud.spi.GettableProviderSpec;
+import crud.spi.GettableSpec;
 import crud.spi.Resource;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link ReadableProvider} that don't
+ * Tests those methods of {@link GettableProvider} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
 public class ReadableProviderTest {
 
-    protected final ReadableSpec<Object> mockResource = mock(ReadableSpec.class);
+    protected final GettableSpec<Object> mockResource = mock(GettableSpec.class);
 
-    protected final ReadableProviderSpec<Object, Object> mockProvider = mock(ReadableProviderSpec.class);
+    protected final GettableProviderSpec<Object, Object> mockProvider = mock(GettableProviderSpec.class);
 
 
     @Before
     public void setup() {
         when(this.mockResource.get()).thenReturn(Observable.empty());
-        when(this.mockProvider.reader(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.reader(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockProvider.getter(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.getter(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final ReadableSpec<Object> resource = provider.reader(key);
+        final GettableSpec<Object> resource = provider.getter(key);
 
         // then:
         assertNotNull(resource);
@@ -69,12 +69,12 @@ public class ReadableProviderTest {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final Resource resource1 = provider.reader(key);
-        final Resource resource2 = provider.reader(key);
+        final Resource resource1 = provider.getter(key);
+        final Resource resource2 = provider.getter(key);
 
         // then:
         assertEquals(resource1, resource2);
@@ -83,16 +83,16 @@ public class ReadableProviderTest {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
 
         // when:
-        provider.reader(null);
+        provider.getter(null);
     }
 
     @Test
     public void fluentProviderNotEqualDelegate() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -103,10 +103,10 @@ public class ReadableProviderTest {
     @Test
     public void fromFluentProviderReturnsSameObject() {
         // given:
-        final ReadableProvider<Object, Object> origProvider = createDefaultProvider();
+        final GettableProvider<Object, Object> origProvider = createDefaultProvider();
 
         // when:
-        final ReadableProvider<Object, Object> wrappedProvider = ReadableProvider.from(
+        final GettableProvider<Object, Object> wrappedProvider = GettableProvider.from(
                 origProvider);
 
         // then:
@@ -116,32 +116,32 @@ public class ReadableProviderTest {
     @Test
     public void fluentProviderCallsDelegate() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        provider.reader(key);
+        provider.getter(key);
 
         // then:
-        verify(this.mockProvider).reader(key);
+        verify(this.mockProvider).getter(key);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Readable<Object>> function = provider.toFunction();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Gettable<Object>> function = provider.toFunction();
         final Object key = createDefaultKey();
 
         // when:
         function.call(key);
 
         // then:
-        verify(this.mockProvider).reader(key);
+        verify(this.mockProvider).getter(key);
     }
 
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
-        return ReadableProvider.from(this.mockProvider);
+    protected GettableProvider<Object, Object> createDefaultProvider() {
+        return GettableProvider.from(this.mockProvider);
     }
 
     protected Object createDefaultKey() {

@@ -18,8 +18,8 @@ package crud.spi;
 /**
  * Look up a {@link DeletableSpec} based on a given key.
  *
- * @see ReadableProviderSpec
- * @see WritableProviderSpec
+ * @see GettableProviderSpec
+ * @see SettableProviderSpec
  * @see UpdatableProviderSpec
  * @see DeletableSpec
  */

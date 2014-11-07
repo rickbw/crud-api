@@ -26,12 +26,12 @@ import rx.Observable;
  *
  * @param <RSRC>    The type of the resource's value(s).
  *
- * @see WritableSpec
+ * @see SettableSpec
  * @see UpdatableSpec
  * @see DeletableSpec
- * @see ReadableProviderSpec
+ * @see GettableProviderSpec
  */
-public interface ReadableSpec<RSRC> extends Resource {
+public interface GettableSpec<RSRC> extends Resource {
 
     /**
      * Request the value(s) of this resource. Zero or more values will be

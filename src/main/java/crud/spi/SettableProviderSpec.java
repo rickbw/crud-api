@@ -16,17 +16,17 @@ package crud.spi;
 
 
 /**
- * Look up a {@link ReadableSpec} based on a given key.
+ * Look up a {@link SettableSpec} based on a given key.
  *
+ * @see GettableProviderSpec
  * @see DeletableProviderSpec
- * @see WritableProviderSpec
  * @see UpdatableProviderSpec
- * @see ReadableSpec
+ * @see SettableSpec
  */
-public interface ReadableProviderSpec<KEY, RSRC> extends ResourceProviderSpec {
+public interface SettableProviderSpec<KEY, RSRC, RESPONSE> extends ResourceProviderSpec {
 
     /**
-     * Get the {@link ReadableSpec} associated with the given key. Resources
+     * Get the {@link UpdatableSpec} associated with the given key. Resources
      * returned for keys that are equal should themselves be equal. In no
      * case should a resource be {@code null}; the absence of state should be
      * handled by the {@code Resource} itself.
@@ -40,6 +40,6 @@ public interface ReadableProviderSpec<KEY, RSRC> extends ResourceProviderSpec {
      *
      * @throws NullPointerException if the given key is null.
      */
-    ReadableSpec<RSRC> reader(KEY key);
+    SettableSpec<RSRC, RESPONSE> setter(KEY key);
 
 }

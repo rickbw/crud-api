@@ -24,7 +24,7 @@ import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Readable} that handles
+ * Tests the nested subclass of {@link Gettable} that handles
  * transforming responses.
  */
 public class ReadableProviderFlatMapValueTest
@@ -44,14 +44,14 @@ extends ReadableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final ReadableProvider<Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
         final String origResponse = "Hello, World";
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
         when(super.mockResource.get()).thenReturn(Observable.<Object>just(origResponse));
-        final Readable<Object> resource = provider.reader(key);
+        final Gettable<Object> resource = provider.getter(key);
         final Observable<Object> response = resource.get();
 
         // then:
@@ -60,7 +60,7 @@ extends ReadableProviderTest {
     }
 
     @Override
-    protected ReadableProvider<Object, Object> createDefaultProvider() {
+    protected GettableProvider<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>flatMapValue(mapper);
     }
 

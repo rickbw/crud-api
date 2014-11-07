@@ -18,13 +18,13 @@ import static crud.RxAssertions.assertObservablesEqual;
 
 import org.junit.Test;
 
-import crud.spi.WritableSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 
 
 /**
  * A base class for all unit test classes that operate on
- * {@link WritableSpec}s. It tests basic contracts that should hold true
+ * {@link SettableSpec}s. It tests basic contracts that should hold true
  * for all implementations.
  */
 public abstract class WritableSpecTest<RSRC, RESP> extends ResourceTest {
@@ -38,19 +38,19 @@ public abstract class WritableSpecTest<RSRC, RESP> extends ResourceTest {
     @Test
     public void responsesFromRepeatedWritesAreTheSame() {
         // given:
-        final WritableSpec<RSRC, RESP> resource = createDefaultResource();
+        final SettableSpec<RSRC, RESP> resource = createDefaultResource();
         final RSRC newValue = createDefaultResourceState();
 
         // when:
-        final Observable<RESP> result1 = resource.write(newValue);
-        final Observable<RESP> result2 = resource.write(newValue);
+        final Observable<RESP> result1 = resource.set(newValue);
+        final Observable<RESP> result2 = resource.set(newValue);
 
         // then:
         assertObservablesEqual(result1, result2);
     }
 
     @Override
-    protected abstract WritableSpec<RSRC, RESP> createDefaultResource();
+    protected abstract SettableSpec<RSRC, RESP> createDefaultResource();
 
     /**
      * Create an object suitable for being written to the resources returned

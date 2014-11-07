@@ -26,7 +26,7 @@ import rx.functions.Func1;
  * A set of fluent transformations on {@link UpdatableProviderSpec}s.
  *
  * Note that this class lacks a {@code retry} operation, as in e.g.
- * {@link ReadableProvider#retry(int)}. This is because updates
+ * {@link GettableProvider#retry(int)}. This is because updates
  * are not idempotent; hence, retries are not inherently retriable.
  * Applications must handle retry logic, if any, themselves.
  */

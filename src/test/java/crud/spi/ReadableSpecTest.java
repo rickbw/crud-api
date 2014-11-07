@@ -18,13 +18,13 @@ import static crud.RxAssertions.assertObservablesEqual;
 
 import org.junit.Test;
 
-import crud.spi.ReadableSpec;
+import crud.spi.GettableSpec;
 import rx.Observable;
 
 
 /**
  * A base class for all unit test classes that operate on
- * {@link ReadableSpec}s. It tests basic contracts that should hold true
+ * {@link GettableSpec}s. It tests basic contracts that should hold true
  * for all implementations.
  */
 public abstract class ReadableSpecTest<RSRC> extends ResourceTest {
@@ -32,7 +32,7 @@ public abstract class ReadableSpecTest<RSRC> extends ResourceTest {
     @Test
     public void getsAreIdempotent() {
         // given:
-        final ReadableSpec<RSRC> resource = createDefaultResource();
+        final GettableSpec<RSRC> resource = createDefaultResource();
 
         // when:
         final Observable<RSRC> result1 = resource.get();
@@ -43,6 +43,6 @@ public abstract class ReadableSpecTest<RSRC> extends ResourceTest {
     }
 
     @Override
-    protected abstract ReadableSpec<RSRC> createDefaultResource();
+    protected abstract GettableSpec<RSRC> createDefaultResource();
 
 }

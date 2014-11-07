@@ -17,7 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-import crud.spi.ReadableSpec;
+import crud.spi.GettableSpec;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func0;
@@ -25,17 +25,17 @@ import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link ReadableSpec}s.
+ * A set of fluent transformations on {@link GettableSpec}s.
  */
-public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
+public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
 
     /**
-     * If the given resource is a {@code Readable}, return it.
+     * If the given resource is a {@code Gettable}, return it.
      * Otherwise, wrap it in a new instance.
      */
-    public static <RSRC> Readable<RSRC> from(final ReadableSpec<RSRC> resource) {
-        if (resource instanceof Readable<?>) {
-            return (Readable<RSRC>) resource;
+    public static <RSRC> Gettable<RSRC> from(final GettableSpec<RSRC> resource) {
+        if (resource instanceof Gettable<?>) {
+            return (Gettable<RSRC>) resource;
         } else {
             return new DelegatingReadableResource<>(resource);
         }
@@ -45,30 +45,30 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
      * Create and return a new resource that will transform the state of
      * this resource.
      *
-     * If this method is called on two equal {@code Readable}s,
+     * If this method is called on two equal {@code Gettable}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Readable<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
+    public <TO> Gettable<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
         return new MappingReadableResource<>(this, mapper);
     }
 
     /**
      * Create and return a new resource that will transform and flatten the
      * responses from this resource. Take care that the given function does
-     * not violate the requirements of {@link ReadableSpec#get()} calls:
+     * not violate the requirements of {@link GettableSpec#get()} calls:
      * it must maintain idempotency, and it must not create observable side
      * effects.
      *
-     * If this method is called on two equal {@code Readable}s,
+     * If this method is called on two equal {@code Gettable}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Readable<TO> flatMapValue(
+    public <TO> Gettable<TO> flatMapValue(
             final Func1<? super RSRC, ? extends Observable<? extends TO>> mapper) {
         return new FlatMappingReadableResource<>(this, mapper);
     }
@@ -88,12 +88,12 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
      * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
      * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
      *
-     * If this method is called on two equal {@code Readable}s,
+     * If this method is called on two equal {@code Gettable}s,
      * the results will be equal if the max retry counts are equal.
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public Readable<RSRC> retry(final int maxRetries) {
+    public Gettable<RSRC> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;
         } else if (maxRetries < 0) {
@@ -104,11 +104,11 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
     }
 
     /**
-     * Wrap this {@code Readable} in another one that will
+     * Wrap this {@code Gettable} in another one that will
      * pass all observations through a given adapter {@link Observer}, as with
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
-    public <TO> Readable<TO> lift(final Observable.Operator<TO, RSRC> bind) {
+    public <TO> Gettable<TO> lift(final Observable.Operator<TO, RSRC> bind) {
         return new LiftingReadableResource<>(this, bind);
     }
 
@@ -138,7 +138,7 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
         return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
             @Override
             public Observable<RSRC> call() {
-                return Readable.this.get();
+                return Gettable.this.get();
             }
         };
     }
@@ -150,11 +150,11 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
      * parameters that should not be public.
      */
     private static abstract class AbstractFluentReadableResource<FROM, TO, T>
-    extends Readable<TO> {
-        protected final ResourceStateMixin<ReadableSpec<FROM>, T> state;
+    extends Gettable<TO> {
+        protected final ResourceStateMixin<GettableSpec<FROM>, T> state;
 
         protected AbstractFluentReadableResource(
-                final ReadableSpec<FROM> delegate,
+                final GettableSpec<FROM> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
         }
@@ -183,12 +183,12 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
 
     /**
      * It may seem that the business of this class could be accomplished by
-     * Readable itself. However, that would require an
+     * Gettable itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
     private static final class DelegatingReadableResource<RSRC>
     extends AbstractFluentReadableResource<RSRC, RSRC, Void> {
-        public DelegatingReadableResource(final ReadableSpec<RSRC> delegate) {
+        public DelegatingReadableResource(final GettableSpec<RSRC> delegate) {
             super(delegate, null);
         }
 
@@ -204,7 +204,7 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
     private static final class MappingReadableResource<FROM, TO>
     extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
         public MappingReadableResource(
-                final ReadableSpec<FROM> delegate,
+                final GettableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
@@ -223,7 +223,7 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
     private static final class FlatMappingReadableResource<FROM, TO>
     extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
         private FlatMappingReadableResource(
-                final ReadableSpec<FROM> delegate,
+                final GettableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
@@ -242,7 +242,7 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
     private static final class RetryingReadableResource<RSRC>
     extends AbstractFluentReadableResource<RSRC, RSRC, Integer>{
         public RetryingReadableResource(
-                final ReadableSpec<RSRC> delegate,
+                final GettableSpec<RSRC> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
             if (maxRetries <= 0) {
@@ -263,7 +263,7 @@ public abstract class Readable<RSRC> implements ReadableSpec<RSRC> {
     private static final class LiftingReadableResource<FROM, TO>
     extends AbstractFluentReadableResource<FROM, TO, Observable.Operator<TO, FROM>> {
         public LiftingReadableResource(
-                final ReadableSpec<FROM> delegate,
+                final GettableSpec<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);
             Objects.requireNonNull(bind, "null operator");

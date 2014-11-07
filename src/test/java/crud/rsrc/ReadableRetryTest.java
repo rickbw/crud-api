@@ -25,7 +25,7 @@ import rx.Observable;
 
 
 /**
- * Tests the nested subclass of {@link Readable} that handles
+ * Tests the nested subclass of {@link Gettable} that handles
  * retries.
  */
 public class ReadableRetryTest extends ReadableTest {
@@ -37,10 +37,10 @@ public class ReadableRetryTest extends ReadableTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final Readable<Object> expected = super.createDefaultResource();
+        final Gettable<Object> expected = super.createDefaultResource();
 
         // when:
-        final Readable<Object> actual = expected.retry(0);
+        final Gettable<Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -49,7 +49,7 @@ public class ReadableRetryTest extends ReadableTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final Readable<Object> provider = super.createDefaultResource();
+        final Gettable<Object> provider = super.createDefaultResource();
 
         // when:
         provider.retry(-1);
@@ -59,7 +59,7 @@ public class ReadableRetryTest extends ReadableTest {
     @Test
     public void retryUntilSuccess() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
                 Notification.createOnError(new RuntimeException("1st retry")),
@@ -80,7 +80,7 @@ public class ReadableRetryTest extends ReadableTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final Readable<Object> resource = createDefaultResource();
+        final Gettable<Object> resource = createDefaultResource();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
                 new ConcurrentModificationException("throw over and over"));
@@ -92,7 +92,7 @@ public class ReadableRetryTest extends ReadableTest {
     }
 
     @Override
-    protected Readable<Object> createDefaultResource() {
+    protected Gettable<Object> createDefaultResource() {
         return super.createDefaultResource().retry(NUM_RETRIES);
     }
 

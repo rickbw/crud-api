@@ -27,40 +27,40 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.spi.Resource;
-import crud.spi.WritableProviderSpec;
-import crud.spi.WritableSpec;
+import crud.spi.SettableProviderSpec;
+import crud.spi.SettableSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link WritableProvider} that don't
+ * Tests those methods of {@link SettableProvider} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
 public class WritableProviderTest {
 
-    protected final WritableSpec<Object, Object> mockResource = mock(WritableSpec.class);
+    protected final SettableSpec<Object, Object> mockResource = mock(SettableSpec.class);
 
-    protected final WritableProviderSpec<Object, Object, Object> mockProvider = mock(WritableProviderSpec.class);
+    protected final SettableProviderSpec<Object, Object, Object> mockProvider = mock(SettableProviderSpec.class);
 
 
     @Before
     public void setup() {
-        when(this.mockResource.write(any())).thenReturn(Observable.empty());
-        when(this.mockProvider.writer(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.writer(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockResource.set(any())).thenReturn(Observable.empty());
+        when(this.mockProvider.setter(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.setter(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final Resource resource = provider.writer(key);
+        final Resource resource = provider.setter(key);
 
         // then:
         assertNotNull(resource);
@@ -69,12 +69,12 @@ public class WritableProviderTest {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final Resource resource1 = provider.writer(key);
-        final Resource resource2 = provider.writer(key);
+        final Resource resource1 = provider.setter(key);
+        final Resource resource2 = provider.setter(key);
 
         // then:
         assertEquals(resource1, resource2);
@@ -83,16 +83,16 @@ public class WritableProviderTest {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
 
         // when:
-        provider.writer(null);
+        provider.setter(null);
     }
 
     @Test
     public void fluentProviderNotEqualDelegate() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -103,10 +103,10 @@ public class WritableProviderTest {
     @Test
     public void fromFluentProviderReturnsSameObject() {
         // given:
-        final WritableProvider<Object, Object, Object> origProvider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> origProvider = createDefaultProvider();
 
         // when:
-        final WritableProvider<Object, Object, Object> wrappedProvider = WritableProvider.from(
+        final SettableProvider<Object, Object, Object> wrappedProvider = SettableProvider.from(
                 origProvider);
 
         // then:
@@ -116,32 +116,32 @@ public class WritableProviderTest {
     @Test
     public void fluentProviderCallsDelegate() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        provider.writer(key);
+        provider.setter(key);
 
         // then:
-        verify(this.mockProvider).writer(key);
+        verify(this.mockProvider).setter(key);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
-        final WritableProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Writable<Object, Object>> function = provider.toFunction();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Settable<Object, Object>> function = provider.toFunction();
         final Object key = createDefaultKey();
 
         // when:
         function.call(key);
 
         // then:
-        verify(this.mockProvider).writer(key);
+        verify(this.mockProvider).setter(key);
     }
 
-    protected WritableProvider<Object, Object, Object> createDefaultProvider() {
-        return WritableProvider.from(this.mockProvider);
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
+        return SettableProvider.from(this.mockProvider);
     }
 
     protected Object createDefaultKey() {

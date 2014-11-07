@@ -18,9 +18,9 @@ package crud.spi;
 /**
  * Look up a {@link UpdatableSpec} based on a given key.
  *
- * @see ReadableProviderSpec
+ * @see GettableProviderSpec
  * @see DeletableProviderSpec
- * @see WritableProviderSpec
+ * @see SettableProviderSpec
  * @see UpdatableSpec
  */
 public interface UpdatableProviderSpec<KEY, UPDATE, RESPONSE> extends ResourceProviderSpec {

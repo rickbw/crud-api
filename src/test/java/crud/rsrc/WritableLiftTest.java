@@ -22,13 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import crud.rsrc.Writable;
+import crud.rsrc.Settable;
 import rx.Observable;
 import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link Writable} that handles
+ * Tests the nested subclass of {@link Settable} that handles
  * lifting subscriptions.
  */
 public class WritableLiftTest extends WritableTest {
@@ -46,13 +46,13 @@ public class WritableLiftTest extends WritableTest {
     @Test
     public void lifterCalled() {
         // given:
-        final Writable<Object, Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Observable<Object> response = resource.write(newValue);
+        when(super.mockDelegate.set(newValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
+        final Observable<Object> response = resource.set(newValue);
 
         // then:
         final Object actualResponseValue = response.toBlocking().first();
@@ -62,7 +62,7 @@ public class WritableLiftTest extends WritableTest {
     }
 
     @Override
-    protected Writable<Object, Object> createDefaultResource() {
+    protected Settable<Object, Object> createDefaultResource() {
         return super.createDefaultResource().lift(this.lifter);
     }
 
