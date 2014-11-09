@@ -31,10 +31,15 @@ public class UpdatableMapResponseTest extends UpdatableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object obj) {
+                    return RESPONSE_PREFIX + obj;
+                }
+            });
         }
     };
 
@@ -43,7 +48,7 @@ public class UpdatableMapResponseTest extends UpdatableTest {
     public void transformationApplied() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Observable<? extends Object> update = createDefaultUpdate();
+        final Observable<Object> update = createDefaultUpdate();
 
         // when:
         when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>just("world"));

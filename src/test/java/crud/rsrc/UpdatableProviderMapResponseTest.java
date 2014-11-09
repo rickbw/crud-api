@@ -14,7 +14,7 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertEquals;
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -28,10 +28,15 @@ extends UpdatableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object response) {
-            return PREFIX + response;
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object obj) {
+                    return PREFIX + obj;
+                }
+            });
         }
     };
 
@@ -41,18 +46,17 @@ extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<String> update = Observable.just("Hello");
-        final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse);
+        final Observable<Object> update = Observable.<Object>just("Hello");
+        final Observable<Object> origResponse = Observable.<Object>just("world");
+        final Observable<Object> mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.update(update)).thenReturn(Observable.<Object>just(origResponse));
+        when(super.mockResource.update(update)).thenReturn(origResponse);
         final Updatable<Object, Object> resource = provider.updater(key);
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final String responseString = (String) response.toBlocking().single();
-        assertEquals(mappedResponse, responseString);
+        assertObservablesEqual(mappedResponse, response);
     }
 
     @Override

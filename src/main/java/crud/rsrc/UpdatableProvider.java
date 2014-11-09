@@ -18,7 +18,6 @@ import java.util.Objects;
 
 import crud.spi.UpdatableProviderSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -43,7 +42,7 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
     }
 
     public <R> UpdatableProvider<KEY, UPDATE, R> mapResponse(
-            final Func1<? super RESPONSE, ? extends R> mapper) {
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
         final UpdatableProvider<KEY, UPDATE, R> result = new UpdatableProvider<KEY, UPDATE, R>() {
             @Override
@@ -56,32 +55,8 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         return result;
     }
 
-    public <R> UpdatableProvider<KEY, UPDATE, R> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
-        Objects.requireNonNull(mapper, "null function");
-        final UpdatableProvider<KEY, UPDATE, R> result = new UpdatableProvider<KEY, UPDATE, R>() {
-            @Override
-            public Updatable<UPDATE, R> updater(final KEY key) {
-                return outerProvider()
-                        .updater(key)
-                        .flatMapResponse(mapper);
-            }
-        };
-        return result;
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> UpdatableProvider<KEY, UPDATE, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
-    }
-
     public <U> UpdatableProvider<KEY, U, RESPONSE> adaptUpdate(
-            final Func1<? super U, ? extends UPDATE> adapter) {
+            final Func1<? super Observable<U>, ? extends Observable<UPDATE>> adapter) {
         Objects.requireNonNull(adapter, "null function");
         final UpdatableProvider<KEY, U, RESPONSE> result = new UpdatableProvider<KEY, U, RESPONSE>() {
             @Override
@@ -106,18 +81,6 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
             }
         };
         return result;
-    }
-
-    public <TO> UpdatableProvider<KEY, UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Objects.requireNonNull(bind, "null operator");
-        return new UpdatableProvider<KEY, UPDATE, TO>() {
-            @Override
-            public Updatable<UPDATE, TO> updater(final KEY key) {
-                return outerProvider()
-                        .updater(key)
-                        .lift(bind);
-            }
-        };
     }
 
     public Func1<KEY, Updatable<UPDATE, RESPONSE>> toFunction() {

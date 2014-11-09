@@ -57,7 +57,7 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
     }
 
     @Override
-    public Observable<Void> update(final Observable<? extends String> update) {
+    public Observable<Void> update(final Observable<String> update) {
         return Observable.create(new OnSubscribe<Void>() {
             @Override
             public void call(final Subscriber<? super Void> subscriber) {

@@ -62,7 +62,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     public void fluentResourceCallsDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Observable<String> update = createDefaultUpdate();
+        final Observable<Object> update = createDefaultUpdate();
 
         // when:
         resource.update(update);
@@ -139,8 +139,8 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     }
 
     @Override
-    protected Observable<String> createDefaultUpdate() {
-        return Observable.just("Hello, World");
+    protected Observable<Object> createDefaultUpdate() {
+        return Observable.<Object>just("Hello, World");
     }
 
 }

@@ -29,10 +29,15 @@ extends UpdatableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> adapter = new Func1<Object, String>() {
+    private static final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object response) {
-            return PREFIX + response;
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object obj) {
+                    return PREFIX + obj;
+                }
+            });
         }
     };
 
@@ -42,8 +47,8 @@ extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<String> origUpdate = Observable.just("World!");
-        final Observable<String> adaptedUpdate = origUpdate.map(this.adapter);
+        final Observable<Object> origUpdate = Observable.<Object>just("World!");
+        final Observable<Object> adaptedUpdate = adapter.call(origUpdate);
 
         // when:
         final Updatable<Object, Object> resource = provider.updater(key);

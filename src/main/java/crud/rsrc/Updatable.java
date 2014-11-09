@@ -18,7 +18,6 @@ import java.util.Objects;
 
 import crud.spi.UpdatableSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -51,33 +50,8 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * implementation.
      */
     public <TO> Updatable<UPDATE, TO> mapResponse(
-            final Func1<? super RESPONSE, ? extends TO> mapper) {
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
         return new MappingUpdatable<>(this, mapper);
-    }
-
-    /**
-     * Create and return a new resource that will transform and flatten the
-     * responses from this resource.
-     *
-     * If this method is called on two equal {@code Updatable}s,
-     * the results will be equal if the functions are equal. If equality
-     * behavior it important to you (for example, if you intend to keep
-     * resources in a {@code HashSet}), consider it in your function
-     * implementation.
-     */
-    public <TO> Updatable<UPDATE, TO> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingUpdatable<>(this, mapper);
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> Updatable<UPDATE, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
     }
 
     /**
@@ -91,20 +65,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * implementation.
      */
     public <TO> Updatable<TO, RESPONSE> adaptUpdate(
-            final Func1<? super TO, ? extends UPDATE> adapter) {
+            final Func1<? super Observable<TO>, ? extends Observable<UPDATE>> adapter) {
         return new AdaptingUpdatable<>(this, adapter);
     }
-
-    /**
-     * Wrap this {@code Updatable} in another one that will
-     * pass all observations through a given adapter {@link Observer}, as with
-     * {@link Observable#lift(rx.Observable.Operator)}.
-     */
-    public <TO> Updatable<UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingUpdatable<>(this, bind);
-    }
-
-    // TODO: Expose other Observable methods
 
     /**
      * Return a function that, when called, will call {@link #update(Observable)}.
@@ -171,7 +134,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<RESPONSE> update(final Observable<? extends UPDATE> update) {
+        public Observable<RESPONSE> update(final Observable<UPDATE> update) {
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .update(update);
             return response;
@@ -180,76 +143,37 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
 
 
     private static final class MappingUpdatable<UPDATE, FROM, TO>
-    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends TO>> {
+    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         private MappingUpdatable(
                 final UpdatableSpec<UPDATE, FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
+                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
-        public Observable<TO> update(final Observable<? extends UPDATE> update) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .update(update)
-                    .map(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class FlatMappingUpdatable<UPDATE, FROM, TO>
-    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingUpdatable(
-                final UpdatableSpec<UPDATE, FROM> delegate,
-                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> update(final Observable<? extends UPDATE> update) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .update(update)
-                    .flatMap(super.state.getAuxiliaryState());
-            return response;
+        public Observable<TO> update(final Observable<UPDATE> update) {
+            final Observable<FROM> response = super.state.getDelegate().update(update);
+            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
+            return mapped;
         }
     }
 
 
     private static final class AdaptingUpdatable<FROM, TO, RESPONSE>
-    extends AbstractUpdatable<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
+    extends AbstractUpdatable<FROM, TO, RESPONSE, RESPONSE, Func1<? super Observable<TO>, ? extends Observable<FROM>>> {
         private AdaptingUpdatable(
                 final UpdatableSpec<FROM, RESPONSE> delegate,
-                final Func1<? super TO, ? extends FROM> adapter) {
+                final Func1<? super Observable<TO>, ? extends Observable<FROM>> adapter) {
             super(delegate, adapter);
             Objects.requireNonNull(adapter, "null function");
         }
 
         @Override
-        public Observable<RESPONSE> update(final Observable<? extends TO> update) {
-            final Observable<FROM> transformed = update.map(super.state.getAuxiliaryState());
+        public Observable<RESPONSE> update(final Observable<TO> update) {
+            final Observable<FROM> transformed = super.state.getAuxiliaryState().call(update);
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .update(transformed);
-            return response;
-        }
-    }
-
-
-    private static final class LiftingUpdatable<UPDATE, FROM, TO>
-    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingUpdatable(
-                final UpdatableSpec<UPDATE, FROM> delegate,
-                final Observable.Operator<TO, FROM> bind) {
-            super(delegate, bind);
-            Objects.requireNonNull(bind, "null operator");
-        }
-
-        @Override
-        public Observable<TO> update(final Observable<? extends UPDATE> update) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .update(update)
-                    .lift(super.state.getAuxiliaryState());
             return response;
         }
     }

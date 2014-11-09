@@ -48,6 +48,6 @@ public interface UpdatableSpec<UPDATE, RESPONSE> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    Observable<RESPONSE> update(Observable<? extends UPDATE> update);
+    Observable<RESPONSE> update(Observable<UPDATE> update);
 
 }
