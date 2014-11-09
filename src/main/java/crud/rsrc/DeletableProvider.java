@@ -19,11 +19,9 @@ import java.util.Objects;
 import com.google.common.base.Function;
 
 import crud.spi.DeletableProviderSpec;
-import crud.spi.DeletableSpec;
 import crud.spi.Resource;
 import crud.spi.ResourceProviderSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -57,7 +55,7 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
      * @see Deletable#mapResponse(Func1)
      */
     public <R> DeletableProvider<KEY, R> mapResponse(
-            final Func1<? super RESPONSE, ? extends R> mapper) {
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
         final DeletableProvider<KEY, R> result = new DeletableProvider<KEY, R>() {
             @Override
@@ -68,30 +66,6 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
             }
         };
         return result;
-    }
-
-    public <R> DeletableProvider<KEY, R> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
-        Objects.requireNonNull(mapper, "null function");
-        final DeletableProvider<KEY, R> result = new DeletableProvider<KEY, R>() {
-            @Override
-            public Deletable<R> deleter(final KEY key) {
-                return outerProvider()
-                        .deleter(key)
-                        .flatMapResponse(mapper);
-            }
-        };
-        return result;
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> DeletableProvider<KEY, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
     }
 
     /**
@@ -109,57 +83,6 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
             }
         };
         return result;
-    }
-
-    /**
-     * Return a resource provider, the resource from which will transparently
-     * retry calls to {@link DeletableSpec#delete()} that throw, as with
-     * {@link Observable#retry(long)}. Specifically, any {@link Observable}
-     * returned by {@link DeletableSpec#delete()} will re-subscribe up to
-     * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
-     * called, rather than propagating that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     *
-     * @see Deletable#retry(int)
-     */
-    public DeletableProvider<KEY, RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;    // no-op
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new DeletableProvider<KEY, RESPONSE>() {
-                @Override
-                public Deletable<RESPONSE> deleter(final KEY key) {
-                    return outerProvider()
-                            .deleter(key)
-                            .retry(maxRetries);
-                }
-            };
-        }
-    }
-
-    /**
-     * @see Deletable#lift(rx.Observable.Operator)
-     */
-    public <TO> DeletableProvider<KEY, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Objects.requireNonNull(bind, "null operator");
-        return new DeletableProvider<KEY, TO>() {
-            @Override
-            public Deletable<TO> deleter(final KEY key) {
-                return outerProvider()
-                        .deleter(key)
-                        .lift(bind);
-            }
-        };
     }
 
     /**

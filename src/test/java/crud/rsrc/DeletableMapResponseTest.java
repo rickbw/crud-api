@@ -31,10 +31,10 @@ public class DeletableMapResponseTest extends DeletableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Object, Observable<Object>> mapper = new Func1<Object, Observable<Object>>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Observable<Object> call(final Object input) {
+            return Observable.<Object>just(RESPONSE_PREFIX + input);
         }
     };
 

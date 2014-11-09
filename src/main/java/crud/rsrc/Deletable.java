@@ -15,11 +15,9 @@
 package crud.rsrc;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import crud.spi.DeletableSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
@@ -51,77 +49,10 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Deletable<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
+    public <TO> Deletable<TO> mapResponse(
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
         return new MappingDeletable<>(this, mapper);
     }
-
-    /**
-     * Create and return a new resource that will transform and flatten the
-     * responses from this resource. Take care that the given function does
-     * not violate the idempotency requirement of
-     * {@link DeletableSpec#delete()}.
-     *
-     * If this method is called on two equal {@code Deletable}s,
-     * the results will be equal if the functions are equal. If equality
-     * behavior it important to you (for example, if you intend to keep
-     * resources in a {@code HashSet}), consider it in your function
-     * implementation.
-     */
-    public <TO> Deletable<TO> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingDeletable<>(this, mapper);
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> Deletable<TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
-    }
-
-    /**
-     * Return a resource that will transparently retry calls to
-     * {@link #delete()} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #delete()}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * If this method is called on two equal {@code Deletable}s,
-     * the results will be equal if the max retry counts are equal.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public Deletable<RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;    // no-op
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new RetryingDeletable<>(this, maxRetries);
-        }
-    }
-
-    /**
-     * Wrap this {@code Deletable} in another one that will
-     * pass all observations through a given adapter {@link Observer}, as with
-     * {@link Observable#lift(rx.Observable.Operator)}.
-     */
-    public <TO> Deletable<TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingDeletable<>(this, bind);
-    }
-
-    // TODO: Expose other Observable methods
 
     /**
      * Return a function that, when called, will call {@link #delete()}.
@@ -130,20 +61,6 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * this resource.
      */
     public Func0<Observable<RESPONSE>> toFunction() {
-        return toResourceCallable();
-    }
-
-    /**
-     * Return a {@link Callable} that delegates to {@link #delete()}.
-     * The {@code Callable} overrides {@link Object#equals(Object)},
-     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
-     * this resource.
-     */
-    public Callable<Observable<RESPONSE>> toCallable() {
-        return toResourceCallable();
-    }
-
-    private DelegateObjectMethods.Callable<Observable<RESPONSE>> toResourceCallable() {
         return new DelegateObjectMethods.Callable<Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call() {
@@ -211,78 +128,19 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
 
 
     private static final class MappingDeletable<FROM, TO>
-    extends AbstractDeletable<FROM, TO, Func1<? super FROM, ? extends TO>> {
+    extends AbstractDeletable<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingDeletable(
                 final DeletableSpec<FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
+                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> delete() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .delete()
-                    .map(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class FlatMappingDeletable<FROM, TO>
-    extends AbstractDeletable<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingDeletable(
-                final DeletableSpec<FROM> delegate,
-                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> delete() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .delete()
-                    .flatMap(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class RetryingDeletable<RESPONSE>
-    extends AbstractDeletable<RESPONSE, RESPONSE, Integer> {
-        public RetryingDeletable(
-                final DeletableSpec<RESPONSE> delegate,
-                final int maxRetries) {
-            super(delegate, maxRetries);
-            if (maxRetries <= 0) {
-                throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
-            }
-        }
-
-        @Override
-        public Observable<RESPONSE> delete() {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .delete()
-                    .retry(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-    private static final class LiftingDeletable<FROM, TO>
-    extends AbstractDeletable<FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingDeletable(
-                final DeletableSpec<FROM> delegate,
-                final Observable.Operator<TO, FROM> bind) {
-            super(delegate, bind);
-            Objects.requireNonNull(bind, "null operator");
-        }
-
-        @Override
-        public Observable<TO> delete() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .delete()
-                    .lift(super.state.getAuxiliaryState());
-            return response;
+            final Observable<FROM> response = super.state.getDelegate().delete();
+            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
+            return mapped;
         }
     }
 
