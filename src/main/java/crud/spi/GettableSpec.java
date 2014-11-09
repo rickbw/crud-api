@@ -14,6 +14,8 @@
  */
 package crud.spi;
 
+import com.google.common.base.Supplier;
+
 import rx.Observable;
 
 
@@ -31,7 +33,7 @@ import rx.Observable;
  * @see DeletableSpec
  * @see GettableProviderSpec
  */
-public interface GettableSpec<RSRC> extends Resource {
+public interface GettableSpec<RSRC> extends Resource, Supplier<Observable<RSRC>> {
 
     /**
      * Request the value(s) of this resource. Zero or more values will be
@@ -41,6 +43,7 @@ public interface GettableSpec<RSRC> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
+    @Override
     public abstract Observable<RSRC> get();
 
 }

@@ -17,9 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.GettableProviderSpec;
-import crud.spi.GettableSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -41,7 +39,7 @@ implements GettableProviderSpec<KEY, RSRC> {
     }
 
     public <R> GettableProvider<KEY, R> mapValue(
-            final Func1<? super RSRC, ? extends R> mapper) {
+            final Func1<? super Observable<RSRC>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
         final GettableProvider<KEY, R> result = new GettableProvider<KEY, R>() {
             @Override
@@ -49,20 +47,6 @@ implements GettableProviderSpec<KEY, RSRC> {
                 return outerProvider()
                         .getter(key)
                         .mapValue(mapper);
-            }
-        };
-        return result;
-    }
-
-    public <R> GettableProvider<KEY, R> flatMapValue(
-            final Func1<? super RSRC, ? extends Observable<? extends R>> mapper) {
-        Objects.requireNonNull(mapper, "null function");
-        final GettableProvider<KEY, R> result = new GettableProvider<KEY, R>() {
-            @Override
-            public Gettable<R> getter(final KEY key) {
-                return outerProvider()
-                        .getter(key)
-                        .flatMapValue(mapper);
             }
         };
         return result;
@@ -80,52 +64,6 @@ implements GettableProviderSpec<KEY, RSRC> {
             }
         };
         return result;
-    }
-
-    /**
-     * Return a resource provider, the resource from which will transparently
-     * retry calls to {@link GettableSpec#get()} that throw, as with
-     * {@link Observable#retry(long)}. Specifically, any {@link Observable}
-     * returned by {@link GettableSpec#get()} will re-subscribe up to
-     * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
-     * called, rather than propagating that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public GettableProvider<KEY, RSRC> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;    // no-op
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new GettableProvider<KEY, RSRC>() {
-                @Override
-                public Gettable<RSRC> getter(final KEY key) {
-                    return outerProvider()
-                            .getter(key)
-                            .retry(maxRetries);
-                }
-            };
-        }
-    }
-
-    public <TO> GettableProvider<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
-        Objects.requireNonNull(bind, "null operator");
-        return new GettableProvider<KEY, TO>() {
-            @Override
-            public Gettable<TO> getter(final KEY key) {
-                return outerProvider()
-                        .getter(key)
-                        .lift(bind);
-            }
-        };
     }
 
     public Func1<KEY, Gettable<RSRC>> toFunction() {

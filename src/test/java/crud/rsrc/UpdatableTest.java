@@ -90,8 +90,8 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
         final Updatable<Object, Object> resource2 = createDefaultResource();
 
         // when:
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function1 = resource1.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function2 = resource2.toFunction();
 
         // then:
         // Resources should be equal, so functions too:
@@ -106,8 +106,8 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
         // given:
         final Updatable<Object, Object> resource1 = createDefaultResource();
         final Updatable<Object, Object> resource2 = createDefaultResource();
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function1 = resource1.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function2 = resource2.toFunction();
 
         // when:
         final String string1 = function1.toString();
@@ -122,8 +122,8 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
         // given:
         final Updatable<Object, Object> resource1 = createDefaultResource();
         final Updatable<Object, Object> resource2 = createDefaultResource();
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function1 = resource1.toFunction();
+        final Func1<Observable<Object>, Observable<Object>> function2 = resource2.toFunction();
 
         // when:
         final int hash1 = function1.hashCode();

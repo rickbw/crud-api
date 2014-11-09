@@ -143,11 +143,11 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func1<RSRC, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
+    public Func1<Observable<RSRC>, Observable<RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<Observable<RSRC>, Observable<RESPONSE>>(this) {
             @Override
-            public Observable<RESPONSE> call(final RSRC newValue) {
-                return Settable.this.set(Observable.just(newValue));
+            public Observable<RESPONSE> call(final Observable<RSRC> newValues) {
+                return Settable.this.set(newValues);
             }
         };
     }

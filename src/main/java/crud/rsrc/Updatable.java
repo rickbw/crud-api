@@ -24,11 +24,6 @@ import rx.functions.Func1;
 
 /**
  * A set of fluent transformations on {@link UpdatableSpec}s.
- *
- * Note that this class lacks a {@code retry} operation, as in e.g.
- * {@link Gettable#retry(int)}. This is because updates are not
- * idempotent; hence, retries are not inherently retriable. Applications
- * must handle retry logic, if any, themselves.
  */
 public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDATE, RESPONSE> {
 
@@ -117,11 +112,11 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func1<UPDATE, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<UPDATE, Observable<RESPONSE>>(this) {
+    public Func1<Observable<UPDATE>, Observable<RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<Observable<UPDATE>, Observable<RESPONSE>>(this) {
             @Override
-            public Observable<RESPONSE> call(final UPDATE update) {
-                return Updatable.this.update(Observable.just(update));
+            public Observable<RESPONSE> call(final Observable<UPDATE> update) {
+                return Updatable.this.update(update);
             }
         };
     }

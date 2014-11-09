@@ -28,10 +28,10 @@ extends GettableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private final Func1<Object, Observable<Object>> mapper = new Func1<Object, Observable<Object>>() {
         @Override
-        public String call(final Object response) {
-            return PREFIX + response;
+        public Observable<Object> call(final Object response) {
+            return Observable.<Object>just(PREFIX + response);
         }
     };
 

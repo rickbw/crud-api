@@ -52,9 +52,8 @@ public final class TextFileExample {
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
         final Gettable<String> inputLines = files.getter(inputFile);
         final Updatable<String, Void> outputLines = files.updater(outputFile);
-        final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
-                inputLines,
-                lineToJson,
+        final ResourceMerger<Void> merger = ResourceMerger.withUpdater(
+                inputLines.<String>mapValue(lineToJson),
                 outputLines);
 
         System.out.println("Transforming from " + inputFile + " into " + outputFile + "...");
@@ -64,22 +63,27 @@ public final class TextFileExample {
     }
 
 
-    private static final class LineToJson implements Func1<String, String> {
+    private static final class LineToJson implements Func1<Observable<String>, Observable<String>> {
         @Override
-        public String call(final String line) {
-            final StringBuilder buf = new StringBuilder("{ ");
-            final StringTokenizer tok = new StringTokenizer(line);
-            while (tok.hasMoreTokens()) {
-                final String keyValue = tok.nextToken();
-                final String[] keyValueElems = keyValue.split("=");
-                if (keyValueElems.length == 2) {
-                    final String key = keyValueElems[0];
-                    final String value = keyValueElems[1];
-                    buf.append(key).append(": \"").append(value).append("\",\n  ");
+        public Observable<String> call(final Observable<String> lineObs) {
+            return lineObs.map(new Func1<String, String>() {
+                @Override
+                public String call(final String line) {
+                    final StringBuilder buf = new StringBuilder("{ ");
+                    final StringTokenizer tok = new StringTokenizer(line);
+                    while (tok.hasMoreTokens()) {
+                        final String keyValue = tok.nextToken();
+                        final String[] keyValueElems = keyValue.split("=");
+                        if (keyValueElems.length == 2) {
+                            final String key = keyValueElems[0];
+                            final String value = keyValueElems[1];
+                            buf.append(key).append(": \"").append(value).append("\",\n  ");
+                        }
+                    }
+                    buf.append('}');
+                    return buf.toString();
                 }
-            }
-            buf.append('}');
-            return buf.toString();
+            });
         }
     }
 
