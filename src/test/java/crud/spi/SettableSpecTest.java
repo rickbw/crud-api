@@ -26,7 +26,7 @@ import rx.Observable;
  * {@link SettableSpec}s. It tests basic contracts that should hold true
  * for all implementations.
  */
-public abstract class WritableSpecTest<RSRC, RESP> extends ResourceTest {
+public abstract class SettableSpecTest<RSRC, RESP> extends ResourceTest {
 
     /**
      * This base class can't test true idempotence, because it can't observe

@@ -101,7 +101,7 @@ public class DeletableProviderTest {
     }
 
     @Test
-    public void fromFluentProviderReturnsSameObject() {
+    public void fromProviderReturnsSameObject() {
         // given:
         final DeletableProvider<Object, Object> origProvider = createDefaultProvider();
 

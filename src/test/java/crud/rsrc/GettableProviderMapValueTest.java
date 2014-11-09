@@ -14,7 +14,7 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -23,8 +23,8 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class WritableProviderMapResponseTest
-extends WritableProviderTest {
+public class GettableProviderMapValueTest
+extends GettableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -39,25 +39,22 @@ extends WritableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<String> value = Observable.just("Hello");
-        final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.set(value)).thenReturn(Observable.<Object>just(origResponse));
-        final Settable<Object, Object> resource = provider.setter(key);
-        final Observable<Object> response = resource.set(value);
+        when(super.mockResource.get()).thenReturn(Observable.<Object>just("world"));
+        final Gettable<Object> resource = provider.getter(key);
+        final Observable<Object> response = resource.get();
 
         // then:
         final String responseString = (String) response.toBlocking().single();
-        assertEquals(mappedResponse, responseString);
+        assertTrue(responseString.startsWith(PREFIX));
     }
 
     @Override
-    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>mapResponse(mapper);
+    protected GettableProvider<Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().<Object>mapValue(mapper);
     }
 
 }

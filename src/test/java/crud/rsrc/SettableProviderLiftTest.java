@@ -27,10 +27,10 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link GettableProvider} that
+ * Tests the nested subclass of {@link SettableProvider} that
  * handles lifting subscriptions.
  */
-public class ReadableProviderLiftTest extends ReadableProviderTest {
+public class SettableProviderLiftTest extends SettableProviderTest {
 
     private final AtomicBoolean lifterCalled = new AtomicBoolean(false);
     private final Observable.Operator<Object, Object> lifter = new Observable.Operator<Object, Object>() {
@@ -45,14 +45,14 @@ public class ReadableProviderLiftTest extends ReadableProviderTest {
     @Test
     public void lifterCalled() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String expectedResponseValue = "Response!";
+        final Observable<String> expectedResponseValue = Observable.just("Response!");
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Gettable<Object> resource = provider.getter(key);
-        final Observable<Object> response = resource.get();
+        when(super.mockResource.set(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
+        final Settable<Object, Object> resource = provider.setter(key);
+        final Observable<Object> response = resource.set(expectedResponseValue);
 
         // then:
         final Object actualResponseValue = response.toBlocking().first();
@@ -62,7 +62,7 @@ public class ReadableProviderLiftTest extends ReadableProviderTest {
     }
 
     @Override
-    protected GettableProvider<Object, Object> createDefaultProvider() {
+    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().lift(this.lifter);
     }
 

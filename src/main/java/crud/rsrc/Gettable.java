@@ -37,7 +37,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
         if (resource instanceof Gettable<?>) {
             return (Gettable<RSRC>) resource;
         } else {
-            return new DelegatingReadableResource<>(resource);
+            return new DelegatingGettable<>(resource);
         }
     }
 
@@ -52,7 +52,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      * implementation.
      */
     public <TO> Gettable<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
-        return new MappingReadableResource<>(this, mapper);
+        return new MappingGettable<>(this, mapper);
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      */
     public <TO> Gettable<TO> flatMapValue(
             final Func1<? super RSRC, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingReadableResource<>(this, mapper);
+        return new FlatMappingGettable<>(this, mapper);
     }
 
     /**
@@ -99,7 +99,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new RetryingReadableResource<>(this, maxRetries);
+            return new RetryingGettable<>(this, maxRetries);
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
     public <TO> Gettable<TO> lift(final Observable.Operator<TO, RSRC> bind) {
-        return new LiftingReadableResource<>(this, bind);
+        return new LiftingGettable<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
@@ -149,11 +149,11 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentReadableResource<FROM, TO, T>
+    private static abstract class AbstractGettable<FROM, TO, T>
     extends Gettable<TO> {
         protected final ResourceStateMixin<GettableSpec<FROM>, T> state;
 
-        protected AbstractFluentReadableResource(
+        protected AbstractGettable(
                 final GettableSpec<FROM> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
@@ -170,7 +170,7 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentReadableResource<?, ?, ?> other = (AbstractFluentReadableResource<?, ?, ?>) obj;
+            final AbstractGettable<?, ?, ?> other = (AbstractGettable<?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -186,9 +186,9 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      * Gettable itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
-    private static final class DelegatingReadableResource<RSRC>
-    extends AbstractFluentReadableResource<RSRC, RSRC, Void> {
-        public DelegatingReadableResource(final GettableSpec<RSRC> delegate) {
+    private static final class DelegatingGettable<RSRC>
+    extends AbstractGettable<RSRC, RSRC, Void> {
+        public DelegatingGettable(final GettableSpec<RSRC> delegate) {
             super(delegate, null);
         }
 
@@ -201,9 +201,9 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
     }
 
 
-    private static final class MappingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
-        public MappingReadableResource(
+    private static final class MappingGettable<FROM, TO>
+    extends AbstractGettable<FROM, TO, Func1<? super FROM, ? extends TO>> {
+        public MappingGettable(
                 final GettableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
@@ -220,9 +220,9 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
     }
 
 
-    private static final class FlatMappingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingReadableResource(
+    private static final class FlatMappingGettable<FROM, TO>
+    extends AbstractGettable<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingGettable(
                 final GettableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
@@ -239,9 +239,9 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
     }
 
 
-    private static final class RetryingReadableResource<RSRC>
-    extends AbstractFluentReadableResource<RSRC, RSRC, Integer>{
-        public RetryingReadableResource(
+    private static final class RetryingGettable<RSRC>
+    extends AbstractGettable<RSRC, RSRC, Integer>{
+        public RetryingGettable(
                 final GettableSpec<RSRC> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
@@ -260,9 +260,9 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
     }
 
 
-    private static final class LiftingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingReadableResource(
+    private static final class LiftingGettable<FROM, TO>
+    extends AbstractGettable<FROM, TO, Observable.Operator<TO, FROM>> {
+        public LiftingGettable(
                 final GettableSpec<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);

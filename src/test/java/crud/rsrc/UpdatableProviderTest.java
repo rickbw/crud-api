@@ -101,7 +101,7 @@ public class UpdatableProviderTest {
     }
 
     @Test
-    public void fromFluentProviderReturnsSameObject() {
+    public void fromProviderReturnsSameObject() {
         // given:
         final UpdatableProvider<Object, Object, Object> origProvider = createDefaultProvider();
 

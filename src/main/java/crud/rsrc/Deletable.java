@@ -37,7 +37,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
         if (resource instanceof Deletable<?>) {
             return (Deletable<RESPONSE>) resource;
         } else {
-            return new DelegatingDeletableResource<>(resource);
+            return new DelegatingDeletable<>(resource);
         }
     }
 
@@ -52,7 +52,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * implementation.
      */
     public <TO> Deletable<TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
-        return new MappingDeletableResource<>(this, mapper);
+        return new MappingDeletable<>(this, mapper);
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      */
     public <TO> Deletable<TO> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingDeletableResource<>(this, mapper);
+        return new FlatMappingDeletable<>(this, mapper);
     }
 
     /**
@@ -108,7 +108,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new RetryingDeletableResource<>(this, maxRetries);
+            return new RetryingDeletable<>(this, maxRetries);
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
     public <TO> Deletable<TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingDeletableResource<>(this, bind);
+        return new LiftingDeletable<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
@@ -158,11 +158,11 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentDeletableResource<FROM, TO, T>
+    private static abstract class AbstractDeletable<FROM, TO, T>
     extends Deletable<TO> {
         protected final ResourceStateMixin<DeletableSpec<FROM>, T> state;
 
-        protected AbstractFluentDeletableResource(
+        protected AbstractDeletable(
                 final DeletableSpec<FROM> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
@@ -179,7 +179,7 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentDeletableResource<?, ?, ?> other = (AbstractFluentDeletableResource<?, ?, ?>) obj;
+            final AbstractDeletable<?, ?, ?> other = (AbstractDeletable<?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -195,9 +195,9 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * Deletable itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
-    private static final class DelegatingDeletableResource<RSRC>
-    extends AbstractFluentDeletableResource<RSRC, RSRC, Void> {
-        public DelegatingDeletableResource(final DeletableSpec<RSRC> delegate) {
+    private static final class DelegatingDeletable<RSRC>
+    extends AbstractDeletable<RSRC, RSRC, Void> {
+        public DelegatingDeletable(final DeletableSpec<RSRC> delegate) {
             super(delegate, null);
         }
 
@@ -210,9 +210,9 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
     }
 
 
-    private static final class MappingDeletableResource<FROM, TO>
-    extends AbstractFluentDeletableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
-        public MappingDeletableResource(
+    private static final class MappingDeletable<FROM, TO>
+    extends AbstractDeletable<FROM, TO, Func1<? super FROM, ? extends TO>> {
+        public MappingDeletable(
                 final DeletableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
@@ -229,9 +229,9 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
     }
 
 
-    private static final class FlatMappingDeletableResource<FROM, TO>
-    extends AbstractFluentDeletableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingDeletableResource(
+    private static final class FlatMappingDeletable<FROM, TO>
+    extends AbstractDeletable<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingDeletable(
                 final DeletableSpec<FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
@@ -248,9 +248,9 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
     }
 
 
-    private static final class RetryingDeletableResource<RESPONSE>
-    extends AbstractFluentDeletableResource<RESPONSE, RESPONSE, Integer> {
-        public RetryingDeletableResource(
+    private static final class RetryingDeletable<RESPONSE>
+    extends AbstractDeletable<RESPONSE, RESPONSE, Integer> {
+        public RetryingDeletable(
                 final DeletableSpec<RESPONSE> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
@@ -268,9 +268,9 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
         }
     }
 
-    private static final class LiftingDeletableResource<FROM, TO>
-    extends AbstractFluentDeletableResource<FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingDeletableResource(
+    private static final class LiftingDeletable<FROM, TO>
+    extends AbstractDeletable<FROM, TO, Observable.Operator<TO, FROM>> {
+        public LiftingDeletable(
                 final DeletableSpec<FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);

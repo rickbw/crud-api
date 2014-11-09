@@ -14,7 +14,7 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -25,18 +25,16 @@ import rx.functions.Func1;
 
 /**
  * Tests the nested subclass of {@link Gettable} that handles
- * transforming responses.
+ * transforming resource states.
  */
-public class ReadableProviderFlatMapValueTest
-extends ReadableProviderTest {
+public class GettableMapValueTest extends GettableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, Observable<String>> mapper = new Func1<Object, Observable<String>>() {
+    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
         @Override
-        public Observable<String> call(final Object input) {
-            final String transformed = RESPONSE_PREFIX + input;
-            return Observable.just(transformed);
+        public String call(final Object input) {
+            return RESPONSE_PREFIX + input;
         }
     };
 
@@ -44,24 +42,20 @@ extends ReadableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
-        final Object key = createDefaultKey();
-        final String origResponse = "Hello, World";
-        final String mappedResponse = mapper.call(origResponse).toBlocking().first();
+        final Gettable<Object> resource = createDefaultResource();
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>just(origResponse));
-        final Gettable<Object> resource = provider.getter(key);
+        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just("world"));
         final Observable<Object> response = resource.get();
 
         // then:
         final Object responseValue = response.toBlocking().first();
-        assertEquals(mappedResponse, responseValue);
+        assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
     }
 
     @Override
-    protected GettableProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>flatMapValue(mapper);
+    protected Gettable<Object> createDefaultResource() {
+        return super.createDefaultResource().<Object>mapValue(mapper);
     }
 
 }

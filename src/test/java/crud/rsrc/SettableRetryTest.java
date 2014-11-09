@@ -29,7 +29,7 @@ import rx.Observable;
  * Tests the nested subclass of {@link Settable} that handles
  * retries.
  */
-public class WritableRetryTest extends WritableTest {
+public class SettableRetryTest extends SettableTest {
 
     private static final int NUM_RETRIES = 2;
 //    private static final String SUCCESS_RESPONSE = "Hello, World";

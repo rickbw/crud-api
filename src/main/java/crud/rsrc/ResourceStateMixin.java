@@ -21,7 +21,7 @@ import rx.functions.Func1;
 
 
 /**
- * Maintains state on behalf of the {@code Fluent*Resource} classes in this
+ * Maintains state on behalf of the {@code Resource} classes in this
  * package, in order to minimize repeated boilerplate code.
  */
 /*package*/ final class ResourceStateMixin<R extends Resource, T> {

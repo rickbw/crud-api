@@ -27,7 +27,7 @@ import rx.functions.Func1;
  * Tests the nested subclass of {@link Gettable} that handles
  * transforming responses.
  */
-public class ReadableFlatMapValueTest extends ReadableTest {
+public class GettableFlatMapValueTest extends GettableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 

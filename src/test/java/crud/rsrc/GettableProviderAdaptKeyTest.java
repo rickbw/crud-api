@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import rx.functions.Func1;
 
 
-public class ReadableProviderAdaptKeyTest
-extends ReadableProviderTest {
+public class GettableProviderAdaptKeyTest
+extends GettableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 

@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.spi.SettableSpec;
-import crud.spi.WritableSpecTest;
+import crud.spi.SettableSpecTest;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -36,7 +36,7 @@ import rx.functions.Func1;
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
-public class WritableTest extends WritableSpecTest<Object, Object> {
+public class SettableTest extends SettableSpecTest<Object, Object> {
 
     protected final SettableSpec<Object, Object> mockDelegate = mock(SettableSpec.class);
 
@@ -71,7 +71,7 @@ public class WritableTest extends WritableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromResourceReturnsSameObject() {
         // given:
         final Settable<Object, Object> origRsrc = createDefaultResource();
 

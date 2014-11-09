@@ -27,10 +27,10 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link SettableProvider} that
- * handles lifting subscriptions.
+ * Tests the nested subclass of {@link Gettable} that handles
+ * lifting subscriptions.
  */
-public class WritableProviderLiftTest extends WritableProviderTest {
+public class GettableLiftTest extends GettableTest {
 
     private final AtomicBoolean lifterCalled = new AtomicBoolean(false);
     private final Observable.Operator<Object, Object> lifter = new Observable.Operator<Object, Object>() {
@@ -45,25 +45,23 @@ public class WritableProviderLiftTest extends WritableProviderTest {
     @Test
     public void lifterCalled() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Object key = createDefaultKey();
-        final Observable<String> expectedResponseValue = Observable.just("Response!");
+        final Gettable<Object> resource = createDefaultResource();
+        final String expectedResourceValue = "Response!";
 
         // when:
-        when(super.mockResource.set(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final Settable<Object, Object> resource = provider.setter(key);
-        final Observable<Object> response = resource.set(expectedResponseValue);
+        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just(expectedResourceValue));
+        final Observable<Object> response = resource.get();
 
         // then:
-        final Object actualResponseValue = response.toBlocking().first();
+        final Object actualResourceValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
-        assertEquals(expectedResponseValue, actualResponseValue);
+        assertEquals(expectedResourceValue, actualResourceValue);
         assertTrue(this.lifterCalled.get());    // after getting value
     }
 
     @Override
-    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().lift(this.lifter);
+    protected Gettable<Object> createDefaultResource() {
+        return super.createDefaultResource().lift(this.lifter);
     }
 
 }

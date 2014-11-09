@@ -41,7 +41,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         if (resource instanceof Updatable<?, ?>) {
             return (Updatable<UPDATE, RESPONSE>) resource;
         } else {
-            return new DelegatingUpdatableResource<>(resource);
+            return new DelegatingUpdatable<>(resource);
         }
     }
 
@@ -57,7 +57,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      */
     public <TO> Updatable<UPDATE, TO> mapResponse(
             final Func1<? super RESPONSE, ? extends TO> mapper) {
-        return new MappingUpdatableResource<>(this, mapper);
+        return new MappingUpdatable<>(this, mapper);
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      */
     public <TO> Updatable<UPDATE, TO> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingUpdatableResource<>(this, mapper);
+        return new FlatMappingUpdatable<>(this, mapper);
     }
 
     /**
@@ -97,7 +97,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      */
     public <TO> Updatable<TO, RESPONSE> adaptUpdate(
             final Func1<? super TO, ? extends UPDATE> adapter) {
-        return new AdaptingUpdatableResource<>(this, adapter);
+        return new AdaptingUpdatable<>(this, adapter);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
     public <TO> Updatable<UPDATE, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingUpdatableResource<>(this, bind);
+        return new LiftingUpdatable<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
@@ -132,11 +132,11 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentUpdatableResource<FROMU, TOU, FROMR, TOR, T>
+    private static abstract class AbstractUpdatable<FROMU, TOU, FROMR, TOR, T>
     extends Updatable<TOU, TOR> {
         protected final ResourceStateMixin<UpdatableSpec<FROMU, FROMR>, T> state;
 
-        protected AbstractFluentUpdatableResource(
+        protected AbstractUpdatable(
                 final UpdatableSpec<FROMU, FROMR> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
@@ -153,7 +153,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentUpdatableResource<?, ?, ?, ?, ?> other = (AbstractFluentUpdatableResource<?, ?, ?, ?, ?>) obj;
+            final AbstractUpdatable<?, ?, ?, ?, ?> other = (AbstractUpdatable<?, ?, ?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -169,9 +169,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * Updatable itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
-    private static final class DelegatingUpdatableResource<UPDATE, RESPONSE>
-    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, RESPONSE, RESPONSE, Void> {
-        public DelegatingUpdatableResource(final UpdatableSpec<UPDATE, RESPONSE> delegate) {
+    private static final class DelegatingUpdatable<UPDATE, RESPONSE>
+    extends AbstractUpdatable<UPDATE, UPDATE, RESPONSE, RESPONSE, Void> {
+        public DelegatingUpdatable(final UpdatableSpec<UPDATE, RESPONSE> delegate) {
             super(delegate, null);
         }
 
@@ -184,9 +184,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
     }
 
 
-    private static final class MappingUpdatableResource<UPDATE, FROM, TO>
-    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends TO>> {
-        private MappingUpdatableResource(
+    private static final class MappingUpdatable<UPDATE, FROM, TO>
+    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends TO>> {
+        private MappingUpdatable(
                 final UpdatableSpec<UPDATE, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
@@ -203,9 +203,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
     }
 
 
-    private static final class FlatMappingUpdatableResource<UPDATE, FROM, TO>
-    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingUpdatableResource(
+    private static final class FlatMappingUpdatable<UPDATE, FROM, TO>
+    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingUpdatable(
                 final UpdatableSpec<UPDATE, FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
@@ -222,9 +222,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
     }
 
 
-    private static final class AdaptingUpdatableResource<FROM, TO, RESPONSE>
-    extends AbstractFluentUpdatableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
-        private AdaptingUpdatableResource(
+    private static final class AdaptingUpdatable<FROM, TO, RESPONSE>
+    extends AbstractUpdatable<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
+        private AdaptingUpdatable(
                 final UpdatableSpec<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
             super(delegate, adapter);
@@ -241,9 +241,9 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
     }
 
 
-    private static final class LiftingUpdatableResource<UPDATE, FROM, TO>
-    extends AbstractFluentUpdatableResource<UPDATE, UPDATE, FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingUpdatableResource(
+    private static final class LiftingUpdatable<UPDATE, FROM, TO>
+    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Observable.Operator<TO, FROM>> {
+        public LiftingUpdatable(
                 final UpdatableSpec<UPDATE, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);

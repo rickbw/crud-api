@@ -27,7 +27,7 @@ import rx.Observable;
  * {@link GettableSpec}s. It tests basic contracts that should hold true
  * for all implementations.
  */
-public abstract class ReadableSpecTest<RSRC> extends ResourceTest {
+public abstract class GettableSpecTest<RSRC> extends ResourceTest {
 
     @Test
     public void getsAreIdempotent() {

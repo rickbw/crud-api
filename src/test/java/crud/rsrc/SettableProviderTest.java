@@ -39,7 +39,7 @@ import rx.functions.Func1;
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class WritableProviderTest {
+public class SettableProviderTest {
 
     protected final SettableSpec<Object, Object> mockResource = mock(SettableSpec.class);
 
@@ -101,7 +101,7 @@ public class WritableProviderTest {
     }
 
     @Test
-    public void fromFluentProviderReturnsSameObject() {
+    public void fromProviderReturnsSameObject() {
         // given:
         final SettableProvider<Object, Object, Object> origProvider = createDefaultProvider();
 

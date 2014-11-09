@@ -27,10 +27,10 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link Gettable} that handles
- * lifting subscriptions.
+ * Tests the nested subclass of {@link GettableProvider} that
+ * handles lifting subscriptions.
  */
-public class ReadableLiftTest extends ReadableTest {
+public class GettableProviderLiftTest extends GettableProviderTest {
 
     private final AtomicBoolean lifterCalled = new AtomicBoolean(false);
     private final Observable.Operator<Object, Object> lifter = new Observable.Operator<Object, Object>() {
@@ -45,23 +45,25 @@ public class ReadableLiftTest extends ReadableTest {
     @Test
     public void lifterCalled() {
         // given:
-        final Gettable<Object> resource = createDefaultResource();
-        final String expectedResourceValue = "Response!";
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+        final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just(expectedResourceValue));
+        when(super.mockResource.get()).thenReturn(Observable.<Object>just(expectedResponseValue));
+        final Gettable<Object> resource = provider.getter(key);
         final Observable<Object> response = resource.get();
 
         // then:
-        final Object actualResourceValue = response.toBlocking().first();
+        final Object actualResponseValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
-        assertEquals(expectedResourceValue, actualResourceValue);
+        assertEquals(expectedResponseValue, actualResponseValue);
         assertTrue(this.lifterCalled.get());    // after getting value
     }
 
     @Override
-    protected Gettable<Object> createDefaultResource() {
-        return super.createDefaultResource().lift(this.lifter);
+    protected GettableProvider<Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().lift(this.lifter);
     }
 
 }

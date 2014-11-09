@@ -71,7 +71,7 @@ public class DeletableTest extends DeletableSpecTest<Object> {
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromResourceReturnsSameObject() {
         // given:
         final Deletable<Object> origRsrc = createDefaultResource();
 

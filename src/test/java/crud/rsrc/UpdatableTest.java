@@ -72,7 +72,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromResourceReturnsSameObject() {
         // given:
         final Updatable<Object, Object> origRsrc = createDefaultResource();
 

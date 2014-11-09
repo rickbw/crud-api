@@ -36,7 +36,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         if (resource instanceof Settable<?, ?>) {
             return (Settable<RSRC, RESPONSE>) resource;
         } else {
-            return new DelegatingWritableResource<>(resource);
+            return new DelegatingSettable<>(resource);
         }
     }
 
@@ -51,7 +51,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * implementation.
      */
     public <TO> Settable<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
-        return new MappingWritableResource<>(this, mapper);
+        return new MappingSettable<>(this, mapper);
     }
 
     /**
@@ -68,7 +68,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      */
     public <TO> Settable<RSRC, TO> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingWritableResource<>(this, mapper);
+        return new FlatMappingSettable<>(this, mapper);
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      */
     public <TO> Settable<TO, RESPONSE> adaptNewValue(
             final Func1<? super TO, ? extends RSRC> adapter) {
-        return new AdaptingWritableResource<>(this, adapter);
+        return new AdaptingSettable<>(this, adapter);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new RetryingWritableResource<>(this, maxRetries);
+            return new RetryingSettable<>(this, maxRetries);
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * {@link Observable#lift(rx.Observable.Operator)}.
      */
     public <TO> Settable<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingWritableResource<>(this, bind);
+        return new LiftingSettable<>(this, bind);
     }
 
     // TODO: Expose other Observable methods
@@ -158,11 +158,11 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentWritableResource<FROMRS, TORS, FROMRP, TORP, T>
+    private static abstract class AbstractSettable<FROMRS, TORS, FROMRP, TORP, T>
     extends Settable<TORS, TORP> {
         protected final ResourceStateMixin<SettableSpec<FROMRS, FROMRP>, T> state;
 
-        protected AbstractFluentWritableResource(
+        protected AbstractSettable(
                 final SettableSpec<FROMRS, FROMRP> delegate,
                 final T auxiliary) {
             this.state = new ResourceStateMixin<>(delegate, auxiliary);
@@ -179,7 +179,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentWritableResource<?, ?, ?, ?, ?> other = (AbstractFluentWritableResource<?, ?, ?, ?, ?>) obj;
+            final AbstractSettable<?, ?, ?, ?, ?> other = (AbstractSettable<?, ?, ?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -190,9 +190,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class DelegatingWritableResource<RSRC, RESPONSE>
-    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
-        public DelegatingWritableResource(final SettableSpec<RSRC, RESPONSE> delegate) {
+    private static final class DelegatingSettable<RSRC, RESPONSE>
+    extends AbstractSettable<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
+        public DelegatingSettable(final SettableSpec<RSRC, RESPONSE> delegate) {
             super(delegate, null);
         }
 
@@ -205,9 +205,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class MappingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
-        public MappingWritableResource(
+    private static final class MappingSettable<RSRC, FROM, TO>
+    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
+        public MappingSettable(
                 final SettableSpec<RSRC, FROM> delegate,
                 final Func1<? super FROM, ? extends TO> mapper) {
             super(delegate, mapper);
@@ -224,9 +224,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class FlatMappingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingWritableResource(
+    private static final class FlatMappingSettable<RSRC, FROM, TO>
+    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
+        private FlatMappingSettable(
                 final SettableSpec<RSRC, FROM> delegate,
                 final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
             super(delegate, mapper);
@@ -243,9 +243,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class AdaptingWritableResource<FROM, TO, RESPONSE>
-    extends AbstractFluentWritableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
-        private AdaptingWritableResource(
+    private static final class AdaptingSettable<FROM, TO, RESPONSE>
+    extends AbstractSettable<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
+        private AdaptingSettable(
                 final SettableSpec<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {
             super(delegate, adapter);
@@ -262,9 +262,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class RetryingWritableResource<RSRC, RESPONSE>
-    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
-        public RetryingWritableResource(
+    private static final class RetryingSettable<RSRC, RESPONSE>
+    extends AbstractSettable<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
+        public RetryingSettable(
                 final SettableSpec<RSRC, RESPONSE> delegate,
                 final int maxRetries) {
             super(delegate, maxRetries);
@@ -283,9 +283,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
     }
 
 
-    private static final class LiftingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingWritableResource(
+    private static final class LiftingSettable<RSRC, FROM, TO>
+    extends AbstractSettable<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
+        public LiftingSettable(
                 final SettableSpec<RSRC, FROM> delegate,
                 final Observable.Operator<TO, FROM> bind) {
             super(delegate, bind);

@@ -14,18 +14,12 @@
  */
 package crud.rsrc;
 
-import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.verify;
-
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import rx.Observable;
 import rx.functions.Func1;
 
 
-public class WritableProviderAdaptNewValueTest
-extends WritableProviderTest {
+public class SettableProviderAdaptKeyTest
+extends SettableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -37,28 +31,38 @@ extends WritableProviderTest {
     };
 
 
-    @Test
-    public void passAdaptedValueToResource() {
+    @Override
+    public void fluentProviderCallsDelegate() {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Object key = createDefaultKey();
-        final Observable<String> origValue = Observable.just("World!");
-        final Observable<String> adaptedValue = origValue.map(adapter);
+        final Object origKey = createDefaultKey();
+        final String transformedKey = adapter.call(origKey);
 
         // when:
-        final Settable<Object, Object> resource = provider.setter(key);
-        resource.set(origValue);
+        provider.setter(origKey);
 
         // then:
-        @SuppressWarnings("rawtypes")
-        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
-        verify(super.mockResource).set(captor.capture());
-        assertObservablesEqual(adaptedValue, adaptedValue);
+        verify(this.mockProvider).setter(transformedKey);
+    }
+
+    @Override
+    public void functionCallsDelegate() {
+        // given:
+        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Settable<Object, Object>> function = provider.toFunction();
+        final Object origKey = createDefaultKey();
+        final String transformedKey = adapter.call(origKey);
+
+        // when:
+        function.call(origKey);
+
+        // then:
+        verify(this.mockProvider).setter(transformedKey);
     }
 
     @Override
     protected SettableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>adaptNewValue(adapter);
+        return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 
 }

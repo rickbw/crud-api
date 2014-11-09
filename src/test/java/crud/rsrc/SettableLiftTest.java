@@ -31,7 +31,7 @@ import rx.Subscriber;
  * Tests the nested subclass of {@link Settable} that handles
  * lifting subscriptions.
  */
-public class WritableLiftTest extends WritableTest {
+public class SettableLiftTest extends SettableTest {
 
     private final AtomicBoolean lifterCalled = new AtomicBoolean(false);
     private final Observable.Operator<Object, Object> lifter = new Observable.Operator<Object, Object>() {

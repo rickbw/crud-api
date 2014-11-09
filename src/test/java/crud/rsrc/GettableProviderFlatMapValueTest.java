@@ -19,23 +19,24 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Settable;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Settable} that handles
+ * Tests the nested subclass of {@link Gettable} that handles
  * transforming responses.
  */
-public class WritableMapResponseTest extends WritableTest {
+public class GettableProviderFlatMapValueTest
+extends GettableProviderTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Object, Observable<String>> mapper = new Func1<Object, Observable<String>>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Observable<String> call(final Object input) {
+            final String transformed = RESPONSE_PREFIX + input;
+            return Observable.just(transformed);
         }
     };
 
@@ -43,14 +44,15 @@ public class WritableMapResponseTest extends WritableTest {
     @Test
     public void transformationApplied() {
         // given:
-        final Settable<Object, Object> resource = createDefaultResource();
-        final Observable<Object> newValue = createDefaultResourceState();
-        final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse);
+        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final Object key = createDefaultKey();
+        final String origResponse = "Hello, World";
+        final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
-        when(super.mockDelegate.set(newValue)).thenReturn(Observable.<Object>just(origResponse));
-        final Observable<Object> response = resource.set(newValue);
+        when(super.mockResource.get()).thenReturn(Observable.<Object>just(origResponse));
+        final Gettable<Object> resource = provider.getter(key);
+        final Observable<Object> response = resource.get();
 
         // then:
         final Object responseValue = response.toBlocking().first();
@@ -58,8 +60,8 @@ public class WritableMapResponseTest extends WritableTest {
     }
 
     @Override
-    protected Settable<Object, Object> createDefaultResource() {
-        return super.createDefaultResource().<Object>mapResponse(mapper);
+    protected GettableProvider<Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().<Object>flatMapValue(mapper);
     }
 
 }

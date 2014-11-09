@@ -14,20 +14,21 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
+import crud.rsrc.Settable;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link Gettable} that handles
- * transforming resource states.
+ * Tests the nested subclass of {@link Settable} that handles
+ * transforming responses.
  */
-public class ReadableMapValueTest extends ReadableTest {
+public class SettableMapResponseTest extends SettableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
@@ -42,20 +43,23 @@ public class ReadableMapValueTest extends ReadableTest {
     @Test
     public void transformationApplied() {
         // given:
-        final Gettable<Object> resource = createDefaultResource();
+        final Settable<Object, Object> resource = createDefaultResource();
+        final Observable<Object> newValue = createDefaultResourceState();
+        final String origResponse = "world";
+        final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just("world"));
-        final Observable<Object> response = resource.get();
+        when(super.mockDelegate.set(newValue)).thenReturn(Observable.<Object>just(origResponse));
+        final Observable<Object> response = resource.set(newValue);
 
         // then:
         final Object responseValue = response.toBlocking().first();
-        assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
+        assertEquals(mappedResponse, responseValue);
     }
 
     @Override
-    protected Gettable<Object> createDefaultResource() {
-        return super.createDefaultResource().<Object>mapValue(mapper);
+    protected Settable<Object, Object> createDefaultResource() {
+        return super.createDefaultResource().<Object>mapResponse(mapper);
     }
 
 }

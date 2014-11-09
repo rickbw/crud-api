@@ -23,20 +23,15 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-/**
- * Tests the nested subclass of {@link Settable} that handles
- * transforming responses.
- */
-public class WritableProviderFlatMapResponseTest
-extends WritableProviderTest {
+public class SettableProviderMapResponseTest
+extends SettableProviderTest {
 
-    private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
+    private static final String PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, Observable<String>> mapper = new Func1<Object, Observable<String>>() {
+    private final Func1<Object, String> mapper = new Func1<Object, String>() {
         @Override
-        public Observable<String> call(final Object input) {
-            final String transformed = RESPONSE_PREFIX + input;
-            return Observable.just(transformed);
+        public String call(final Object response) {
+            return PREFIX + response;
         }
     };
 
@@ -46,23 +41,23 @@ extends WritableProviderTest {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<Object> newValue = Observable.<Object>just("Hello");
+        final Observable<String> value = Observable.just("Hello");
         final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse).toBlocking().first();
+        final String mappedResponse = mapper.call(origResponse);
 
         // when:
-        when(super.mockResource.set(newValue)).thenReturn(Observable.<Object>just(origResponse));
+        when(super.mockResource.set(value)).thenReturn(Observable.<Object>just(origResponse));
         final Settable<Object, Object> resource = provider.setter(key);
-        final Observable<Object> response = resource.set(newValue);
+        final Observable<Object> response = resource.set(value);
 
         // then:
-        final Object responseValue = response.toBlocking().first();
-        assertEquals(mappedResponse, responseValue);
+        final String responseString = (String) response.toBlocking().single();
+        assertEquals(mappedResponse, responseString);
     }
 
     @Override
     protected SettableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>flatMapResponse(mapper);
+        return super.createDefaultProvider().<Object>mapResponse(mapper);
     }
 
 }

@@ -27,7 +27,7 @@ import rx.functions.Func1;
  * Tests the nested subclass of {@link Settable} that handles
  * transforming responses.
  */
-public class WritableFlatMapResponseTest extends WritableTest {
+public class SettableFlatMapResponseTest extends SettableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 

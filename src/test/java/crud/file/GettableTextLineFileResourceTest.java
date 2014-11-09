@@ -29,14 +29,14 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 
 import crud.spi.GettableSpec;
-import crud.spi.ReadableSpecTest;
+import crud.spi.GettableSpecTest;
 import rx.Observable;
 
 
 /**
  * Test of the {@link GettableSpec} aspect of {@link TextLineFileResource}.
  */
-public class ReadableTextLineFileResourceTest extends ReadableSpecTest<String> {
+public class GettableTextLineFileResourceTest extends GettableSpecTest<String> {
 
     private static final ImmutableList<String> lines = ImmutableList.of(
             "foo=bar bax=quux",

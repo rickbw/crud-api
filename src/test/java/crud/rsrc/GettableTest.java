@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.ReadableSpecTest;
+import crud.spi.GettableSpecTest;
 import crud.spi.GettableSpec;
 import rx.Observable;
 import rx.functions.Func0;
@@ -37,7 +37,7 @@ import rx.functions.Func0;
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
-public class ReadableTest extends ReadableSpecTest<Object> {
+public class GettableTest extends GettableSpecTest<Object> {
 
     protected final GettableSpec<Object> mockDelegate = mock(GettableSpec.class);
 
@@ -71,7 +71,7 @@ public class ReadableTest extends ReadableSpecTest<Object> {
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromResourceReturnsSameObject() {
         // given:
         final Gettable<Object> origRsrc = createDefaultResource();
 
