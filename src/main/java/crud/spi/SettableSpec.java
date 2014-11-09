@@ -49,6 +49,6 @@ public interface SettableSpec<RSRC, RESPONSE> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    Observable<RESPONSE> set(Observable<? extends RSRC> newValue);
+    Observable<RESPONSE> set(Observable<RSRC> newValue);
 
 }

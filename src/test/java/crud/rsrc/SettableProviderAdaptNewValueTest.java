@@ -29,10 +29,15 @@ extends SettableProviderTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> adapter = new Func1<Object, String>() {
+    private final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object response) {
-            return PREFIX + response;
+        public Observable<Object> call(final Observable<Object> responseObs) {
+            return responseObs.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object response) {
+                    return PREFIX + responseObs;
+                }
+            });
         }
     };
 
@@ -42,8 +47,8 @@ extends SettableProviderTest {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<String> origValue = Observable.just("World!");
-        final Observable<String> adaptedValue = origValue.map(adapter);
+        final Observable<Object> origValue = Observable.<Object>just("World!");
+        final Observable<Object> adaptedValue = adapter.call(origValue);
 
         // when:
         final Settable<Object, Object> resource = provider.setter(key);

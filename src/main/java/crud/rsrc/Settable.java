@@ -18,7 +18,6 @@ import java.util.Objects;
 
 import crud.spi.SettableSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -50,35 +49,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> Settable<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
+    public <TO> Settable<RSRC, TO> mapResponse(
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
         return new MappingSettable<>(this, mapper);
-    }
-
-    /**
-     * Create and return a new resource that will transform and flatten the
-     * responses from this resource. Take care that the given function does
-     * not violate the idempotency requirement of
-     * {@link SettableSpec#set(Observable)}.
-     *
-     * If this method is called on two equal {@code Settable}s,
-     * the results will be equal if the functions are equal. If equality
-     * behavior it important to you (for example, if you intend to keep
-     * resources in a {@code HashSet}), consider it in your function
-     * implementation.
-     */
-    public <TO> Settable<RSRC, TO> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingSettable<>(this, mapper);
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> Settable<RSRC, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
     }
 
     /**
@@ -92,50 +65,9 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * implementation.
      */
     public <TO> Settable<TO, RESPONSE> adaptNewValue(
-            final Func1<? super TO, ? extends RSRC> adapter) {
+            final Func1<? super Observable<TO>, ? extends Observable<RSRC>> adapter) {
         return new AdaptingSettable<>(this, adapter);
     }
-
-    /**
-     * Return a resource that will transparently retry calls to
-     * {@link #set(Observable)} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #set(Observable)}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * If this method is called on two equal {@code Settable}s,
-     * the results will be equal if the max retry counts are equal.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public Settable<RSRC, RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new RetryingSettable<>(this, maxRetries);
-        }
-    }
-
-    /**
-     * Wrap this {@code Settable} in another one that will
-     * pass all observations through a given adapter {@link Observer}, as with
-     * {@link Observable#lift(rx.Observable.Operator)}.
-     */
-    public <TO> Settable<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingSettable<>(this, bind);
-    }
-
-    // TODO: Expose other Observable methods
 
     /**
      * Return a function that, when called, will call {@link #set(Observable)}.
@@ -197,7 +129,7 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         }
 
         @Override
-        public Observable<RESPONSE> set(final Observable<? extends RSRC> newValue) {
+        public Observable<RESPONSE> set(final Observable<RSRC> newValue) {
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .set(newValue);
             return response;
@@ -206,97 +138,37 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
 
 
     private static final class MappingSettable<RSRC, FROM, TO>
-    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
+    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingSettable(
                 final SettableSpec<RSRC, FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
+                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
-        public Observable<TO> set(final Observable<? extends RSRC> value) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .set(value)
-                    .map(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class FlatMappingSettable<RSRC, FROM, TO>
-    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingSettable(
-                final SettableSpec<RSRC, FROM> delegate,
-                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> set(final Observable<? extends RSRC> update) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .set(update)
-                    .flatMap(super.state.getAuxiliaryState());
-            return response;
+        public Observable<TO> set(final Observable<RSRC> newValue) {
+            final Observable<FROM> response = super.state.getDelegate().set(newValue);
+            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
+            return mapped;
         }
     }
 
 
     private static final class AdaptingSettable<FROM, TO, RESPONSE>
-    extends AbstractSettable<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
+    extends AbstractSettable<FROM, TO, RESPONSE, RESPONSE, Func1<? super Observable<TO>, ? extends Observable<FROM>>> {
         private AdaptingSettable(
                 final SettableSpec<FROM, RESPONSE> delegate,
-                final Func1<? super TO, ? extends FROM> adapter) {
+                final Func1<? super Observable<TO>, ? extends Observable<FROM>> adapter) {
             super(delegate, adapter);
             Objects.requireNonNull(adapter, "null function");
         }
 
         @Override
-        public Observable<RESPONSE> set(final Observable<? extends TO> value) {
-            final Observable<FROM> transformed = value.map(super.state.getAuxiliaryState());
+        public Observable<RESPONSE> set(final Observable<TO> newValue) {
+            final Observable<FROM> transformed = super.state.getAuxiliaryState().call(newValue);
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .set(transformed);
-            return response;
-        }
-    }
-
-
-    private static final class RetryingSettable<RSRC, RESPONSE>
-    extends AbstractSettable<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
-        public RetryingSettable(
-                final SettableSpec<RSRC, RESPONSE> delegate,
-                final int maxRetries) {
-            super(delegate, maxRetries);
-            if (maxRetries <= 0) {
-                throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
-            }
-        }
-
-        @Override
-        public Observable<RESPONSE> set(final Observable<? extends RSRC> newResourceState) {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .set(newResourceState)
-                    .retry(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class LiftingSettable<RSRC, FROM, TO>
-    extends AbstractSettable<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingSettable(
-                final SettableSpec<RSRC, FROM> delegate,
-                final Observable.Operator<TO, FROM> bind) {
-            super(delegate, bind);
-            Objects.requireNonNull(bind, "null operator");
-        }
-
-        @Override
-        public Observable<TO> set(final Observable<? extends RSRC> newResourceState) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .set(newResourceState)
-                    .lift(super.state.getAuxiliaryState());
             return response;
         }
     }

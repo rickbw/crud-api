@@ -32,10 +32,15 @@ public class SettableAdaptNewValueTest extends SettableTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> adapter = new Func1<Object, String>() {
+    private static final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object obj) {
+                    return RESPONSE_PREFIX + obj;
+                }
+            });
         }
     };
 
@@ -46,7 +51,7 @@ public class SettableAdaptNewValueTest extends SettableTest {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
         final Observable<Object> original = createDefaultResourceState();
-        final Observable<String> adapted = original.map(adapter);
+        final Observable<Object> adapted = adapter.call(original);
 
         // when:
         resource.set(original);

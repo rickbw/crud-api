@@ -17,9 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.SettableProviderSpec;
-import crud.spi.SettableSpec;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -41,7 +39,7 @@ implements SettableProviderSpec<KEY, RSRC, RESPONSE> {
     }
 
     public <RESP> SettableProvider<KEY, RSRC, RESP> mapResponse(
-            final Func1<? super RESPONSE, ? extends RESP> mapper) {
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<RESP>> mapper) {
         Objects.requireNonNull(mapper, "null function");
         final SettableProvider<KEY, RSRC, RESP> result = new SettableProvider<KEY, RSRC, RESP>() {
             @Override
@@ -54,32 +52,8 @@ implements SettableProviderSpec<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public <R> SettableProvider<KEY, RSRC, R> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
-        Objects.requireNonNull(mapper, "null function");
-        final SettableProvider<KEY, RSRC, R> result = new SettableProvider<KEY, RSRC, R>() {
-            @Override
-            public Settable<RSRC, R> setter(final KEY key) {
-                return outerProvider()
-                        .setter(key)
-                        .flatMapResponse(mapper);
-            }
-        };
-        return result;
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> SettableProvider<KEY, RSRC, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
-    }
-
     public <RC> SettableProvider<KEY, RC, RESPONSE> adaptNewValue(
-            final Func1<? super RC, ? extends RSRC> adapter) {
+            final Func1<? super Observable<RC>, ? extends Observable<RSRC>> adapter) {
         Objects.requireNonNull(adapter, "null function");
         final SettableProvider<KEY, RC, RESPONSE> result = new SettableProvider<KEY, RC, RESPONSE>() {
             @Override
@@ -104,54 +78,6 @@ implements SettableProviderSpec<KEY, RSRC, RESPONSE> {
             }
         };
         return result;
-    }
-
-    /**
-     * Return a resource provider, the resource from which will transparently
-     * retry calls to {@link SettableSpec#set(Observable)} that throw, as
-     * with {@link Observable#retry(long)}. Specifically, any
-     * {@link Observable} returned by {@link SettableSpec#set(Observable)}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public SettableProvider<KEY, RSRC, RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;    // no-op
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new SettableProvider<KEY, RSRC, RESPONSE>() {
-                @Override
-                public Settable<RSRC, RESPONSE> setter(final KEY key) {
-                    return outerProvider()
-                            .setter(key)
-                            .retry(maxRetries);
-                }
-            };
-        }
-    }
-
-    public <TO> SettableProvider<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Objects.requireNonNull(bind, "null operator");
-        return new SettableProvider<KEY, RSRC, TO>() {
-            @Override
-            public Settable<RSRC, TO> setter(final KEY key) {
-                final Settable<RSRC, TO> resource = outerProvider()
-                        .setter(key)
-                        .lift(bind);
-                return resource;
-            }
-        };
     }
 
     public Func1<KEY, Settable<RSRC, RESPONSE>> toFunction() {
