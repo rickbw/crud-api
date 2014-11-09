@@ -49,7 +49,7 @@ public class UpdatableTextLineFileResourceTest extends UpdatableSpecTest<String,
     public void linesWritten() throws IOException {
         // given:
         final UpdatableSpec<String, Void> resource = createDefaultResource();
-        final String expectedLine = createDefaultUpdate();
+        final Observable<String> expectedLine = createDefaultUpdate();
         final int numLines = 3;
 
         // when:
@@ -63,7 +63,7 @@ public class UpdatableTextLineFileResourceTest extends UpdatableSpecTest<String,
         try (BufferedReader reader = new BufferedReader(new FileReader(this.file))) {
             for (int i = 0; i < numLines; ++i) {
                 final String actualLine = reader.readLine();
-                assertEquals(expectedLine, actualLine);
+                assertEquals(expectedLine.toBlocking().single(), actualLine);
             }
             assertNull(reader.readLine());
         }
@@ -75,8 +75,8 @@ public class UpdatableTextLineFileResourceTest extends UpdatableSpecTest<String,
     }
 
     @Override
-    protected String createDefaultUpdate() {
-        return "hello, world";
+    protected Observable<String> createDefaultUpdate() {
+        return Observable.just("hello, world");
     }
 
 }

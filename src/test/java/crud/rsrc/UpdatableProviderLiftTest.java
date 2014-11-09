@@ -14,7 +14,7 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertEquals;
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -47,17 +47,16 @@ public class UpdatableProviderLiftTest extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String expectedResponseValue = "Response!";
+        final Observable<Object> expectedResponseValue = Observable.<Object>just("Response!");
 
         // when:
-        when(super.mockResource.update(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
+        when(super.mockResource.update(expectedResponseValue)).thenReturn(expectedResponseValue);
         final Updatable<Object, Object> resource = provider.updater(key);
         final Observable<Object> response = resource.update(expectedResponseValue);
 
         // then:
-        final Object actualResponseValue = response.toBlocking().first();
         // Test lifter doesn't actually do anything:
-        assertEquals(expectedResponseValue, actualResponseValue);
+        assertObservablesEqual(expectedResponseValue, response);
         assertTrue(this.lifterCalled.get());    // after getting value
     }
 

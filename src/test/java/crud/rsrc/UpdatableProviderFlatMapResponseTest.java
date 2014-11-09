@@ -14,7 +14,7 @@
  */
 package crud.rsrc;
 
-import static org.junit.Assert.assertEquals;
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -46,9 +46,9 @@ extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Object update = "Hello";
+        final Observable<? extends Object> update = Observable.just("Hello");
         final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse).toBlocking().first();
+        final Observable<String> mappedResponse = mapper.call(origResponse);
 
         // when:
         when(super.mockResource.update(update)).thenReturn(Observable.<Object>just(origResponse));
@@ -56,8 +56,7 @@ extends UpdatableProviderTest {
         final Observable<Object> response = resource.update(update);
 
         // then:
-        final Object responseValue = response.toBlocking().first();
-        assertEquals(mappedResponse, responseValue);
+        assertObservablesEqual(mappedResponse, response);
     }
 
     @Override

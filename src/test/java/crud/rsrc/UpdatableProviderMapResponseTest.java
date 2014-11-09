@@ -41,7 +41,7 @@ extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String update = "Hello";
+        final Observable<String> update = Observable.just("Hello");
         final String origResponse = "world";
         final String mappedResponse = mapper.call(origResponse);
 

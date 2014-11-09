@@ -112,7 +112,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
     // TODO: Expose other Observable methods
 
     /**
-     * Return a function that, when called, will call {@link #update(Object)}.
+     * Return a function that, when called, will call {@link #update(Observable)}.
      * The function object implements {@link Object#equals(Object)},
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
@@ -121,7 +121,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         return new DelegateObjectMethods.Function<UPDATE, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final UPDATE update) {
-                return Updatable.this.update(update);
+                return Updatable.this.update(Observable.just(update));
             }
         };
     }
@@ -176,7 +176,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<RESPONSE> update(final UPDATE update) {
+        public Observable<RESPONSE> update(final Observable<? extends UPDATE> update) {
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .update(update);
             return response;
@@ -194,7 +194,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<TO> update(final UPDATE update) {
+        public Observable<TO> update(final Observable<? extends UPDATE> update) {
             final Observable<TO> response = super.state.getDelegate()
                     .update(update)
                     .map(super.state.getAuxiliaryState());
@@ -213,7 +213,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<TO> update(final UPDATE update) {
+        public Observable<TO> update(final Observable<? extends UPDATE> update) {
             final Observable<TO> response = super.state.getDelegate()
                     .update(update)
                     .flatMap(super.state.getAuxiliaryState());
@@ -232,8 +232,8 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<RESPONSE> update(final TO update) {
-            final FROM transformed = super.state.getAuxiliaryState().call(update);
+        public Observable<RESPONSE> update(final Observable<? extends TO> update) {
+            final Observable<FROM> transformed = update.map(super.state.getAuxiliaryState());
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .update(transformed);
             return response;
@@ -251,7 +251,7 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         }
 
         @Override
-        public Observable<TO> update(final UPDATE update) {
+        public Observable<TO> update(final Observable<? extends UPDATE> update) {
             final Observable<TO> response = super.state.getDelegate()
                     .update(update)
                     .lift(super.state.getAuxiliaryState());

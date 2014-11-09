@@ -14,7 +14,7 @@
  */
 package crud.spi;
 
-import crud.spi.UpdatableSpec;
+import rx.Observable;
 
 
 /**
@@ -31,6 +31,6 @@ public abstract class UpdatableSpecTest<UPDATE, RESP> extends ResourceTest {
      * Create an object suitable for being written to the resources returned
      * by {@link #createDefaultResource()}.
      */
-    protected abstract UPDATE createDefaultUpdate();
+    protected abstract Observable<? extends UPDATE> createDefaultUpdate();
 
 }

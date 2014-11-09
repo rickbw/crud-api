@@ -48,7 +48,7 @@ public class UpdatableProviderTest {
 
     @Before
     public void setup() {
-        when(this.mockResource.update(any())).thenReturn(Observable.empty());
+        when(this.mockResource.update(any(Observable.class))).thenReturn(Observable.empty());
         when(this.mockProvider.updater(any())).thenReturn(this.mockResource);
         when(this.mockProvider.updater(null)).thenThrow(new NullPointerException("mock"));
     }

@@ -15,10 +15,11 @@
 package crud.file;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.Writer;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -33,6 +34,7 @@ import crud.spi.UpdatableSpec;
 import crud.util.BooleanSubscription;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
+import rx.Observer;
 import rx.Subscriber;
 
 
@@ -55,8 +57,13 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
     }
 
     @Override
-    public Observable<Void> update(final String update) {
-        return Observable.create(new WriteLineOnSubscribe(update));
+    public Observable<Void> update(final Observable<? extends String> update) {
+        return Observable.create(new OnSubscribe<Void>() {
+            @Override
+            public void call(final Subscriber<? super Void> subscriber) {
+                update.subscribe(new WriteLineObserver(subscriber));
+            }
+        });
     }
 
     @Override
@@ -133,26 +140,70 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
     }
 
 
-    private final class WriteLineOnSubscribe implements OnSubscribe<Void> {
-        private final String update;
+    private final class WriteLineObserver implements Observer<String> {
+        private final Subscriber<? super Void> subscriber;
+        private transient BufferedWriter writer = null;
+        private final boolean appendToFile = true;
 
-        private WriteLineOnSubscribe(final String update) {
-            this.update = Objects.requireNonNull(update);
+        public WriteLineObserver(final Subscriber<? super Void> subscriber) {
+            this.subscriber = subscriber;
+            assert this.subscriber != null;
         }
 
         @Override
-        public void call(final Subscriber<? super Void> subscriber) {
-            /* XXX: Inefficient! Opens file just to write one line.
-             * If we could pass in a whole Observable of lines, we could
-             * stream them all in, and only close at the end.
-             */
-            final boolean appendToFile = true;
-            try (Writer writer = new FileWriter(TextLineFileResource.this.file, appendToFile)) {
-                final String line = (this.update.endsWith("\n")) ? this.update : this.update + "\n";
-                writer.write(line);
-                subscriber.onCompleted();
-            } catch (final Throwable ex) {
-                subscriber.onError(ex);
+        public void onNext(final String str) {
+            if (this.subscriber.isUnsubscribed()) {
+                return;
+            }
+            try {
+                if (this.writer == null) {
+                    this.writer = new BufferedWriter(new FileWriter(
+                            TextLineFileResource.this.file,
+                            this.appendToFile));
+                }
+                this.writer.write(str);
+                if (!str.endsWith("\n") && !str.endsWith("\r")) {
+                    this.writer.newLine();
+                }
+            } catch (final IOException ex) {
+                onError(ex);
+            }
+        }
+
+        @Override
+        public void onError(final Throwable ex) {
+            try {
+                if (this.writer != null) {
+                    this.writer.close();
+                }
+                if (!this.subscriber.isUnsubscribed()) {
+                    this.subscriber.onError(ex);
+                }
+            } catch (final IOException closeError) {
+                ex.addSuppressed(closeError);
+                if (!this.subscriber.isUnsubscribed()) {
+                    this.subscriber.onError(ex);
+                }
+            } finally {
+                this.writer = null;
+            }
+        }
+
+        @Override
+        public void onCompleted() {
+            try {
+                if (this.writer != null) {
+                    this.writer.close();
+                }
+                if (!this.subscriber.isUnsubscribed()) {
+                    this.subscriber.onCompleted();
+                }
+            } catch (final IOException closeError) {
+                if (!this.subscriber.isUnsubscribed()) {
+                    this.subscriber.onError(closeError);
+                }
+            } finally {
+                this.writer = null;
             }
         }
     }

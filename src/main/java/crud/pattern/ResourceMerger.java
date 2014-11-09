@@ -63,7 +63,7 @@ public abstract class ResourceMerger<RESPONSE> {
 
     /**
      * Create a merger that will read from the given {@link GettableSpec}
-     * and write the results with {@link UpdatableSpec#update(Object)}.
+     * and write the results with {@link UpdatableSpec#update(Observable)}.
      *
      * @see #mapToUpdater(GettableSpec, Func1, UpdatableSpec)
      */
@@ -90,7 +90,7 @@ public abstract class ResourceMerger<RESPONSE> {
     /**
      * Create a merger that will read from the given {@link GettableSpec},
      * apply the given transformation to the results, and then write them with
-     * {@link UpdatableSpec#update(Object)}.
+     * {@link UpdatableSpec#update(Observable)}.
      */
     public static <RSRC, UPDATE, RESPONSE> ResourceMerger<RESPONSE> mapToUpdater(
             final GettableSpec<? extends RSRC> reader,

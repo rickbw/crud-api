@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import crud.rsrc.Updatable;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -45,7 +44,7 @@ public class UpdatableFlatMapResponseTest extends UpdatableTest {
     public void transformationApplied() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Object update = createDefaultUpdate();
+        final Observable<? extends Object> update = createDefaultUpdate();
 
         // when:
         when(super.mockDelegate.update(update)).thenReturn(Observable.<Object>just("world"));

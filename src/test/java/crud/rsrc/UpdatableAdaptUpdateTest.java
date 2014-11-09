@@ -14,10 +14,13 @@
  */
 package crud.rsrc;
 
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import rx.Observable;
 import rx.functions.Func1;
 
 
@@ -42,14 +45,18 @@ public class UpdatableAdaptUpdateTest extends UpdatableTest {
     public void fluentResourceCallsDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Object original = createDefaultUpdate();
-        final String adapted = mapper.call(original);
+        final Observable<? extends Object> original = createDefaultUpdate();
+        final Observable<String> adapted = original.map(mapper);
 
         // when:
         resource.update(original);
 
         // then:
-        verify(this.mockDelegate).update(adapted);
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(this.mockDelegate).update(captor.capture());
+        final Observable<String> actual = captor.getValue();
+        assertObservablesEqual(adapted, actual);
     }
 
     @Override

@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import crud.rsrc.Updatable;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -47,7 +46,7 @@ public class UpdatableLiftTest extends UpdatableTest {
     public void lifterCalled() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Object update = createDefaultUpdate();
+        final Observable<? extends Object> update = createDefaultUpdate();
         final String expectedResponseValue = "Response!";
 
         // when:

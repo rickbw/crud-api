@@ -14,10 +14,13 @@
  */
 package crud.rsrc;
 
+import static crud.RxAssertions.assertObservablesEqual;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import rx.Observable;
 import rx.functions.Func1;
 
 
@@ -39,15 +42,19 @@ extends UpdatableProviderTest {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final String origUpdate = "World!";
-        final String adaptedUpdate = adapter.call(origUpdate);
+        final Observable<String> origUpdate = Observable.just("World!");
+        final Observable<String> adaptedUpdate = origUpdate.map(this.adapter);
 
         // when:
         final Updatable<Object, Object> resource = provider.updater(key);
         resource.update(origUpdate);
 
         // then:
-        verify(super.mockResource).update(adaptedUpdate);
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(this.mockResource).update(captor.capture());
+        final Observable<String> actual = captor.getValue();
+        assertObservablesEqual(adaptedUpdate, actual);
     }
 
     @Override

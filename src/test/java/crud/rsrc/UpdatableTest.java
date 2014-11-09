@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.UpdatableSpecTest;
 import crud.spi.UpdatableSpec;
+import crud.spi.UpdatableSpecTest;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -44,7 +44,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
 
     @Before
     public void setup() {
-        when(this.mockDelegate.update(any())).thenReturn(Observable.empty());
+        when(this.mockDelegate.update(any(Observable.class))).thenReturn(Observable.empty());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     public void fluentResourceCallsDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
-        final Object update = createDefaultUpdate();
+        final Observable<String> update = createDefaultUpdate();
 
         // when:
         resource.update(update);
@@ -139,8 +139,8 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     }
 
     @Override
-    protected Object createDefaultUpdate() {
-        return "Hello, World";
+    protected Observable<String> createDefaultUpdate() {
+        return Observable.just("Hello, World");
     }
 
 }
