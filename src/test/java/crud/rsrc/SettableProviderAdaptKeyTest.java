@@ -32,7 +32,7 @@ extends SettableProviderTest {
 
 
     @Override
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();

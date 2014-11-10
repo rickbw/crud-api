@@ -46,7 +46,7 @@ public class DeletableTest extends DeletableSpecTest<Object> {
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void resourceNotEqualDelegate() {
         // given:
         final Deletable<Object> resource = createDefaultResource();
 
@@ -57,7 +57,7 @@ public class DeletableTest extends DeletableSpecTest<Object> {
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Deletable<Object> resource = createDefaultResource();
 

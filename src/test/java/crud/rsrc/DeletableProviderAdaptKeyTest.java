@@ -32,7 +32,7 @@ extends DeletableProviderTest {
 
 
     @Override
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final DeletableProvider<Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();

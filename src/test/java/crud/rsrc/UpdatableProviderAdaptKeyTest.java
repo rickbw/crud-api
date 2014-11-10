@@ -32,7 +32,7 @@ extends UpdatableProviderTest {
 
 
     @Override
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();

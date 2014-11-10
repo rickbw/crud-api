@@ -32,7 +32,7 @@ extends GettableProviderTest {
 
 
     @Override
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final GettableProvider<Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();

@@ -90,7 +90,7 @@ public class SettableProviderTest {
     }
 
     @Test
-    public void fluentProviderNotEqualDelegate() {
+    public void providerNotEqualDelegate() {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
 
@@ -114,7 +114,7 @@ public class SettableProviderTest {
     }
 
     @Test
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();

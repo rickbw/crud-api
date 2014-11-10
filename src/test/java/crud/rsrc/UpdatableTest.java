@@ -48,7 +48,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void resourceNotEqualDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
 
@@ -59,7 +59,7 @@ public class UpdatableTest extends UpdatableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
         final Observable<Object> update = createDefaultUpdate();

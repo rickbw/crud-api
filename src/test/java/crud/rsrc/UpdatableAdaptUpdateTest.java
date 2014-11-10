@@ -47,7 +47,7 @@ public class UpdatableAdaptUpdateTest extends UpdatableTest {
 
     @Override
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Updatable<Object, Object> resource = createDefaultResource();
         final Observable<Object> original = createDefaultUpdate();

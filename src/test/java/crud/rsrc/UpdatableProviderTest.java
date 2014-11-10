@@ -90,7 +90,7 @@ public class UpdatableProviderTest {
     }
 
     @Test
-    public void fluentProviderNotEqualDelegate() {
+    public void providerNotEqualDelegate() {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
 
@@ -114,7 +114,7 @@ public class UpdatableProviderTest {
     }
 
     @Test
-    public void fluentProviderCallsDelegate() {
+    public void providerCallsDelegate() {
         // given:
         final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();

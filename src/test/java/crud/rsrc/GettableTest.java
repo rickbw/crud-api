@@ -46,7 +46,7 @@ public class GettableTest extends GettableSpecTest<Object> {
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void resourceNotEqualDelegate() {
         // given:
         final Gettable<Object> resource = createDefaultResource();
 
@@ -57,7 +57,7 @@ public class GettableTest extends GettableSpecTest<Object> {
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Gettable<Object> resource = createDefaultResource();
 

@@ -47,7 +47,7 @@ public class SettableAdaptNewValueTest extends SettableTest {
 
     @Override
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
         final Observable<Object> original = createDefaultResourceState();

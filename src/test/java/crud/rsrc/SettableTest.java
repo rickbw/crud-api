@@ -47,7 +47,7 @@ public class SettableTest extends SettableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void resourceNotEqualDelegate() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
 
@@ -58,7 +58,7 @@ public class SettableTest extends SettableSpecTest<Object, Object> {
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void resourceCallsDelegate() {
         // given:
         final Settable<Object, Object> resource = createDefaultResource();
         final Observable<Object> newState = createDefaultResourceState();
