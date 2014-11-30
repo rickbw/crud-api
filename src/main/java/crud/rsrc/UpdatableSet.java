@@ -16,23 +16,23 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.spi.UpdatableProviderSpec;
+import crud.spi.UpdatableSetSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link UpdatableProviderSpec}s.
+ * A set of fluent transformations on {@link UpdatableSetSpec}s.
  */
-public abstract class UpdatableProvider<KEY, UPDATE, RESPONSE>
-implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
+public abstract class UpdatableSet<KEY, UPDATE, RESPONSE>
+implements UpdatableSetSpec<KEY, UPDATE, RESPONSE> {
 
-    public static <KEY, UPDATE, RESPONSE> UpdatableProvider<KEY, UPDATE, RESPONSE> from(
-            final UpdatableProviderSpec<KEY, UPDATE, RESPONSE> provider) {
-        if (provider instanceof UpdatableProvider<?, ?, ?>) {
-            return (UpdatableProvider<KEY, UPDATE, RESPONSE>) provider;
+    public static <KEY, UPDATE, RESPONSE> UpdatableSet<KEY, UPDATE, RESPONSE> from(
+            final UpdatableSetSpec<KEY, UPDATE, RESPONSE> provider) {
+        if (provider instanceof UpdatableSet<?, ?, ?>) {
+            return (UpdatableSet<KEY, UPDATE, RESPONSE>) provider;
         } else {
-            return new UpdatableProvider<KEY, UPDATE, RESPONSE>() {
+            return new UpdatableSet<KEY, UPDATE, RESPONSE>() {
                 @Override
                 public Updatable<UPDATE, RESPONSE> updater(final KEY key) {
                     return Updatable.from(provider.updater(key));
@@ -41,13 +41,13 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         }
     }
 
-    public <R> UpdatableProvider<KEY, UPDATE, R> mapResponse(
+    public <R> UpdatableSet<KEY, UPDATE, R> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final UpdatableProvider<KEY, UPDATE, R> result = new UpdatableProvider<KEY, UPDATE, R>() {
+        final UpdatableSet<KEY, UPDATE, R> result = new UpdatableSet<KEY, UPDATE, R>() {
             @Override
             public Updatable<UPDATE, R> updater(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .updater(key)
                         .mapResponse(mapper);
             }
@@ -55,13 +55,13 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         return result;
     }
 
-    public <U> UpdatableProvider<KEY, U, RESPONSE> adaptUpdate(
+    public <U> UpdatableSet<KEY, U, RESPONSE> adaptUpdate(
             final Func1<? super Observable<U>, ? extends Observable<UPDATE>> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final UpdatableProvider<KEY, U, RESPONSE> result = new UpdatableProvider<KEY, U, RESPONSE>() {
+        final UpdatableSet<KEY, U, RESPONSE> result = new UpdatableSet<KEY, U, RESPONSE>() {
             @Override
             public Updatable<U, RESPONSE> updater(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .updater(key)
                         .adaptUpdate(adapter);
             }
@@ -69,15 +69,15 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
         return result;
     }
 
-    public <K> UpdatableProvider<K, UPDATE, RESPONSE> adaptKey(
+    public <K> UpdatableSet<K, UPDATE, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final UpdatableProvider<K, UPDATE, RESPONSE> result = new UpdatableProvider<K, UPDATE, RESPONSE>() {
+        final UpdatableSet<K, UPDATE, RESPONSE> result = new UpdatableSet<K, UPDATE, RESPONSE>() {
             @Override
             public Updatable<UPDATE, RESPONSE> updater(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().updater(transformedKey);
+                return outerResourceSet().updater(transformedKey);
             }
         };
         return result;
@@ -95,7 +95,7 @@ implements UpdatableProviderSpec<KEY, UPDATE, RESPONSE> {
     @Override
     public abstract Updatable<UPDATE, RESPONSE> updater(KEY key);
 
-    private UpdatableProvider<KEY, UPDATE, RESPONSE> outerProvider() {
+    private UpdatableSet<KEY, UPDATE, RESPONSE> outerResourceSet() {
         return this;
     }
 

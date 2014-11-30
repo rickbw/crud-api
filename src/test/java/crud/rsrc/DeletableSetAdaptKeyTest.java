@@ -18,8 +18,7 @@ import static org.mockito.Mockito.verify;
 import rx.functions.Func1;
 
 
-public class UpdatableProviderAdaptKeyTest
-extends UpdatableProviderTest {
+public class DeletableSetAdaptKeyTest extends DeletableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -34,22 +33,22 @@ extends UpdatableProviderTest {
     @Override
     public void providerCallsDelegate() {
         // given:
-        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.updater(origKey);
+        provider.deleter(origKey);
 
         // then:
-        verify(this.mockProvider).updater(transformedKey);
+        verify(this.mockProvider).deleter(transformedKey);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
-        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Updatable<Object, Object>> function = provider.toFunction();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Deletable<Object>> function = provider.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
@@ -57,11 +56,11 @@ extends UpdatableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).updater(transformedKey);
+        verify(this.mockProvider).deleter(transformedKey);
     }
 
     @Override
-    protected UpdatableProvider<Object, Object, Object> createDefaultProvider() {
+    protected DeletableSet<Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 

@@ -32,7 +32,7 @@
  *
  * There are two primary abstractions in the API:
  * {@link crud.spi.Resource}s and
- * {@link crud.spi.ResourceProviderSpec}s. The former encapsulates the
+ * {@link crud.spi.ResourceSet}s. The former encapsulates the
  * I/O operations on state, and hence uses a reactive style. There are four
  * derived interfaces, one for each CRUD operation:
  * <ul>
@@ -47,12 +47,12 @@
  * lookup idiom, where keys are generic and may be simple -- e.g. a URL -- or
  * arbitrarily complex -- e.g. a database query -- depending on the underlying
  * data-access technology. There are four derived
- * {@link crud.spi.ResourceProviderSpec} interfaces:
+ * {@link crud.spi.ResourceSet} interfaces:
  * <ul>
- *  <li>{@link crud.spi.GettableProviderSpec}</li>
- *  <li>{@link crud.spi.SettableProviderSpec}</li>
- *  <li>{@link crud.spi.UpdatableProviderSpec}</li>
- *  <li>{@link crud.spi.DeletableProviderSpec}</li>
+ *  <li>{@link crud.spi.GettableSetSpec}</li>
+ *  <li>{@link crud.spi.SettableSetSpec}</li>
+ *  <li>{@link crud.spi.UpdatableSetSpec}</li>
+ *  <li>{@link crud.spi.DeletableSetSpec}</li>
  * </ul>
  *
  * In addition to these core abstractions, this library provides a number of

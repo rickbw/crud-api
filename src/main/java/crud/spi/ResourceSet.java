@@ -19,6 +19,6 @@ package crud.spi;
  * Look up a resource based on a given key. This super-interface encapsulates
  * navigation among resources.
  */
-public interface ResourceProviderSpec {
+public interface ResourceSet {
     // marker interface
 }

@@ -31,7 +31,7 @@ import rx.Observable;
  * @see SettableSpec
  * @see UpdatableSpec
  * @see DeletableSpec
- * @see GettableProviderSpec
+ * @see GettableSetSpec
  */
 public interface GettableSpec<RSRC> extends Resource, Supplier<Observable<RSRC>> {
 

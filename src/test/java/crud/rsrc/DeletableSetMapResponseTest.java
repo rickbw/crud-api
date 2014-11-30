@@ -23,12 +23,11 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class GettableProviderMapValueTest
-extends GettableProviderTest {
+public class DeletableSetMapResponseTest extends DeletableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, Observable<Object>> mapper = new Func1<Object, Observable<Object>>() {
+    private static final Func1<Object, Observable<Object>> mapper = new Func1<Object, Observable<Object>>() {
         @Override
         public Observable<Object> call(final Object response) {
             return Observable.<Object>just(PREFIX + response);
@@ -39,13 +38,13 @@ extends GettableProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>just("world"));
-        final Gettable<Object> resource = provider.getter(key);
-        final Observable<Object> response = resource.get();
+        when(super.mockResource.delete()).thenReturn(Observable.<Object>just("world"));
+        final Deletable<Object> resource = provider.deleter(key);
+        final Observable<Object> response = resource.delete();
 
         // then:
         final String responseString = (String) response.toBlocking().single();
@@ -53,8 +52,8 @@ extends GettableProviderTest {
     }
 
     @Override
-    protected GettableProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>mapValue(mapper);
+    protected DeletableSet<Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().<Object>mapResponse(mapper);
     }
 
 }

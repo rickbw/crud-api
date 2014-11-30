@@ -18,31 +18,30 @@ import java.util.Objects;
 
 import com.google.common.base.Function;
 
-import crud.spi.DeletableProviderSpec;
+import crud.spi.DeletableSetSpec;
 import crud.spi.Resource;
-import crud.spi.ResourceProviderSpec;
+import crud.spi.ResourceSet;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
  * A set of fluent transformations and utilities on
- * {@link DeletableProviderSpec}s.
+ * {@link DeletableSetSpec}s.
  */
-public abstract class DeletableProvider<KEY, RESPONSE>
-implements DeletableProviderSpec<KEY, RESPONSE> {
+public abstract class DeletableSet<KEY, RESPONSE> implements DeletableSetSpec<KEY, RESPONSE> {
 
     /**
-     * If the given {@link ResourceProviderSpec} is already a
-     * {@link DeletableProvider}, return it. Otherwise, wrap it
+     * If the given {@link ResourceSet} is already a
+     * {@link DeletableSet}, return it. Otherwise, wrap it
      * in a new instance.
      */
-    public static <KEY, RESPONSE> DeletableProvider<KEY, RESPONSE> from(
-            final DeletableProviderSpec<KEY, RESPONSE> provider) {
-        if (provider instanceof DeletableProvider<?, ?>) {
-            return (DeletableProvider<KEY, RESPONSE>) provider;
+    public static <KEY, RESPONSE> DeletableSet<KEY, RESPONSE> from(
+            final DeletableSetSpec<KEY, RESPONSE> provider) {
+        if (provider instanceof DeletableSet<?, ?>) {
+            return (DeletableSet<KEY, RESPONSE>) provider;
         } else {
-            return new DeletableProvider<KEY, RESPONSE>() {
+            return new DeletableSet<KEY, RESPONSE>() {
                 @Override
                 public Deletable<RESPONSE> deleter(final KEY key) {
                     return Deletable.from(provider.deleter(key));
@@ -54,13 +53,13 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
     /**
      * @see Deletable#mapResponse(Func1)
      */
-    public <R> DeletableProvider<KEY, R> mapResponse(
+    public <R> DeletableSet<KEY, R> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final DeletableProvider<KEY, R> result = new DeletableProvider<KEY, R>() {
+        final DeletableSet<KEY, R> result = new DeletableSet<KEY, R>() {
             @Override
             public Deletable<R> deleter(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .deleter(key)
                         .mapResponse(mapper);
             }
@@ -69,24 +68,24 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
     }
 
     /**
-     * Transform the key used to look up {@link DeletableProviderSpec}s.
+     * Transform the key used to look up {@link DeletableSetSpec}s.
      */
-    public <K> DeletableProvider<K, RESPONSE> adaptKey(
+    public <K> DeletableSet<K, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final DeletableProvider<K, RESPONSE> result = new DeletableProvider<K, RESPONSE>() {
+        final DeletableSet<K, RESPONSE> result = new DeletableSet<K, RESPONSE>() {
             @Override
             public Deletable<RESPONSE> deleter(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().deleter(transformedKey);
+                return outerResourceSet().deleter(transformedKey);
             }
         };
         return result;
     }
 
     /**
-     * Present this {@link ResourceProviderSpec} as a {@link Function} from key
+     * Present this {@link ResourceSet} as a {@link Function} from key
      * to {@link Resource}.
      */
     public Func1<KEY, Deletable<RESPONSE>> toFunction() {
@@ -101,7 +100,7 @@ implements DeletableProviderSpec<KEY, RESPONSE> {
     @Override
     public abstract Deletable<RESPONSE> deleter(KEY key);
 
-    private DeletableProvider<KEY, RESPONSE> outerProvider() {
+    private DeletableSet<KEY, RESPONSE> outerResourceSet() {
         return this;
     }
 

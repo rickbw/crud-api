@@ -24,18 +24,17 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class UpdatableProviderAdaptUpdateTest
-extends UpdatableProviderTest {
+public class SettableSetAdaptNewValueTest extends SettableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
+    private final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public Observable<Object> call(final Observable<Object> input) {
-            return input.map(new Func1<Object, Object>() {
+        public Observable<Object> call(final Observable<Object> responseObs) {
+            return responseObs.map(new Func1<Object, Object>() {
                 @Override
-                public Object call(final Object obj) {
-                    return PREFIX + obj;
+                public Object call(final Object response) {
+                    return PREFIX + responseObs;
                 }
             });
         }
@@ -45,26 +44,25 @@ extends UpdatableProviderTest {
     @Test
     public void passAdaptedValueToResource() {
         // given:
-        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<Object> origUpdate = Observable.<Object>just("World!");
-        final Observable<Object> adaptedUpdate = adapter.call(origUpdate);
+        final Observable<Object> origValue = Observable.<Object>just("World!");
+        final Observable<Object> adaptedValue = adapter.call(origValue);
 
         // when:
-        final Updatable<Object, Object> resource = provider.updater(key);
-        resource.update(origUpdate);
+        final Settable<Object, Object> resource = provider.setter(key);
+        resource.set(origValue);
 
         // then:
         @SuppressWarnings("rawtypes")
         final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
-        verify(this.mockResource).update(captor.capture());
-        final Observable<String> actual = captor.getValue();
-        assertObservablesEqual(adaptedUpdate, actual);
+        verify(super.mockResource).set(captor.capture());
+        assertObservablesEqual(adaptedValue, adaptedValue);
     }
 
     @Override
-    protected UpdatableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>adaptUpdate(adapter);
+    protected SettableSet<Object, Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().<Object>adaptNewValue(adapter);
     }
 
 }

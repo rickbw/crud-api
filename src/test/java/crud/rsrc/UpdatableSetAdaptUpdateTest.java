@@ -15,20 +15,20 @@
 package crud.rsrc;
 
 import static crud.RxAssertions.assertObservablesEqual;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import rx.Observable;
 import rx.functions.Func1;
 
 
-public class UpdatableProviderMapResponseTest
-extends UpdatableProviderTest {
+public class UpdatableSetAdaptUpdateTest extends UpdatableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
+    private static final Func1<Observable<Object>, Observable<Object>> adapter = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
         public Observable<Object> call(final Observable<Object> input) {
             return input.map(new Func1<Object, Object>() {
@@ -42,26 +42,28 @@ extends UpdatableProviderTest {
 
 
     @Test
-    public void transformationApplied() {
+    public void passAdaptedValueToResource() {
         // given:
-        final UpdatableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
-        final Observable<Object> update = Observable.<Object>just("Hello");
-        final Observable<Object> origResponse = Observable.<Object>just("world");
-        final Observable<Object> mappedResponse = mapper.call(origResponse);
+        final Observable<Object> origUpdate = Observable.<Object>just("World!");
+        final Observable<Object> adaptedUpdate = adapter.call(origUpdate);
 
         // when:
-        when(super.mockResource.update(update)).thenReturn(origResponse);
         final Updatable<Object, Object> resource = provider.updater(key);
-        final Observable<Object> response = resource.update(update);
+        resource.update(origUpdate);
 
         // then:
-        assertObservablesEqual(mappedResponse, response);
+        @SuppressWarnings("rawtypes")
+        final ArgumentCaptor<Observable> captor = ArgumentCaptor.forClass(Observable.class);
+        verify(this.mockResource).update(captor.capture());
+        final Observable<String> actual = captor.getValue();
+        assertObservablesEqual(adaptedUpdate, actual);
     }
 
     @Override
-    protected UpdatableProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>mapResponse(mapper);
+    protected UpdatableSet<Object, Object, Object> createDefaultProvider() {
+        return super.createDefaultProvider().<Object>adaptUpdate(adapter);
     }
 
 }

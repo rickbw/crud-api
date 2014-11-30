@@ -27,9 +27,9 @@ import com.google.common.annotations.VisibleForTesting;
 
 import crud.rsrc.Gettable;
 import crud.rsrc.Updatable;
-import crud.spi.GettableProviderSpec;
+import crud.spi.GettableSetSpec;
 import crud.spi.GettableSpec;
-import crud.spi.UpdatableProviderSpec;
+import crud.spi.UpdatableSetSpec;
 import crud.spi.UpdatableSpec;
 import crud.util.BooleanSubscription;
 import rx.Observable;
@@ -47,8 +47,8 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
     private final File file;
 
 
-    public static Provider provider() {
-        return new Provider();
+    public static Set resources() {
+        return new Set();
     }
 
     @Override
@@ -104,8 +104,8 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
     }
 
 
-    public static class Provider
-    implements GettableProviderSpec<File, String>, UpdatableProviderSpec<File, String, Void> {
+    public static class Set
+    implements GettableSetSpec<File, String>, UpdatableSetSpec<File, String, Void> {
         @Override
         public Gettable<String> getter(final File file) {
             return Gettable.from(new TextLineFileResource(file));
@@ -116,7 +116,7 @@ implements GettableSpec<String>, UpdatableSpec<String, Void> {
             return Updatable.from(new TextLineFileResource(file));
         }
 
-        private Provider() {
+        private Set() {
             // instantiation via factory method only
         }
     }

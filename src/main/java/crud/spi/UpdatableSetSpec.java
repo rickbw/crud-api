@@ -16,14 +16,14 @@ package crud.spi;
 
 
 /**
- * Look up a {@link SettableSpec} based on a given key.
+ * Look up a {@link UpdatableSpec} based on a given key.
  *
- * @see GettableProviderSpec
- * @see DeletableProviderSpec
- * @see UpdatableProviderSpec
- * @see SettableSpec
+ * @see GettableSetSpec
+ * @see DeletableSetSpec
+ * @see SettableSetSpec
+ * @see UpdatableSpec
  */
-public interface SettableProviderSpec<KEY, RSRC, RESPONSE> extends ResourceProviderSpec {
+public interface UpdatableSetSpec<KEY, UPDATE, RESPONSE> extends ResourceSet {
 
     /**
      * Get the {@link UpdatableSpec} associated with the given key. Resources
@@ -40,6 +40,6 @@ public interface SettableProviderSpec<KEY, RSRC, RESPONSE> extends ResourceProvi
      *
      * @throws NullPointerException if the given key is null.
      */
-    SettableSpec<RSRC, RESPONSE> setter(KEY key);
+    UpdatableSpec<UPDATE, RESPONSE> updater(KEY key);
 
 }

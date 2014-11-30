@@ -18,8 +18,7 @@ import static org.mockito.Mockito.verify;
 import rx.functions.Func1;
 
 
-public class GettableProviderAdaptKeyTest
-extends GettableProviderTest {
+public class UpdatableSetAdaptKeyTest extends UpdatableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -34,22 +33,22 @@ extends GettableProviderTest {
     @Override
     public void providerCallsDelegate() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
         // when:
-        provider.getter(origKey);
+        provider.updater(origKey);
 
         // then:
-        verify(this.mockProvider).getter(transformedKey);
+        verify(this.mockProvider).updater(transformedKey);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Gettable<Object>> function = provider.toFunction();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Updatable<Object, Object>> function = provider.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
@@ -57,11 +56,11 @@ extends GettableProviderTest {
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).getter(transformedKey);
+        verify(this.mockProvider).updater(transformedKey);
     }
 
     @Override
-    protected GettableProvider<Object, Object> createDefaultProvider() {
+    protected UpdatableSet<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 

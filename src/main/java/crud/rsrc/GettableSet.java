@@ -16,20 +16,19 @@ package crud.rsrc;
 
 import java.util.Objects;
 
-import crud.spi.GettableProviderSpec;
+import crud.spi.GettableSetSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
-public abstract class GettableProvider<KEY, RSRC>
-implements GettableProviderSpec<KEY, RSRC> {
+public abstract class GettableSet<KEY, RSRC> implements GettableSetSpec<KEY, RSRC> {
 
-    public static <KEY, RSRC> GettableProvider<KEY, RSRC> from(
-            final GettableProviderSpec<KEY, RSRC> provider) {
-        if (provider instanceof GettableProvider<?, ?>) {
-            return (GettableProvider<KEY, RSRC>) provider;
+    public static <KEY, RSRC> GettableSet<KEY, RSRC> from(
+            final GettableSetSpec<KEY, RSRC> provider) {
+        if (provider instanceof GettableSet<?, ?>) {
+            return (GettableSet<KEY, RSRC>) provider;
         } else {
-            return new GettableProvider<KEY, RSRC>() {
+            return new GettableSet<KEY, RSRC>() {
                 @Override
                 public Gettable<RSRC> getter(final KEY key) {
                     return Gettable.from(provider.getter(key));
@@ -38,13 +37,13 @@ implements GettableProviderSpec<KEY, RSRC> {
         }
     }
 
-    public <R> GettableProvider<KEY, R> mapValue(
+    public <R> GettableSet<KEY, R> mapValue(
             final Func1<? super Observable<RSRC>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final GettableProvider<KEY, R> result = new GettableProvider<KEY, R>() {
+        final GettableSet<KEY, R> result = new GettableSet<KEY, R>() {
             @Override
             public Gettable<R> getter(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .getter(key)
                         .mapValue(mapper);
             }
@@ -52,15 +51,15 @@ implements GettableProviderSpec<KEY, RSRC> {
         return result;
     }
 
-    public <K> GettableProvider<K, RSRC> adaptKey(
+    public <K> GettableSet<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final GettableProvider<K, RSRC> result = new GettableProvider<K, RSRC>() {
+        final GettableSet<K, RSRC> result = new GettableSet<K, RSRC>() {
             @Override
             public Gettable<RSRC> getter(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().getter(transformedKey);
+                return outerResourceSet().getter(transformedKey);
             }
         };
         return result;
@@ -78,7 +77,7 @@ implements GettableProviderSpec<KEY, RSRC> {
     @Override
     public abstract Gettable<RSRC> getter(KEY key);
 
-    private GettableProvider<KEY, RSRC> outerProvider() {
+    private GettableSet<KEY, RSRC> outerResourceSet() {
         return this;
     }
 

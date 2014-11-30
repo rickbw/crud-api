@@ -27,23 +27,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.spi.Resource;
-import crud.spi.SettableProviderSpec;
+import crud.spi.SettableSetSpec;
 import crud.spi.SettableSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link SettableProvider} that don't
+ * Tests those methods of {@link SettableSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class SettableProviderTest {
+public class SettableSetTest {
 
     protected final SettableSpec<Object, Object> mockResource = mock(SettableSpec.class);
 
-    protected final SettableProviderSpec<Object, Object, Object> mockProvider = mock(SettableProviderSpec.class);
+    protected final SettableSetSpec<Object, Object, Object> mockProvider = mock(SettableSetSpec.class);
 
 
     @Before
@@ -56,7 +56,7 @@ public class SettableProviderTest {
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -69,7 +69,7 @@ public class SettableProviderTest {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -83,7 +83,7 @@ public class SettableProviderTest {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
 
         // when:
         provider.setter(null);
@@ -92,7 +92,7 @@ public class SettableProviderTest {
     @Test
     public void providerNotEqualDelegate() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -103,10 +103,10 @@ public class SettableProviderTest {
     @Test
     public void fromProviderReturnsSameObject() {
         // given:
-        final SettableProvider<Object, Object, Object> origProvider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> origProvider = createDefaultProvider();
 
         // when:
-        final SettableProvider<Object, Object, Object> wrappedProvider = SettableProvider.from(
+        final SettableSet<Object, Object, Object> wrappedProvider = SettableSet.from(
                 origProvider);
 
         // then:
@@ -116,7 +116,7 @@ public class SettableProviderTest {
     @Test
     public void providerCallsDelegate() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -129,7 +129,7 @@ public class SettableProviderTest {
     @Test
     public void functionCallsDelegate() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Func1<Object, Settable<Object, Object>> function = provider.toFunction();
         final Object key = createDefaultKey();
 
@@ -140,8 +140,8 @@ public class SettableProviderTest {
         verify(this.mockProvider).setter(key);
     }
 
-    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
-        return SettableProvider.from(this.mockProvider);
+    protected SettableSet<Object, Object, Object> createDefaultProvider() {
+        return SettableSet.from(this.mockProvider);
     }
 
     protected Object createDefaultKey() {

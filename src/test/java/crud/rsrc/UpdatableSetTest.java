@@ -26,41 +26,41 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.GettableProviderSpec;
-import crud.spi.GettableSpec;
 import crud.spi.Resource;
+import crud.spi.UpdatableSetSpec;
+import crud.spi.UpdatableSpec;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link GettableProvider} that don't
+ * Tests those methods of {@link UpdatableSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
- * Those layered behaviors (like retries) are covered in test classes of their
- * own.
+ * Those layered behaviors (like transformations) are covered in test classes
+ * of their own.
  */
-public class GettableProviderTest {
+public class UpdatableSetTest {
 
-    protected final GettableSpec<Object> mockResource = mock(GettableSpec.class);
+    protected final UpdatableSpec<Object, Object> mockResource = mock(UpdatableSpec.class);
 
-    protected final GettableProviderSpec<Object, Object> mockProvider = mock(GettableProviderSpec.class);
+    protected final UpdatableSetSpec<Object, Object, Object> mockProvider = mock(UpdatableSetSpec.class);
 
 
     @Before
     public void setup() {
-        when(this.mockResource.get()).thenReturn(Observable.empty());
-        when(this.mockProvider.getter(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.getter(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockResource.update(any(Observable.class))).thenReturn(Observable.empty());
+        when(this.mockProvider.updater(any())).thenReturn(this.mockResource);
+        when(this.mockProvider.updater(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final GettableSpec<Object> resource = provider.getter(key);
+        final Resource resource = provider.updater(key);
 
         // then:
         assertNotNull(resource);
@@ -69,12 +69,12 @@ public class GettableProviderTest {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        final Resource resource1 = provider.getter(key);
-        final Resource resource2 = provider.getter(key);
+        final Resource resource1 = provider.updater(key);
+        final Resource resource2 = provider.updater(key);
 
         // then:
         assertEquals(resource1, resource2);
@@ -83,16 +83,16 @@ public class GettableProviderTest {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
 
         // when:
-        provider.getter(null);
+        provider.updater(null);
     }
 
     @Test
     public void providerNotEqualDelegate() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -103,10 +103,10 @@ public class GettableProviderTest {
     @Test
     public void fromProviderReturnsSameObject() {
         // given:
-        final GettableProvider<Object, Object> origProvider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> origProvider = createDefaultProvider();
 
         // when:
-        final GettableProvider<Object, Object> wrappedProvider = GettableProvider.from(
+        final UpdatableSet<Object, Object, Object> wrappedProvider = UpdatableSet.from(
                 origProvider);
 
         // then:
@@ -116,32 +116,32 @@ public class GettableProviderTest {
     @Test
     public void providerCallsDelegate() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
-        provider.getter(key);
+        provider.updater(key);
 
         // then:
-        verify(this.mockProvider).getter(key);
+        verify(this.mockProvider).updater(key);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
-        final GettableProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, Gettable<Object>> function = provider.toFunction();
+        final UpdatableSet<Object, Object, Object> provider = createDefaultProvider();
+        final Func1<Object, Updatable<Object, Object>> function = provider.toFunction();
         final Object key = createDefaultKey();
 
         // when:
         function.call(key);
 
         // then:
-        verify(this.mockProvider).getter(key);
+        verify(this.mockProvider).updater(key);
     }
 
-    protected GettableProvider<Object, Object> createDefaultProvider() {
-        return GettableProvider.from(this.mockProvider);
+    protected UpdatableSet<Object, Object, Object> createDefaultProvider() {
+        return UpdatableSet.from(this.mockProvider);
     }
 
     protected Object createDefaultKey() {

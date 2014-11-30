@@ -18,8 +18,7 @@ import static org.mockito.Mockito.verify;
 import rx.functions.Func1;
 
 
-public class SettableProviderAdaptKeyTest
-extends SettableProviderTest {
+public class SettableSetAdaptKeyTest extends SettableSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -34,7 +33,7 @@ extends SettableProviderTest {
     @Override
     public void providerCallsDelegate() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
 
@@ -48,7 +47,7 @@ extends SettableProviderTest {
     @Override
     public void functionCallsDelegate() {
         // given:
-        final SettableProvider<Object, Object, Object> provider = createDefaultProvider();
+        final SettableSet<Object, Object, Object> provider = createDefaultProvider();
         final Func1<Object, Settable<Object, Object>> function = provider.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = adapter.call(origKey);
@@ -61,7 +60,7 @@ extends SettableProviderTest {
     }
 
     @Override
-    protected SettableProvider<Object, Object, Object> createDefaultProvider() {
+    protected SettableSet<Object, Object, Object> createDefaultProvider() {
         return super.createDefaultProvider().<Object>adaptKey(adapter);
     }
 

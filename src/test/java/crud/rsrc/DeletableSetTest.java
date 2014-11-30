@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.spi.DeletableProviderSpec;
+import crud.spi.DeletableSetSpec;
 import crud.spi.DeletableSpec;
 import crud.spi.Resource;
 import rx.Observable;
@@ -34,16 +34,16 @@ import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link DeletableProvider} that don't
+ * Tests those methods of {@link DeletableSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class DeletableProviderTest {
+public class DeletableSetTest {
 
     protected final DeletableSpec<Object> mockResource = mock(DeletableSpec.class);
 
-    protected final DeletableProviderSpec<Object, Object> mockProvider = mock(DeletableProviderSpec.class);
+    protected final DeletableSetSpec<Object, Object> mockProvider = mock(DeletableSetSpec.class);
 
 
     @Before
@@ -56,7 +56,7 @@ public class DeletableProviderTest {
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -69,7 +69,7 @@ public class DeletableProviderTest {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -83,7 +83,7 @@ public class DeletableProviderTest {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
 
         // when:
         provider.deleter(null);
@@ -92,7 +92,7 @@ public class DeletableProviderTest {
     @Test
     public void providerNotEqualDelegate() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -103,10 +103,10 @@ public class DeletableProviderTest {
     @Test
     public void fromProviderReturnsSameObject() {
         // given:
-        final DeletableProvider<Object, Object> origProvider = createDefaultProvider();
+        final DeletableSet<Object, Object> origProvider = createDefaultProvider();
 
         // when:
-        final DeletableProvider<Object, Object> wrappedProvider = DeletableProvider.from(
+        final DeletableSet<Object, Object> wrappedProvider = DeletableSet.from(
                 origProvider);
 
         // then:
@@ -116,7 +116,7 @@ public class DeletableProviderTest {
     @Test
     public void providerCallsDelegate() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Object key = createDefaultKey();
 
         // when:
@@ -129,7 +129,7 @@ public class DeletableProviderTest {
     @Test
     public void functionCallsDelegate() {
         // given:
-        final DeletableProvider<Object, Object> provider = createDefaultProvider();
+        final DeletableSet<Object, Object> provider = createDefaultProvider();
         final Func1<Object, Deletable<Object>> function = provider.toFunction();
         final Object key = createDefaultKey();
 
@@ -140,8 +140,8 @@ public class DeletableProviderTest {
         verify(this.mockProvider).deleter(key);
     }
 
-    protected DeletableProvider<Object, Object> createDefaultProvider() {
-        return DeletableProvider.from(this.mockProvider);
+    protected DeletableSet<Object, Object> createDefaultProvider() {
+        return DeletableSet.from(this.mockProvider);
     }
 
     protected Object createDefaultKey() {

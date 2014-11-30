@@ -16,17 +16,17 @@ package crud.spi;
 
 
 /**
- * Look up a {@link DeletableSpec} based on a given key.
+ * Look up a {@link SettableSpec} based on a given key.
  *
- * @see GettableProviderSpec
- * @see SettableProviderSpec
- * @see UpdatableProviderSpec
- * @see DeletableSpec
+ * @see GettableSetSpec
+ * @see DeletableSetSpec
+ * @see UpdatableSetSpec
+ * @see SettableSpec
  */
-public interface DeletableProviderSpec<KEY, RESPONSE> extends ResourceProviderSpec {
+public interface SettableSetSpec<KEY, RSRC, RESPONSE> extends ResourceSet {
 
     /**
-     * Get the {@link DeletableSpec} associated with the given key. Resources
+     * Get the {@link UpdatableSpec} associated with the given key. Resources
      * returned for keys that are equal should themselves be equal. In no
      * case should a resource be {@code null}; the absence of state should be
      * handled by the {@code Resource} itself.
@@ -40,6 +40,6 @@ public interface DeletableProviderSpec<KEY, RESPONSE> extends ResourceProviderSp
      *
      * @throws NullPointerException if the given key is null.
      */
-    DeletableSpec<RESPONSE> deleter(KEY key);
+    SettableSpec<RSRC, RESPONSE> setter(KEY key);
 
 }
