@@ -14,9 +14,8 @@
  */
 package crud.rsrc;
 
-import java.util.Objects;
-
 import crud.spi.SettableSpec;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -24,7 +23,10 @@ import rx.functions.Func1;
 /**
  * A set of fluent transformations on {@link SettableSpec}s.
  */
-public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RESPONSE> {
+public class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RESPONSE> {
+
+    private final FluentFunc1<Observable<RSRC>, Observable<RESPONSE>> delegate;
+
 
     /**
      * If the given resource is a {@code Settable}, return it.
@@ -35,8 +37,23 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
         if (resource instanceof Settable<?, ?>) {
             return (Settable<RSRC, RESPONSE>) resource;
         } else {
-            return new DelegatingSettable<>(resource);
+            return from(new DelegateObjectMethods.Function<Observable<RSRC>, Observable<RESPONSE>>(resource) {
+                @Override
+                public Observable<RESPONSE> call(final Observable<RSRC> state) {
+                    return resource.set(state);
+                }
+            });
         }
+    }
+
+    public static <RSRC, RESPONSE> Settable<RSRC, RESPONSE> from(
+            final Func1<Observable<RSRC>, Observable<RESPONSE>> func) {
+        return new Settable<>(func);
+    }
+
+    @Override
+    public Observable<RESPONSE> set(final Observable<RSRC> newState) {
+        return this.delegate.call(newState);
     }
 
     /**
@@ -51,7 +68,8 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      */
     public <TO> Settable<RSRC, TO> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
-        return new MappingSettable<>(this, mapper);
+        final FluentFunc1<Observable<RSRC>, Observable<TO>> asFunction = toFunction().mapResult(mapper);
+        return from(asFunction);
     }
 
     /**
@@ -66,7 +84,8 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      */
     public <TO> Settable<TO, RESPONSE> adaptNewValue(
             final Func1<? super Observable<TO>, ? extends Observable<RSRC>> adapter) {
-        return new AdaptingSettable<>(this, adapter);
+        final FluentFunc1<Observable<TO>, Observable<RESPONSE>> asFunction = toFunction().adaptInput(adapter);
+        return from(asFunction);
     }
 
     /**
@@ -75,102 +94,32 @@ public abstract class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RES
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func1<Observable<RSRC>, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<Observable<RSRC>, Observable<RESPONSE>>(this) {
-            @Override
-            public Observable<RESPONSE> call(final Observable<RSRC> newValues) {
-                return Settable.this.set(newValues);
-            }
-        };
+    public FluentFunc1<Observable<RSRC>, Observable<RESPONSE>> toFunction() {
+        return this.delegate;
     }
 
-
-    /**
-     * Private superclass for the concrete nested classes here. It cannot be
-     * combined with its parent class, because it needs additional type
-     * parameters that should not be public.
-     */
-    private static abstract class AbstractSettable<FROMRS, TORS, FROMRP, TORP, T>
-    extends Settable<TORS, TORP> {
-        protected final ResourceStateMixin<SettableSpec<FROMRS, FROMRP>, T> state;
-
-        protected AbstractSettable(
-                final SettableSpec<FROMRS, FROMRP> delegate,
-                final T auxiliary) {
-            this.state = new ResourceStateMixin<>(delegate, auxiliary);
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final AbstractSettable<?, ?, ?, ?, ?> other = (AbstractSettable<?, ?, ?, ?, ?>) obj;
-            return this.state.equals(other.state);
+        if (obj == null) {
+            return false;
         }
-
-        @Override
-        public int hashCode() {
-            return 31 + this.state.hashCode();
+        if (getClass() != obj.getClass()) {
+            return false;
         }
+        final Settable<?, ?> other = (Settable<?, ?>) obj;
+        return this.delegate.equals(other.delegate);
     }
 
-
-    private static final class DelegatingSettable<RSRC, RESPONSE>
-    extends AbstractSettable<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
-        public DelegatingSettable(final SettableSpec<RSRC, RESPONSE> delegate) {
-            super(delegate, null);
-        }
-
-        @Override
-        public Observable<RESPONSE> set(final Observable<RSRC> newValue) {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .set(newValue);
-            return response;
-        }
+    @Override
+    public int hashCode() {
+        return 31 + this.delegate.hashCode();
     }
 
-
-    private static final class MappingSettable<RSRC, FROM, TO>
-    extends AbstractSettable<RSRC, RSRC, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
-        public MappingSettable(
-                final SettableSpec<RSRC, FROM> delegate,
-                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> set(final Observable<RSRC> newValue) {
-            final Observable<FROM> response = super.state.getDelegate().set(newValue);
-            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
-            return mapped;
-        }
-    }
-
-
-    private static final class AdaptingSettable<FROM, TO, RESPONSE>
-    extends AbstractSettable<FROM, TO, RESPONSE, RESPONSE, Func1<? super Observable<TO>, ? extends Observable<FROM>>> {
-        private AdaptingSettable(
-                final SettableSpec<FROM, RESPONSE> delegate,
-                final Func1<? super Observable<TO>, ? extends Observable<FROM>> adapter) {
-            super(delegate, adapter);
-            Objects.requireNonNull(adapter, "null function");
-        }
-
-        @Override
-        public Observable<RESPONSE> set(final Observable<TO> newValue) {
-            final Observable<FROM> transformed = super.state.getAuxiliaryState().call(newValue);
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .set(transformed);
-            return response;
-        }
+    private Settable(final Func1<Observable<RSRC>, Observable<RESPONSE>> delegate) {
+        this.delegate = FluentFunc1.from(delegate);
     }
 
 }

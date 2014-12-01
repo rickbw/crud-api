@@ -14,9 +14,8 @@
  */
 package crud.rsrc;
 
-import java.util.Objects;
-
 import crud.spi.UpdatableSpec;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -24,7 +23,10 @@ import rx.functions.Func1;
 /**
  * A set of fluent transformations on {@link UpdatableSpec}s.
  */
-public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDATE, RESPONSE> {
+public class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDATE, RESPONSE> {
+
+    private final FluentFunc1<Observable<UPDATE>, Observable<RESPONSE>> delegate;
+
 
     /**
      * If the given resource is a {@code Updatable}, return it.
@@ -35,8 +37,23 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
         if (resource instanceof Updatable<?, ?>) {
             return (Updatable<UPDATE, RESPONSE>) resource;
         } else {
-            return new DelegatingUpdatable<>(resource);
+            return from(new DelegateObjectMethods.Function<Observable<UPDATE>, Observable<RESPONSE>>(resource) {
+                @Override
+                public Observable<RESPONSE> call(final Observable<UPDATE> update) {
+                    return resource.update(update);
+                }
+            });
         }
+    }
+
+    public static <UPDATE, RESPONSE> Updatable<UPDATE, RESPONSE> from(
+            final Func1<Observable<UPDATE>, Observable<RESPONSE>> func) {
+        return new Updatable<>(func);
+    }
+
+    @Override
+    public Observable<RESPONSE> update(final Observable<UPDATE> update) {
+        return this.delegate.call(update);
     }
 
     /**
@@ -51,7 +68,8 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      */
     public <TO> Updatable<UPDATE, TO> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
-        return new MappingUpdatable<>(this, mapper);
+        final FluentFunc1<Observable<UPDATE>, Observable<TO>> asFunction = toFunction().mapResult(mapper);
+        return from(asFunction);
     }
 
     /**
@@ -66,7 +84,8 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      */
     public <TO> Updatable<TO, RESPONSE> adaptUpdate(
             final Func1<? super Observable<TO>, ? extends Observable<UPDATE>> adapter) {
-        return new AdaptingUpdatable<>(this, adapter);
+        final FluentFunc1<Observable<TO>, Observable<RESPONSE>> asFunction = toFunction().adaptInput(adapter);
+        return from(asFunction);
     }
 
     /**
@@ -75,107 +94,32 @@ public abstract class Updatable<UPDATE, RESPONSE> implements UpdatableSpec<UPDAT
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func1<Observable<UPDATE>, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<Observable<UPDATE>, Observable<RESPONSE>>(this) {
-            @Override
-            public Observable<RESPONSE> call(final Observable<UPDATE> update) {
-                return Updatable.this.update(update);
-            }
-        };
+    public FluentFunc1<Observable<UPDATE>, Observable<RESPONSE>> toFunction() {
+        return this.delegate;
     }
 
-
-    /**
-     * Private superclass for the concrete nested classes here. It cannot be
-     * combined with its parent class, because it needs additional type
-     * parameters that should not be public.
-     */
-    private static abstract class AbstractUpdatable<FROMU, TOU, FROMR, TOR, T>
-    extends Updatable<TOU, TOR> {
-        protected final ResourceStateMixin<UpdatableSpec<FROMU, FROMR>, T> state;
-
-        protected AbstractUpdatable(
-                final UpdatableSpec<FROMU, FROMR> delegate,
-                final T auxiliary) {
-            this.state = new ResourceStateMixin<>(delegate, auxiliary);
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final AbstractUpdatable<?, ?, ?, ?, ?> other = (AbstractUpdatable<?, ?, ?, ?, ?>) obj;
-            return this.state.equals(other.state);
+        if (obj == null) {
+            return false;
         }
-
-        @Override
-        public int hashCode() {
-            return 31 + this.state.hashCode();
+        if (getClass() != obj.getClass()) {
+            return false;
         }
+        final Updatable<?, ?> other = (Updatable<?, ?>) obj;
+        return this.delegate.equals(other.delegate);
     }
 
-
-    /**
-     * It may seem that the business of this class could be accomplished by
-     * Updatable itself. However, that would require an
-     * additional layer of equals() and hashCode overrides and an unsafe cast.
-     */
-    private static final class DelegatingUpdatable<UPDATE, RESPONSE>
-    extends AbstractUpdatable<UPDATE, UPDATE, RESPONSE, RESPONSE, Void> {
-        public DelegatingUpdatable(final UpdatableSpec<UPDATE, RESPONSE> delegate) {
-            super(delegate, null);
-        }
-
-        @Override
-        public Observable<RESPONSE> update(final Observable<UPDATE> update) {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .update(update);
-            return response;
-        }
+    @Override
+    public int hashCode() {
+        return 31 + this.delegate.hashCode();
     }
 
-
-    private static final class MappingUpdatable<UPDATE, FROM, TO>
-    extends AbstractUpdatable<UPDATE, UPDATE, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
-        private MappingUpdatable(
-                final UpdatableSpec<UPDATE, FROM> delegate,
-                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> update(final Observable<UPDATE> update) {
-            final Observable<FROM> response = super.state.getDelegate().update(update);
-            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
-            return mapped;
-        }
-    }
-
-
-    private static final class AdaptingUpdatable<FROM, TO, RESPONSE>
-    extends AbstractUpdatable<FROM, TO, RESPONSE, RESPONSE, Func1<? super Observable<TO>, ? extends Observable<FROM>>> {
-        private AdaptingUpdatable(
-                final UpdatableSpec<FROM, RESPONSE> delegate,
-                final Func1<? super Observable<TO>, ? extends Observable<FROM>> adapter) {
-            super(delegate, adapter);
-            Objects.requireNonNull(adapter, "null function");
-        }
-
-        @Override
-        public Observable<RESPONSE> update(final Observable<TO> update) {
-            final Observable<FROM> transformed = super.state.getAuxiliaryState().call(update);
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .update(transformed);
-            return response;
-        }
+    private Updatable(final Func1<Observable<UPDATE>, Observable<RESPONSE>> delegate) {
+        this.delegate = FluentFunc1.from(delegate);
     }
 
 }
