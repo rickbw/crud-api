@@ -14,9 +14,8 @@
  */
 package crud.rsrc;
 
-import java.util.Objects;
-
 import crud.spi.DeletableSpec;
+import crud.util.FluentFunc0;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -25,7 +24,10 @@ import rx.functions.Func1;
 /**
  * A set of fluent transformations on {@link DeletableSpec}s.
  */
-public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
+public class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
+
+    private final FluentFunc0<Observable<RESPONSE>> delegate;
+
 
     /**
      * If the given resource is a {@code Deletable}, return it.
@@ -35,8 +37,22 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
         if (resource instanceof Deletable<?>) {
             return (Deletable<RESPONSE>) resource;
         } else {
-            return new DelegatingDeletable<>(resource);
+            return from(new DelegateObjectMethods.Callable<Observable<RESPONSE>>(resource) {
+                @Override
+                public Observable<RESPONSE> call() {
+                    return resource.delete();
+                }
+            });
         }
+    }
+
+    public static <RESPONSE> Deletable<RESPONSE> from(final Func0<Observable<RESPONSE>> func) {
+        return new Deletable<>(func);
+    }
+
+    @Override
+    public Observable<RESPONSE> delete() {
+        return this.delegate.call();
     }
 
     /**
@@ -51,7 +67,8 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      */
     public <TO> Deletable<TO> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
-        return new MappingDeletable<>(this, mapper);
+        final FluentFunc0<Observable<TO>> asFunction = toFunction().mapResult(mapper);
+        return from(asFunction);
     }
 
     /**
@@ -60,88 +77,32 @@ public abstract class Deletable<RESPONSE> implements DeletableSpec<RESPONSE> {
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func0<Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Callable<Observable<RESPONSE>>(this) {
-            @Override
-            public Observable<RESPONSE> call() {
-                return Deletable.this.delete();
-            }
-        };
+    public FluentFunc0<Observable<RESPONSE>> toFunction() {
+        return this.delegate;
     }
 
-
-    /**
-     * Private superclass for the concrete nested classes here. It cannot be
-     * combined with its parent class, because it needs additional type
-     * parameters that should not be public.
-     */
-    private static abstract class AbstractDeletable<FROM, TO, T>
-    extends Deletable<TO> {
-        protected final ResourceStateMixin<DeletableSpec<FROM>, T> state;
-
-        protected AbstractDeletable(
-                final DeletableSpec<FROM> delegate,
-                final T auxiliary) {
-            this.state = new ResourceStateMixin<>(delegate, auxiliary);
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final AbstractDeletable<?, ?, ?> other = (AbstractDeletable<?, ?, ?>) obj;
-            return this.state.equals(other.state);
+        if (obj == null) {
+            return false;
         }
-
-        @Override
-        public int hashCode() {
-            return 31 + this.state.hashCode();
+        if (getClass() != obj.getClass()) {
+            return false;
         }
+        final Deletable<?> other = (Deletable<?>) obj;
+        return this.delegate.equals(other.delegate);
     }
 
-
-    /**
-     * It may seem that the business of this class could be accomplished by
-     * Deletable itself. However, that would require an
-     * additional layer of equals() and hashCode overrides and an unsafe cast.
-     */
-    private static final class DelegatingDeletable<RSRC>
-    extends AbstractDeletable<RSRC, RSRC, Void> {
-        public DelegatingDeletable(final DeletableSpec<RSRC> delegate) {
-            super(delegate, null);
-        }
-
-        @Override
-        public Observable<RSRC> delete() {
-            final Observable<RSRC> response = super.state.getDelegate()
-                    .delete();
-            return response;
-        }
+    @Override
+    public int hashCode() {
+        return 31 + this.delegate.hashCode();
     }
 
-
-    private static final class MappingDeletable<FROM, TO>
-    extends AbstractDeletable<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
-        public MappingDeletable(
-                final DeletableSpec<FROM> delegate,
-                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> delete() {
-            final Observable<FROM> response = super.state.getDelegate().delete();
-            final Observable<TO> mapped = super.state.getAuxiliaryState().call(response);
-            return mapped;
-        }
+    private Deletable(final Func0<Observable<RESPONSE>> delegate) {
+        this.delegate = FluentFunc0.from(delegate);
     }
 
 }

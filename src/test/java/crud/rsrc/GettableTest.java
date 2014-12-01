@@ -24,6 +24,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Supplier;
+
 import crud.spi.GettableSpec;
 import crud.spi.GettableSpecTest;
 import rx.Observable;
@@ -38,11 +40,18 @@ import rx.functions.Func0;
 public class GettableTest extends GettableSpecTest<Object> {
 
     protected final GettableSpec<Object> mockDelegate = mock(GettableSpec.class);
+    /**
+     * Mockito considers Supplier.get() and GettableSpec.get() to be
+     * different methods, even though the latter overrides the former.
+     * Changing the static type of the target works around this stupidity.
+     */
+    private final Supplier<Observable<Object>> mockSupplier = this.mockDelegate;
 
 
     @Before
     public void setup() {
         when(this.mockDelegate.get()).thenReturn(Observable.empty());
+        when(this.mockSupplier.get()).thenReturn(Observable.empty());
     }
 
     @Test
@@ -65,7 +74,7 @@ public class GettableTest extends GettableSpecTest<Object> {
         resource.get();
 
         // then:
-        verify(this.mockDelegate).get();
+        verify(this.mockSupplier).get();
     }
 
     @Test

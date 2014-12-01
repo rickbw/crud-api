@@ -14,11 +14,10 @@
  */
 package crud.rsrc;
 
-import java.util.Objects;
-
 import com.google.common.base.Supplier;
 
 import crud.spi.GettableSpec;
+import crud.util.FluentFunc0;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -27,22 +26,35 @@ import rx.functions.Func1;
 /**
  * A set of fluent transformations on {@link GettableSpec}s.
  */
-public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
+public class Gettable<RSRC> implements GettableSpec<RSRC> {
+
+    private final FluentFunc0<Observable<RSRC>> delegate;
+
 
     /**
      * If the given resource is a {@code Gettable}, return it.
      * Otherwise, wrap it in a new instance.
      */
-    public static <RSRC> Gettable<RSRC> from(final GettableSpec<RSRC> resource) {
-        if (resource instanceof Gettable<?>) {
+    public static <RSRC> Gettable<RSRC> from(final Supplier<Observable<RSRC>> resource) {
+        if (resource instanceof Gettable) {
             return (Gettable<RSRC>) resource;
         } else {
-            return new DelegatingGettable<>(resource);
+            return from(new DelegateObjectMethods.Callable<Observable<RSRC>>(resource) {
+                @Override
+                public Observable<RSRC> call() {
+                    return resource.get();
+                }
+            });
         }
     }
 
-    public static <RSRC> Gettable<RSRC> from(final Supplier<? extends RSRC> supplier) {
-        return new SupplierGettable<>(supplier);
+    public static <RSRC> Gettable<RSRC> from(final Func0<Observable<RSRC>> func) {
+        return new Gettable<>(func);
+    }
+
+    @Override
+    public Observable<RSRC> get() {
+        return this.delegate.call();
     }
 
     /**
@@ -57,7 +69,8 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      */
     public <TO> Gettable<TO> mapValue(
             final Func1<? super Observable<RSRC>, ? extends Observable<TO>> mapper) {
-        return new MappingGettable<>(this, mapper);
+        final FluentFunc0<Observable<TO>> asFunction = toFunction().mapResult(mapper);
+        return from(asFunction);
     }
 
     /**
@@ -66,128 +79,32 @@ public abstract class Gettable<RSRC> implements GettableSpec<RSRC> {
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
      */
-    public Func0<Observable<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
-            @Override
-            public Observable<RSRC> call() {
-                return Gettable.this.get();
-            }
-        };
+    public FluentFunc0<Observable<RSRC>> toFunction() {
+        return this.delegate;
     }
 
-
-    private static final class SupplierGettable<RSRC> extends Gettable<RSRC> {
-        private final Supplier<? extends RSRC> supplier;
-
-        public SupplierGettable(final Supplier<? extends RSRC> supplier) {
-            this.supplier = Objects.requireNonNull(supplier);
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-
-        @Override
-        public Observable<RSRC> get() {
-            final RSRC value = supplier.get();
-            return Observable.just(value);
+        if (obj == null) {
+            return false;
         }
-
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + '(' + this.supplier + ')';
+        if (getClass() != obj.getClass()) {
+            return false;
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final SupplierGettable<?> other = (SupplierGettable<?>) obj;
-            return this.supplier.equals(other.supplier);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.supplier);
-        }
+        final Gettable<?> other = (Gettable<?>) obj;
+        return this.delegate.equals(other.delegate);
     }
 
-
-    /**
-     * Private superclass for the concrete nested classes here. It cannot be
-     * combined with its parent class, because it needs additional type
-     * parameters that should not be public.
-     */
-    private static abstract class AbstractGettable<FROM, TO, T>
-    extends Gettable<TO> {
-        protected final ResourceStateMixin<GettableSpec<FROM>, T> state;
-
-        protected AbstractGettable(
-                final GettableSpec<FROM> delegate,
-                final T auxiliary) {
-            this.state = new ResourceStateMixin<>(delegate, auxiliary);
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final AbstractGettable<?, ?, ?> other = (AbstractGettable<?, ?, ?>) obj;
-            return this.state.equals(other.state);
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 + this.state.hashCode();
-        }
+    @Override
+    public int hashCode() {
+        return 31 + this.delegate.hashCode();
     }
 
-
-    /**
-     * It may seem that the business of this class could be accomplished by
-     * Gettable itself. However, that would require an
-     * additional layer of equals() and hashCode overrides and an unsafe cast.
-     */
-    private static final class DelegatingGettable<RSRC>
-    extends AbstractGettable<RSRC, RSRC, Void> {
-        public DelegatingGettable(final GettableSpec<RSRC> delegate) {
-            super(delegate, null);
-        }
-
-        @Override
-        public Observable<RSRC> get() {
-            final Observable<RSRC> rsrc = super.state.getDelegate()
-                    .get();
-            return rsrc;
-        }
-    }
-
-
-    private static final class MappingGettable<FROM, TO>
-    extends AbstractGettable<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
-        public MappingGettable(
-                final GettableSpec<FROM> delegate,
-                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> get() {
-            final Observable<FROM> rsrc = super.state.getDelegate().get();
-            final Observable<TO> mapped = super.state.getAuxiliaryState().call(rsrc);
-            return mapped;
-        }
+    private Gettable(final Func0<Observable<RSRC>> delegate) {
+        this.delegate = FluentFunc0.from(delegate);
     }
 
 }
