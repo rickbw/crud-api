@@ -16,6 +16,7 @@ package crud.rsrc;
 
 import java.util.Objects;
 
+import crud.spi.ResourceSet;
 import crud.spi.SettableSetSpec;
 import crud.util.FluentFunc1;
 import rx.Observable;
@@ -96,6 +97,26 @@ implements SettableSetSpec<KEY, RSRC, RESPONSE> {
             @Override
             public Settable<RSRC, RESPONSE> call(final KEY key) {
                 return setter(key);
+            }
+        });
+    }
+
+    /**
+     * Present this {@code SettableSet} as an {@link UpdatableSet}. All
+     * updates made via {@link Updatable#update(Observable)} will be reflected
+     * in the state of a corresponding {@link Settable} resource, as if
+     * {@link Settable#set(Observable)} had been called instead.
+     *
+     * Viewing this {@link ResourceSet} as an {@code UpdatableSet} is safe,
+     * because the contract of {@code Updatable} is more relaxed than that of
+     * {@code Settable}. (The opposite is not true, and you will find no
+     * {@code toSettableSet} operation on {@code UpdatableSet}.)
+     */
+    public UpdatableSet<KEY, RSRC, RESPONSE> toUpdatableSet() {
+        return UpdatableSet.from(new Func1<KEY, Updatable<RSRC, RESPONSE>>() {
+            @Override
+            public Updatable<RSRC, RESPONSE> call(final KEY key) {
+                return setter(key).toUpdater();
             }
         });
     }

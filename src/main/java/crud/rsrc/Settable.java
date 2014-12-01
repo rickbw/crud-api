@@ -98,6 +98,21 @@ public class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RESPONSE> {
         return this.delegate;
     }
 
+    /**
+     * Present this {@code Settable} as an {@link Updatable}. All updates made
+     * via {@link Updatable#update(Observable)} will be reflected in the state
+     * of this resource, as if {@link #set(Observable)} had been called
+     * instead.
+     *
+     * Viewing this resource as an {@code Updatable} is safe, because the
+     * contract of {@code Updatable} is more relaxed than that of
+     * {@code Settable}. (The opposite is not true, and you will find no
+     * {@code toSetter} operation on {@code Updatable}.)
+     */
+    public Updatable<RSRC, RESPONSE> toUpdater() {
+        return Updatable.from(toFunction());
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
