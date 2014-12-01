@@ -21,6 +21,7 @@ import com.google.common.base.Function;
 import crud.spi.DeletableSetSpec;
 import crud.spi.Resource;
 import crud.spi.ResourceSet;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -48,6 +49,16 @@ public abstract class DeletableSet<KEY, RESPONSE> implements DeletableSetSpec<KE
                 }
             };
         }
+    }
+
+    public static <KEY, RESPONSE> DeletableSet<KEY, RESPONSE> from(
+            final Func1<? super KEY, ? extends Deletable<RESPONSE>> provider) {
+        return new DeletableSet<KEY, RESPONSE>() {
+            @Override
+            public Deletable<RESPONSE> deleter(final KEY key) {
+                return provider.call(key);
+            }
+        };
     }
 
     /**
@@ -89,12 +100,12 @@ public abstract class DeletableSet<KEY, RESPONSE> implements DeletableSetSpec<KE
      * to {@link Resource}.
      */
     public Func1<KEY, Deletable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, Deletable<RESPONSE>>(this) {
+        return FluentFunc1.from(new DelegateObjectMethods.Function<KEY, Deletable<RESPONSE>>(this) {
             @Override
             public Deletable<RESPONSE> call(final KEY key) {
                 return deleter(key);
             }
-        };
+        });
     }
 
     @Override

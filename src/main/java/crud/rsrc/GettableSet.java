@@ -17,6 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.GettableSetSpec;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -35,6 +36,16 @@ public abstract class GettableSet<KEY, RSRC> implements GettableSetSpec<KEY, RSR
                 }
             };
         }
+    }
+
+    public static <KEY, RSRC> GettableSet<KEY, RSRC> from(
+            final Func1<? super KEY, ? extends Gettable<RSRC>> provider) {
+        return new GettableSet<KEY, RSRC>() {
+            @Override
+            public Gettable<RSRC> getter(final KEY key) {
+                return provider.call(key);
+            }
+        };
     }
 
     public <R> GettableSet<KEY, R> mapValue(
@@ -65,13 +76,13 @@ public abstract class GettableSet<KEY, RSRC> implements GettableSetSpec<KEY, RSR
         return result;
     }
 
-    public Func1<KEY, Gettable<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, Gettable<RSRC>>(this) {
+    public FluentFunc1<KEY, Gettable<RSRC>> toFunction() {
+        return FluentFunc1.from(new DelegateObjectMethods.Function<KEY, Gettable<RSRC>>(this) {
             @Override
             public Gettable<RSRC> call(final KEY key) {
                 return getter(key);
             }
-        };
+        });
     }
 
     @Override

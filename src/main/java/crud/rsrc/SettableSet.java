@@ -17,6 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.SettableSetSpec;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -36,6 +37,16 @@ implements SettableSetSpec<KEY, RSRC, RESPONSE> {
                 }
             };
         }
+    }
+
+    public static <KEY, RSRC, RESPONSE> SettableSet<KEY, RSRC, RESPONSE> from(
+            final Func1<? super KEY, ? extends Settable<RSRC, RESPONSE>> provider) {
+        return new SettableSet<KEY, RSRC, RESPONSE>() {
+            @Override
+            public Settable<RSRC, RESPONSE> setter(final KEY key) {
+                return provider.call(key);
+            }
+        };
     }
 
     public <RESP> SettableSet<KEY, RSRC, RESP> mapResponse(
@@ -80,13 +91,13 @@ implements SettableSetSpec<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public Func1<KEY, Settable<RSRC, RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, Settable<RSRC, RESPONSE>>(this) {
+    public FluentFunc1<KEY, Settable<RSRC, RESPONSE>> toFunction() {
+        return FluentFunc1.from(new DelegateObjectMethods.Function<KEY, Settable<RSRC, RESPONSE>>(this) {
             @Override
             public Settable<RSRC, RESPONSE> call(final KEY key) {
                 return setter(key);
             }
-        };
+        });
     }
 
     @Override

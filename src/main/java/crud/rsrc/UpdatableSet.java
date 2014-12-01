@@ -17,6 +17,7 @@ package crud.rsrc;
 import java.util.Objects;
 
 import crud.spi.UpdatableSetSpec;
+import crud.util.FluentFunc1;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -39,6 +40,16 @@ implements UpdatableSetSpec<KEY, UPDATE, RESPONSE> {
                 }
             };
         }
+    }
+
+    public static <KEY, UPDATE, RESPONSE> UpdatableSet<KEY, UPDATE, RESPONSE> from(
+            final Func1<? super KEY, ? extends Updatable<UPDATE, RESPONSE>> provider) {
+        return new UpdatableSet<KEY, UPDATE, RESPONSE>() {
+            @Override
+            public Updatable<UPDATE, RESPONSE> updater(final KEY key) {
+                return provider.call(key);
+            }
+        };
     }
 
     public <R> UpdatableSet<KEY, UPDATE, R> mapResponse(
@@ -83,13 +94,13 @@ implements UpdatableSetSpec<KEY, UPDATE, RESPONSE> {
         return result;
     }
 
-    public Func1<KEY, Updatable<UPDATE, RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, Updatable<UPDATE, RESPONSE>>(this) {
+    public FluentFunc1<KEY, Updatable<UPDATE, RESPONSE>> toFunction() {
+        return FluentFunc1.from(new DelegateObjectMethods.Function<KEY, Updatable<UPDATE, RESPONSE>>(this) {
             @Override
             public Updatable<UPDATE, RESPONSE> call(final KEY key) {
                 return updater(key);
             }
-        };
+        });
     }
 
     @Override
