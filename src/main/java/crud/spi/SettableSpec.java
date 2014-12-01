@@ -33,11 +33,18 @@ import rx.Observable;
 public interface SettableSpec<RSRC, RESPONSE> extends Resource {
 
     /**
-     * Replace the value of the resource with the value(s) emitted by the
-     * given {@link Observable}. If the resource
-     * previously had no value, it will be initialized with the provided
-     * value(s). The operation may return one or more responses via the
-     * given {@link Observable} as the request is acted upon.
+     * Replace the value of the resource with the last value emitted by the
+     * given {@link Observable}. If the resource previously had no value, it
+     * will be initialized with that value. The operation may return one or
+     * more responses via the given {@link Observable} as the request is acted
+     * upon.
+     *
+     * Note that the behavior of this method differs from that of
+     * {@link UpdatableSpec#update(Observable)} with respect to multiple
+     * emitted input values. Since this operation is idempotent and replaces
+     * the value of the resource completely, it can safely ignore all
+     * intermediate states of its input. However, since neither is true of
+     * {@code update}, that operation must observe all intermediate values.
      *
      * This operation is idempotent.
      *

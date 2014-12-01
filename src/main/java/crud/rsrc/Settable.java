@@ -53,7 +53,7 @@ public class Settable<RSRC, RESPONSE> implements SettableSpec<RSRC, RESPONSE> {
 
     @Override
     public Observable<RESPONSE> set(final Observable<RSRC> newState) {
-        return this.delegate.call(newState);
+        return this.delegate.call(newState.last());
     }
 
     /**

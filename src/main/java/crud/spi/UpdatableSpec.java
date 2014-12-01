@@ -37,8 +37,18 @@ public interface UpdatableSpec<UPDATE, RESPONSE> extends Resource {
 
     /**
      * Update the value of the resource in an unspecified way based on the
-     * given value. The operation may return one or more responses via the
-     * given {@link Observable} as the request is acted upon.
+     * given value(s). The resulting final state of the resource will reflect
+     * all of the emitted updates, just as if {@code update} had been called
+     * with each of them individually The operation may return one or more
+     * responses via the given {@link Observable} as the request is acted
+     * upon.
+     *
+     * Note that the behavior of this method differs from that of
+     * {@link SettableSpec#set(Observable)} with respect to multiple emitted
+     * input values. Since that operation is idempotent and replaces the
+     * value of the resource completely, it can safely ignore all intermediate
+     * states of its input. However, since neither is true of this operation,
+     * it must observe all intermediate values.
      *
      * This operation is <em>not</em> idempotent, in general.
      *
