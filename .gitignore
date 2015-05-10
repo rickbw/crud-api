@@ -1,0 +1,20 @@
+######################
+# Build output directies
+######################
+/target
+*/target
+
+######################
+# Eclipse specific files/directories
+######################
+.classpath
+.project
+.settings
+.metadata
+
+######################
+# OS generated files
+######################
+.DS_Store*
+Icon?
+Thumbs.db
