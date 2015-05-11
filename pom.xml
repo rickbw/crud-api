@@ -65,6 +65,9 @@ the License.
 
         <rxjava.version>1.0.10</rxjava.version>
         <guava.version>18.0</guava.version>
+        <jsr305.version>3.0.0</jsr305.version>
+        <javaee.version>7.0</javaee.version>
+        <slf4j.version>1.7.12</slf4j.version>
 
         <junit.version>4.11</junit.version>
         <mockito.version>1.8.5</mockito.version>
@@ -88,6 +91,22 @@ the License.
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${jsr305.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>${javaee.version}</version>
         </dependency>
 
         <dependency>
