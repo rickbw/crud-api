@@ -85,8 +85,12 @@ public class JmsDataBus implements DataBus {
             return Optional.absent();
         }
 
-        // TODO: Return JMS DataSet to wrap Destination!
-        return Optional.absent();
+        /* Has to be unchecked, because the method signature requires dynamic
+         * typing, but in this case, the types are actually static.
+         */
+        @SuppressWarnings("unchecked")
+        final Optional<DataSet<K, E>> dataSet = createDataSet(id, destination);
+        return dataSet;
     }
 
     @Override
@@ -97,6 +101,17 @@ public class JmsDataBus implements DataBus {
         } catch (final JMSException jx) {
             return Observable.error(new MiddlewareException(jx.getMessage(), jx));
         }
+    }
+
+    /**
+     * Generics have to be unchecked, because the signature of
+     * {@link #dataSet(DataSetId)} requires dynamic typing, but in this case,
+     * the types are actually static.
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Optional createDataSet(final DataSetId id, final Destination destination) {
+        final JmsDataSet dataSet = new JmsDataSet(id, destination);
+        return Optional.of(dataSet);
     }
 
 }
