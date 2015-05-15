@@ -14,6 +14,7 @@
  */
 package crud.core;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Optional;
@@ -60,6 +61,18 @@ public interface DataBus {
     public void start();
 
     public <K, E> Optional<DataSet<K, E>> dataSet(DataSetId<K, E> id);
+
+    /**
+     * Start a new {@link Session}.
+     *
+     * @param requestedOrdering The ordering guarantee that the application
+     *          requires of the resulting {@link Session}. The newly started
+     *          Session may offer a more-stringent ordering than that
+     *          requested, but can never be less.
+     *
+     * @throws MiddlewareException  If a Session could not be started.
+     */
+    public @Nonnull Session startSession(Session.Ordering requestedOrdering);
 
     /**
      * Initiate the (possibly asynchronous) shutdown of this {@link DataBus}.

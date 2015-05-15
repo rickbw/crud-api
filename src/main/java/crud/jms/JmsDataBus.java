@@ -27,11 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 
 import crud.core.DataBus;
 import crud.core.DataSet;
 import crud.core.DataSetId;
 import crud.core.MiddlewareException;
+import crud.core.Session;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -39,6 +41,16 @@ import rx.functions.Func1;
 public class JmsDataBus implements DataBus {
 
     private static final Logger log = LoggerFactory.getLogger(JmsDataBus.class);
+
+    /**
+     * TODO: All this mapping to be injected, or otherwise configured.
+     *
+     * TODO: Add support for application-level acknowledgments.
+     */
+    private static final ImmutableMap<Session.Ordering, Integer> acknowledgeModes = ImmutableMap.of(
+            Session.Ordering.UNORDERED, javax.jms.Session.DUPS_OK_ACKNOWLEDGE,
+            Session.Ordering.ORDERED, javax.jms.Session.AUTO_ACKNOWLEDGE,
+            Session.Ordering.TRANSACTIONAL, javax.jms.Session.AUTO_ACKNOWLEDGE);
 
     private @Nonnull final Connection connection;
     private @Nonnull final Func1<String, Destination> destinationLookup;
@@ -91,6 +103,21 @@ public class JmsDataBus implements DataBus {
         @SuppressWarnings("unchecked")
         final Optional<DataSet<K, E>> dataSet = createDataSet(id, destination);
         return dataSet;
+    }
+
+    @SuppressWarnings("resource")
+    @Override
+    public Session startSession(final Session.Ordering requestedOrdering) {
+        try {
+            final boolean transacted = (requestedOrdering == Session.Ordering.TRANSACTIONAL);
+            final int acknowledgeMode = acknowledgeModes.get(requestedOrdering);
+            final javax.jms.Session delegateSession = this.connection.createSession(
+                    transacted,
+                    acknowledgeMode);
+            return new SessionWrapper(delegateSession);
+        } catch (final JMSException jx) {
+            throw new MiddlewareException(jx.getMessage(), jx);
+        }
     }
 
     @Override

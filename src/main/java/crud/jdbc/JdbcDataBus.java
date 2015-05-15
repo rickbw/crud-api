@@ -28,6 +28,7 @@ import crud.core.DataBus;
 import crud.core.DataSet;
 import crud.core.DataSetId;
 import crud.core.MiddlewareException;
+import crud.core.Session;
 import rx.Observable;
 
 
@@ -68,15 +69,19 @@ public class JdbcDataBus implements DataBus {
 
     @Override
     public <K, E> Optional<DataSet<K, E>> dataSet(final DataSetId<K, E> id) {
+        // TODO: What state should be encapsulated in the Table?
+        final DataSet<K, E> table = new Table<>(id);
+        return Optional.of(table);
+    }
+
+    @SuppressWarnings("resource")
+    @Override
+    public Session startSession(final Session.Ordering requestedOrdering) {
         try {
-            // TODO: Move Connection to "session" concept:
             final Connection connection = this.username.isPresent()
                 ? this.dataSource.getConnection(this.username.get(), this.password.get())
                 : this.dataSource.getConnection();
-
-            // TODO: What state should be encapsulated in the Table?
-            final DataSet<K, E> table = new Table<>(id);
-            return Optional.of(table);
+            return new JdbcSession(connection, requestedOrdering);
         } catch (final SQLException sqx) {
             throw new MiddlewareException(sqx.getMessage(), sqx);
         }
