@@ -79,6 +79,11 @@ public interface DataBus {
      * Once this DataBus is shut down, it will no longer be possible to
      * consume or produce data. This state cannot be undone.
      * <p/>
+     * The shutdown commences immediately with the call to this method; it
+     * does not require the resulting {@link Observable} to be subscribed.
+     * That Observable behaves as if {@link Observable#cache() cached}: the
+     * same result will be emitted to any subscriber.
+     * <p/>
      * <b>Design Rationale</b>: Why does this class not implement a
      * synchronous shutdown analogous to the synchronous {@link #start()},
      * and perhaps even implement {@link AutoCloseable}? Because that would

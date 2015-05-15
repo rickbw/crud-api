@@ -47,6 +47,11 @@ public interface Session {
      * returns {@link Ordering#TRANSACTIONAL}; in all other cases, it will be
      * ignored, and the returned {@link Observable} will
      * {@link Observer#onCompleted() complete} successfully.
+     * <p/>
+     * The commit commences immediately with the call to this method; it
+     * does not require the resulting {@link Observable} to be subscribed.
+     * That Observable behaves as if {@link Observable#cache() cached}: the
+     * same result will be emitted to any subscriber.
      *
      * @return  An {@link Observable} that will
      *          {@link Observer#onCompleted() complete} when the commit has
@@ -61,6 +66,11 @@ public interface Session {
      * returns {@link Ordering#TRANSACTIONAL}; in all other cases, it will be
      * ignored, and the returned {@link Observable} will
      * {@link Observer#onCompleted() complete} successfully.
+     * <p/>
+     * The roll-back commences immediately with the call to this method; it
+     * does not require the resulting {@link Observable} to be subscribed.
+     * That Observable behaves as if {@link Observable#cache() cached}: the
+     * same result will be emitted to any subscriber.
      *
      * @return  An {@link Observable} that will
      *          {@link Observer#onCompleted() complete} when the roll-back has
@@ -70,6 +80,11 @@ public interface Session {
 
     /**
      * Stop all data observations in the context of this {@link Session}.
+     * <p/>
+     * The stop commences immediately with the call to this method; it
+     * does not require the resulting {@link Observable} to be subscribed.
+     * That Observable behaves as if {@link Observable#cache() cached}: the
+     * same result will be emitted to any subscriber.
      * <p/>
      * <b>Design Rationale</b>: Why does this class not implement
      * {@link AutoCloseable}? Because that would encourage block-structured

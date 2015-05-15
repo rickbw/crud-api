@@ -16,17 +16,43 @@ package crud.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 import crud.core.MiddlewareException;
 import crud.core.Session;
+import crud.util.SessionWorker;
 import rx.Observable;
 
 
 public class JdbcSession implements Session {
 
+    private final SessionWorker worker = new SessionWorker();
     private @Nonnull final Connection connection;
+
+    private final Callable<Void> commitTask = new Callable<Void>() {
+        @Override
+        public Void call() throws SQLException {
+            JdbcSession.this.connection.commit();
+            return null;
+        }
+    };
+    private final Callable<Void> rollbackTask = new Callable<Void>() {
+        @Override
+        public Void call() throws SQLException {
+            JdbcSession.this.connection.rollback();
+            return null;
+        }
+    };
+    private final Callable<Void> closeTask = new Callable<Void>() {
+        @Override
+        public Void call() throws SQLException {
+            JdbcSession.this.connection.close();
+            return null;
+        }
+    };
 
 
     public JdbcSession(
@@ -54,32 +80,17 @@ public class JdbcSession implements Session {
 
     @Override
     public Observable<Void> commit() {
-        try {
-            this.connection.commit();
-            return Observable.empty();
-        } catch (final SQLException sx) {
-            return Observable.error(new MiddlewareException(sx.getMessage(), sx));
-        }
+        return this.worker.submit(this.commitTask);
     }
 
     @Override
     public Observable<Void> rollback() {
-        try {
-            this.connection.rollback();
-            return Observable.empty();
-        } catch (final SQLException sx) {
-            return Observable.error(new MiddlewareException(sx.getMessage(), sx));
-        }
+        return this.worker.submit(this.rollbackTask);
     }
 
     @Override
     public Observable<Void> stop() {
-        try {
-            this.connection.close();
-            return Observable.empty();
-        } catch (final SQLException sx) {
-            return Observable.error(new MiddlewareException(sx.getMessage(), sx));
-        }
+        return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
 }
