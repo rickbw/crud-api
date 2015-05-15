@@ -69,12 +69,14 @@ public class JdbcDataBus implements DataBus {
     @Override
     public <K, E> Optional<DataSet<K, E>> dataSet(final DataSetId<K, E> id) {
         try {
+            // TODO: Move Connection to "session" concept:
             final Connection connection = this.username.isPresent()
                 ? this.dataSource.getConnection(this.username.get(), this.password.get())
                 : this.dataSource.getConnection();
 
-            // TODO: Wrap Connection in JDBC DataSet!
-            return Optional.absent();
+            // TODO: What state should be encapsulated in the Table?
+            final DataSet<K, E> table = new Table<>(id);
+            return Optional.of(table);
         } catch (final SQLException sqx) {
             throw new MiddlewareException(sqx.getMessage(), sqx);
         }
