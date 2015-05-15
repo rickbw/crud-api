@@ -87,7 +87,7 @@ public class JmsDataBus implements DataBus {
             log.warn("JMS DataSets have element type Message, not {}", id.getElementType().getName());
             return Optional.absent();
         }
-        if (!String.class.isAssignableFrom(id.getKeyType())) {
+        if (String.class != id.getKeyType()) {
             log.warn("JMS DataSets have key type String, not {}", id.getKeyType().getName());
             return Optional.absent();
         }
@@ -97,12 +97,7 @@ public class JmsDataBus implements DataBus {
             return Optional.absent();
         }
 
-        /* Has to be unchecked, because the method signature requires dynamic
-         * typing, but in this case, the types are actually static.
-         */
-        @SuppressWarnings("unchecked")
-        final Optional<DataSet<K, E>> dataSet = createDataSet(id, destination);
-        return dataSet;
+        return createDataSet(id, destination);
     }
 
     @SuppressWarnings("resource")
@@ -130,15 +125,21 @@ public class JmsDataBus implements DataBus {
         }
     }
 
-    /**
-     * Generics have to be unchecked, because the signature of
-     * {@link #dataSet(DataSetId)} requires dynamic typing, but in this case,
-     * the types are actually static.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Optional createDataSet(final DataSetId id, final Destination destination) {
-        final JmsDataSet dataSet = new JmsDataSet(id, destination);
-        return Optional.of(dataSet);
+    private static <K, E> Optional<DataSet<K, E>> createDataSet(
+            final DataSetId<K, E> id,
+            final Destination destination) {
+        /* All of these unchecked conversions are necessary, because the
+         * method signature requires dynamic typing, but in this case, the
+         * types are actually static.
+         */
+        @SuppressWarnings("unchecked")
+        final DataSetId<String, ? extends Message> msgDataSetId = (DataSetId<String, ? extends Message>) id;
+        final DataSet<String, ? extends Message> jmsDataSet = new JmsDataSet<>(msgDataSetId, destination);
+        @SuppressWarnings("rawtypes")
+        final Optional untypedDataSet = Optional.of(jmsDataSet);
+        @SuppressWarnings("unchecked")
+        final Optional<DataSet<K, E>> typedDataSet = untypedDataSet;
+        return typedDataSet;
     }
 
 }

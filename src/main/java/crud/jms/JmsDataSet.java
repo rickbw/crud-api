@@ -24,21 +24,21 @@ import crud.core.DataSet;
 import crud.core.DataSetId;
 
 
-/*package*/ class JmsDataSet implements DataSet<String, Message> {
+/*package*/ class JmsDataSet<M extends Message> implements DataSet<String, M> {
 
-    private @Nonnull final DataSetId<String, Message> id;
+    private @Nonnull final DataSetId<String, M> id;
     private @Nonnull final Destination destination;
 
 
     public JmsDataSet(
-            @Nonnull final DataSetId<String, Message> id,
+            @Nonnull final DataSetId<String, M> id,
             @Nonnull final Destination destination) {
         this.id = Objects.requireNonNull(id);
         this.destination = Objects.requireNonNull(destination);
     }
 
     @Override
-    public DataSetId<String, Message> getId() {
+    public DataSetId<String, M> getId() {
         return this.id;
     }
 
