@@ -27,7 +27,7 @@ import crud.util.SessionWorker;
 import rx.Observable;
 
 
-public class JdbcSession implements Session {
+/*package*/ class JdbcSession implements Session {
 
     private final SessionWorker worker = new SessionWorker();
     private @Nonnull final Connection connection;
@@ -91,6 +91,14 @@ public class JdbcSession implements Session {
     @Override
     public Observable<Void> stop() {
         return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }
+
+    /*package*/ @Nonnull Connection getConnection() {
+        return this.connection;
+    }
+
+    /*package*/ @Nonnull SessionWorker getWorker() {
+        return this.worker;
     }
 
 }

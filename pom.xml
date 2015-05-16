@@ -107,6 +107,16 @@ the License.
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>${javaee.version}</version>
+            <exclusions>
+                <exclusion>
+                    <!--
+                    javaee-api already contains these classes, but depends on
+                    the artifact as well. Genius.
+                    -->
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>javax.mail</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

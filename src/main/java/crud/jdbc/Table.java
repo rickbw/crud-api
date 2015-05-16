@@ -14,24 +14,37 @@
  */
 package crud.jdbc;
 
+import java.sql.Connection;
 import java.util.Objects;
 
 import crud.core.DataSet;
 import crud.core.DataSetId;
+import crud.core.DataSource;
+import crud.core.Session;
+import crud.util.SessionWorker;
 
 
-/*package*/ class Table<K, E> implements DataSet<K, E> {
+/*package*/ class Table implements DataSet<StatementTemplate, ResultSetRow> {
 
-    private final DataSetId<K, E> id;
+    private final DataSetId<StatementTemplate, ResultSetRow> id;
 
 
-    public Table(final DataSetId<K, E> id) {
+    public Table(final DataSetId<StatementTemplate, ResultSetRow> id) {
         this.id = Objects.requireNonNull(id);
     }
 
     @Override
-    public DataSetId<K, E> getId() {
+    public DataSetId<StatementTemplate, ResultSetRow> getId() {
         return this.id;
+    }
+
+    @SuppressWarnings("resource")
+    @Override
+    public DataSource<ResultSetRow> dataSource(final Session session, final StatementTemplate query) {
+        final JdbcSession jdbcSession = (JdbcSession) session;
+        final Connection connection = jdbcSession.getConnection();
+        final SessionWorker worker = jdbcSession.getWorker();
+        return new QueryDataSource(connection, query, worker);
     }
 
     @Override

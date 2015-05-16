@@ -94,7 +94,7 @@ public interface Session {
      * asynchronously-running I/O operations.
      *
      * @return  An {@link Observable} that will
-     *          {@link Observer#onCompleted() complete} when the roll-back has
+     *          {@link Observer#onCompleted() complete} when the stop has
      *          taken place, or otherwise reflect any failure that occurred.
      */
     public Observable<Void> stop();

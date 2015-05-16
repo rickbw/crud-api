@@ -26,6 +26,22 @@ import javax.annotation.Nonnull;
  */
 public interface DataSet<K, E> {
 
+    /**
+     * @return  A {@link DataSetId} equal to the one provided to the call to
+     *          {@link DataBus#dataSet(DataSetId)} that created this
+     *          {@link DataSet}.
+     */
     public @Nonnull DataSetId<K, E> getId();
+
+    /**
+     * Return a readable source of those data elements of type {@code E}
+     * identified by the given key. Those elements must be read in the
+     * thread associated with the given {@link Session}.
+     *
+     * @throws ClassCastException   If the {@link Session} was not obtained
+     *              from a {@link DataBus} compatible with this
+     *              {@link DataSet}.
+     */
+    public @Nonnull DataSource<E> dataSource(@Nonnull Session session, @Nonnull K key);
 
 }

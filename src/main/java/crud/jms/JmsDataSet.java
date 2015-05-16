@@ -18,10 +18,15 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 
 import crud.core.DataSet;
 import crud.core.DataSetId;
+import crud.core.DataSource;
+import crud.core.MiddlewareException;
+import crud.core.Session;
 
 
 /*package*/ class JmsDataSet<M extends Message> implements DataSet<String, M> {
@@ -43,15 +48,25 @@ import crud.core.DataSetId;
     }
 
     @Override
+    @SuppressWarnings("resource")
+    public DataSource<M> dataSource(final Session session, final String key) {
+        final javax.jms.Session realSession = ((SessionWrapper) session).getDelegate();
+        try {
+            final MessageConsumer messageConsumer = key.isEmpty()
+                    ? realSession.createConsumer(this.destination)
+                    : realSession.createConsumer(this.destination, key);
+            return new MessageConsumerDataSource<>(messageConsumer, this.id.getElementType());
+        } catch (final JMSException jx) {
+            throw new MiddlewareException(jx.getMessage(), jx);
+        }
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName() + '('
                 + this.id
                 + ", " + this.destination
                 + ')';
-    }
-
-    /*package*/ @Nonnull Destination getDestination() {
-        return this.destination;
     }
 
 }

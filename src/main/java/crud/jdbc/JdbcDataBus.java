@@ -21,6 +21,9 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
@@ -33,6 +36,8 @@ import rx.Observable;
 
 
 public class JdbcDataBus implements DataBus {
+
+    private static final Logger log = LoggerFactory.getLogger(JdbcDataBus.class);
 
     private @Nonnull final DataSource dataSource;
     private final Optional<String> username;
@@ -69,9 +74,16 @@ public class JdbcDataBus implements DataBus {
 
     @Override
     public <K, E> Optional<DataSet<K, E>> dataSet(final DataSetId<K, E> id) {
-        // TODO: What state should be encapsulated in the Table?
-        final DataSet<K, E> table = new Table<>(id);
-        return Optional.of(table);
+        if (StatementTemplate.class != id.getKeyType()) {
+            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            return Optional.absent();
+        }
+        if (ResultSetRow.class != id.getElementType()) {
+            // JDBC only support DataSets of type ResultSetRow
+            log.warn("JDBC DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
+            return Optional.absent();
+        }
+        return createDataSet(id);
     }
 
     @SuppressWarnings("resource")
@@ -90,6 +102,21 @@ public class JdbcDataBus implements DataBus {
     @Override
     public Observable<Void> shutdown() {
         return Observable.empty();  // nothing to do
+    }
+
+    private static <K, E> Optional<DataSet<K, E>> createDataSet(final DataSetId<K, E> id) {
+        /* All of these unchecked conversions are necessary, because the
+         * method signature requires dynamic typing, but in this case, the
+         * types are actually static.
+         */
+        @SuppressWarnings("unchecked")
+        final DataSetId<StatementTemplate, ResultSetRow> resultSetDataSetId = (DataSetId<StatementTemplate, ResultSetRow>) id;
+        final DataSet<StatementTemplate, ResultSetRow> table = new Table(resultSetDataSetId);
+        @SuppressWarnings("rawtypes")
+        final Optional untypedDataSet = Optional.of(table);
+        @SuppressWarnings("unchecked")
+        final Optional<DataSet<K, E>> typedDataSet = untypedDataSet;
+        return typedDataSet;
     }
 
 }

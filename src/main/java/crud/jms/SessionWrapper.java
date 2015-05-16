@@ -24,7 +24,7 @@ import crud.core.Session;
 import rx.Observable;
 
 
-public class SessionWrapper implements Session {
+/*package*/ class SessionWrapper implements Session {
 
     private @Nonnull final javax.jms.Session delegate;
 
@@ -73,6 +73,10 @@ public class SessionWrapper implements Session {
         } catch (final JMSException jx) {
             return Observable.error(new MiddlewareException(jx.getMessage(), jx));
         }
+    }
+
+    /*package*/ javax.jms.Session getDelegate() {
+        return this.delegate;
     }
 
 }
