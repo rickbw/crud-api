@@ -16,7 +16,10 @@ package crud.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -38,6 +41,9 @@ import rx.Observable;
 public class JdbcDataBus implements DataBus {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcDataBus.class);
+
+    private static final Set<Session.Ordering> supportedOrderings = Collections.unmodifiableSet(
+            EnumSet.allOf(Session.Ordering.class));
 
     private @Nonnull final DataSource dataSource;
     private final Optional<String> username;
@@ -84,6 +90,11 @@ public class JdbcDataBus implements DataBus {
             return Optional.absent();
         }
         return createDataSet(id);
+    }
+
+    @Override
+    public Set<Session.Ordering> getSupportedSessionOrderings() {
+        return supportedOrderings;
     }
 
     @SuppressWarnings("resource")

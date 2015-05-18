@@ -14,7 +14,10 @@
  */
 package crud.jms;
 
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +37,7 @@ import crud.core.DataSet;
 import crud.core.DataSetId;
 import crud.core.MiddlewareException;
 import crud.core.Session;
+import crud.core.Session.Ordering;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -41,6 +45,9 @@ import rx.functions.Func1;
 public class JmsDataBus implements DataBus {
 
     private static final Logger log = LoggerFactory.getLogger(JmsDataBus.class);
+
+    private static final Set<Ordering> supportedOrderings = Collections.unmodifiableSet(
+            EnumSet.allOf(Session.Ordering.class));
 
     /**
      * TODO: All this mapping to be injected, or otherwise configured.
@@ -98,6 +105,11 @@ public class JmsDataBus implements DataBus {
         }
 
         return createDataSet(id, destination);
+    }
+
+    @Override
+    public Set<Session.Ordering> getSupportedSessionOrderings() {
+        return supportedOrderings;
     }
 
     @SuppressWarnings("resource")

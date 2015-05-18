@@ -14,6 +14,8 @@
  */
 package crud.core;
 
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -60,7 +62,26 @@ public interface DataBus {
      */
     public void start();
 
+    /**
+     * Access the set of data elements identified by the given
+     * {@link DataSetId}. If no such set exists, return
+     * {@link Optional#absent()}.
+     *
+     * @throws MiddlewareException  If it is not possible to determine whether
+     *                              such a data set exists.
+     */
     public <K, E> Optional<DataSet<K, E>> dataSet(DataSetId<K, E> id);
+
+    /**
+     * Return the set of {@link crud.core.Session.Ordering} values that would
+     * result in a successful return from
+     * {@link #startSession(crud.core.Session.Ordering)}, without an
+     * {@link UnsupportedSessionOrderingException} being thrown. Because this
+     * {@link DataBus} is always allowed to silently upgrade the requested
+     * ordering, the set will always contain at least the element
+     * {@link crud.core.Session.Ordering#UNORDERED}.
+     */
+    public Set<Session.Ordering> getSupportedSessionOrderings();
 
     /**
      * Start a new {@link Session}.
@@ -70,7 +91,10 @@ public interface DataBus {
      *          Session may offer a more-stringent ordering than that
      *          requested, but can never be less.
      *
-     * @throws MiddlewareException  If a Session could not be started.
+     * @throws UnsupportedSessionOrderingException   If the requested ordering
+     *              is higher than any supported by this {@link DataBus}.
+     * @throws MiddlewareException          If a Session could not be started
+     *              for any other reason.
      */
     public @Nonnull Session startSession(Session.Ordering requestedOrdering);
 

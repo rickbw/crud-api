@@ -18,7 +18,7 @@ import java.io.IOException;
 
 
 /**
- * Indicates that a problem occured communicating with the target middleware.
+ * Indicates that a problem occurred communicating with the target middleware.
  * For convenience, this exception is unchecked. Check analogs include
  * {@link IOException}, {@link java.sql.SQLException}, and
  * {@javax.jms.JMSException}.
