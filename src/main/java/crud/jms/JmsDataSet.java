@@ -48,6 +48,11 @@ import crud.core.Session;
     }
 
     @Override
+    public boolean isReadable() {
+        return true;
+    }
+
+    @Override
     @SuppressWarnings("resource")
     public DataSource<M> dataSource(final Session session, final String key) {
         final javax.jms.Session realSession = ((SessionWrapper) session).getDelegate();

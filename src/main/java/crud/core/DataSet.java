@@ -34,13 +34,25 @@ public interface DataSet<K, E> {
     public @Nonnull DataSetId<K, E> getId();
 
     /**
+     * @return  true if this {@link DataSet} can be read by means of
+     *          {@link #dataSource(Session, Object)}, or false otherwise.
+     *          Clients may assume that this property is immutable over the
+     *          lifetime of a particular DataSet instance.
+     */
+    public boolean isReadable();
+
+    /**
      * Return a readable source of those data elements of type {@code E}
      * identified by the given key. Those elements must be read in the
      * thread associated with the given {@link Session}.
      *
-     * @throws ClassCastException   If the {@link Session} was not obtained
-     *              from a {@link DataBus} compatible with this
+     * @throws ClassCastException               If the {@link Session} was not
+     *              obtained from a {@link DataBus} compatible with this
      *              {@link DataSet}.
+     * @throws UnsupportedOperationException    If this {@link DataSet} cannot
+     *              be read.
+     *
+     * @see #isReadable()
      */
     public @Nonnull DataSource<E> dataSource(@Nonnull Session session, @Nonnull K key);
 

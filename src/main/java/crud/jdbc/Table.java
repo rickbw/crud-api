@@ -38,6 +38,11 @@ import crud.util.SessionWorker;
         return this.id;
     }
 
+    @Override
+    public boolean isReadable() {
+        return true;
+    }
+
     @SuppressWarnings("resource")
     @Override
     public DataSource<ResultSetRow> dataSource(final Session session, final StatementTemplate query) {
