@@ -20,41 +20,48 @@ import javax.annotation.Nonnull;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 
-import crud.core.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import crud.core.DataSink;
 import crud.core.MiddlewareException;
-import crud.core.ReadableDataSet;
 import crud.core.Session;
+import crud.core.WritableDataSet;
 
 
-/*package*/ class JmsDataSet<M extends Message> implements ReadableDataSet<String, M> {
+/*package*/ class MessageProducingDataSet<M extends Message> implements WritableDataSet<String, M, Void> {
 
-    private @Nonnull final ReadableDataSet.Id<String, M> id;
+    private static final Logger log = LoggerFactory.getLogger(MessageProducingDataSet.class);
+
+    private @Nonnull final WritableDataSet.Id<String, M, Void> id;
     private @Nonnull final Destination destination;
 
 
-    public JmsDataSet(
-            @Nonnull final ReadableDataSet.Id<String, M> id,
+    public MessageProducingDataSet(
+            @Nonnull final WritableDataSet.Id<String, M, Void> id,
             @Nonnull final Destination destination) {
         this.id = Objects.requireNonNull(id);
         this.destination = Objects.requireNonNull(destination);
     }
 
     @Override
-    public ReadableDataSet.Id<String, M> getId() {
+    public WritableDataSet.Id<String, M, Void> getId() {
         return this.id;
     }
 
-    @Override
     @SuppressWarnings("resource")
-    public DataSource<M> dataSource(final Session session, final String key) {
+    @Override
+    public DataSink<M, Void> dataSink(final Session session, final String key) {
+        if (!key.isEmpty()) {
+            log.warn("Ignoring key {}", key);
+        }
+
         final javax.jms.Session realSession = ((SessionWrapper) session).getDelegate();
         try {
-            final MessageConsumer messageConsumer = key.isEmpty()
-                    ? realSession.createConsumer(this.destination)
-                    : realSession.createConsumer(this.destination, key);
-            return new MessageConsumerDataSource<>(messageConsumer, this.id.getElementType());
+            final MessageProducer messageProducer = realSession.createProducer(this.destination);
+            return new MessageProducerDataSink<>(messageProducer);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

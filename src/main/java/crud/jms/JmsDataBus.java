@@ -33,6 +33,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import crud.core.DataBus;
+import crud.core.DataSet;
 import crud.core.MiddlewareException;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
@@ -90,13 +91,7 @@ public class JmsDataBus implements DataBus {
      */
     @Override
     public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
-        if (!Message.class.isAssignableFrom(id.getElementType())) {
-            // JMS only support DataSets of type Message (or a subtype)
-            log.warn("JMS DataSets have element type Message, not {}", id.getElementType().getName());
-            return Optional.absent();
-        }
-        if (String.class != id.getKeyType()) {
-            log.warn("JMS DataSets have key type String, not {}", id.getKeyType().getName());
+        if (!keyAndElementTypesAcceptable(id)) {
             return Optional.absent();
         }
 
@@ -105,12 +100,25 @@ public class JmsDataBus implements DataBus {
             return Optional.absent();
         }
 
-        return createDataSet(id, destination);
+        return createReadableDataSet(id, destination);
     }
 
     @Override
     public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        return Optional.absent();   // TODO
+        if (!keyAndElementTypesAcceptable(id)) {
+            return Optional.absent();
+        }
+        if (Void.class != id.getWriteResultType()) {
+            log.warn("JMS DataSets have write-result type Void, not {}", id.getWriteResultType().getName());
+            return Optional.absent();
+        }
+
+        @Nullable final Destination destination = this.destinationLookup.call(id.getName());
+        if (destination == null) {
+            return Optional.absent();
+        }
+
+        return createWritableDataSet(id, destination);
     }
 
     @Override
@@ -143,7 +151,7 @@ public class JmsDataBus implements DataBus {
         }
     }
 
-    private static <K, E> Optional<ReadableDataSet<K, E>> createDataSet(
+    private static <K, E> Optional<ReadableDataSet<K, E>> createReadableDataSet(
             final ReadableDataSet.Id<K, E> id,
             final Destination destination) {
         /* All of these unchecked conversions are necessary, because the
@@ -152,12 +160,41 @@ public class JmsDataBus implements DataBus {
          */
         @SuppressWarnings("unchecked")
         final ReadableDataSet.Id<String, ? extends Message> msgDataSetId = (ReadableDataSet.Id<String, ? extends Message>) id;
-        final ReadableDataSet<String, ? extends Message> jmsDataSet = new JmsDataSet<>(msgDataSetId, destination);
+        final ReadableDataSet<String, ? extends Message> jmsDataSet = new MessageConsumingDataSet<>(msgDataSetId, destination);
         @SuppressWarnings("rawtypes")
         final Optional untypedDataSet = Optional.of(jmsDataSet);
         @SuppressWarnings("unchecked")
         final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
         return typedDataSet;
+    }
+
+    private static <K, E, R> Optional<WritableDataSet<K, E, R>> createWritableDataSet(
+            final WritableDataSet.Id<K, E, R> id,
+            final Destination destination) {
+        /* All of these unchecked conversions are necessary, because the
+         * method signature requires dynamic typing, but in this case, the
+         * types are actually static.
+         */
+        @SuppressWarnings("unchecked")
+        final WritableDataSet.Id<String, ? extends Message, Void> msgDataSetId = (WritableDataSet.Id<String, ? extends Message, Void>) id;
+        final WritableDataSet<String, ? extends Message, Void> jmsDataSet = new MessageProducingDataSet<>(msgDataSetId, destination);
+        @SuppressWarnings("rawtypes")
+        final Optional untypedDataSet = Optional.of(jmsDataSet);
+        @SuppressWarnings("unchecked")
+        final Optional<WritableDataSet<K, E, R>> typedDataSet = untypedDataSet;
+        return typedDataSet;
+    }
+
+    private static boolean keyAndElementTypesAcceptable(final DataSet.Id<?, ?> id) {
+        if (String.class != id.getKeyType()) {
+            log.warn("JMS DataSets have key type String, not {}", id.getKeyType().getName());
+            return false;
+        }
+        if (!Message.class.isAssignableFrom(id.getElementType())) {
+            log.warn("JMS DataSets have element type Message, not {}", id.getElementType().getName());
+            return false;
+        }
+        return true;
     }
 
 }
