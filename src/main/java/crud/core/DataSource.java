@@ -19,10 +19,13 @@ import rx.Observer;
 
 
 /**
- * A source of data elements of type {@code E}.
+ * A <em>source</em> of data elements of type {@code E}, read by the
+ * application from somewhere else.
  *
  * @param <E>   The static type of the data elements observable from this
  *              {@link DataSource}.
+ *
+ * @see DataSink
  *
  * @author Rick Warren
  */
@@ -32,10 +35,11 @@ public interface DataSource<E> {
      * Begin observation of the data elements. The {@link Observable} may be
      * either "hot" or "cold", depending on the nature of the data source.
      * <p/>
-     * Except in special cases, consuming from this {@link DataSource} will
-     * involve I/O. In the interest of segregating those threads that perform
-     * blocking I/O and those that perform computation, implementations should
-     * not block on this call, nor should elements be delivered in the thread
+     * <b>Note to implementers</b>: Except in special cases, consuming from
+     * this {@link DataSource} will involve I/O. In the interest of
+     * segregating those threads that perform blocking I/O and those that
+     * perform computation, implementations should not block on this call, nor
+     * should elements be delivered in the thread
      * {@link Observable#subscribe() subscribing} to the Observable. Instead,
      * data elements should be delivered to {@link Observer}s in a thread
      * associated with the {@link Session} used to create this

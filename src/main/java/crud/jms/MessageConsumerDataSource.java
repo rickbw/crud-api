@@ -56,7 +56,9 @@ import rx.Subscription;
     @Override
     public Observable<Void> stop() {
         try {
-            // JMS allows close() to be called from any thread.
+            /* TODO: JMS allows close() to be called from any thread.
+             * However, it may block, to better to move it elsewhere.
+             */
             this.consumer.close();
             /* TODO: Should this result in an onCompleted() to the
              * hotObservable? Or perhaps an onError() with a specific
