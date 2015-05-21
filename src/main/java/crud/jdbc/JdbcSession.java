@@ -89,7 +89,7 @@ import rx.Observable;
     }
 
     @Override
-    public Observable<Void> stop() {
+    public Observable<Void> shutdown() {
         return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 

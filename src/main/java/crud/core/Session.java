@@ -32,7 +32,7 @@ import rx.Observer;
  *
  * @author Rick Warren
  */
-public interface Session {
+public interface Session extends AsyncCloseable {
 
     /**
      * Return the guarantee this {@link Session} makes with respect to the
@@ -77,27 +77,6 @@ public interface Session {
      *          taken place, or otherwise reflect any failure that occurred.
      */
     public Observable<Void> rollback();
-
-    /**
-     * Stop all data observations in the context of this {@link Session}.
-     * <p/>
-     * The stop commences immediately with the call to this method; it
-     * does not require the resulting {@link Observable} to be subscribed.
-     * That Observable behaves as if {@link Observable#cache() cached}: the
-     * same result will be emitted to any subscriber.
-     * <p/>
-     * <b>Design Rationale</b>: Why does this class not implement
-     * {@link AutoCloseable}? Because that would encourage block-structured
-     * code, such as with try-with-resources, and asynchronous data processing
-     * is not naturally block structured. Applications would tend to
-     * inadvertently shut down their {@link Session}s underneath their
-     * asynchronously-running I/O operations.
-     *
-     * @return  An {@link Observable} that will
-     *          {@link Observer#onCompleted() complete} when the stop has
-     *          taken place, or otherwise reflect any failure that occurred.
-     */
-    public Observable<Void> stop();
 
 
     /**

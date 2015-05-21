@@ -66,7 +66,7 @@ import rx.Observable;
     }
 
     @Override
-    public Observable<Void> stop() {
+    public Observable<Void> shutdown() {
         try {
             this.delegate.close();
             return Observable.empty();

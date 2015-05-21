@@ -22,7 +22,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.google.common.base.Optional;
 
 import rx.Observable;
-import rx.Observer;
 
 
 /**
@@ -36,7 +35,7 @@ import rx.Observer;
  * @author Rick Warren
  */
 @ThreadSafe
-public interface DataBus {
+public interface DataBus extends AsyncCloseable {
 
     /**
      * When a {@link DataBus} is first initialized, it is in a "stopped"
@@ -97,30 +96,5 @@ public interface DataBus {
      *              for any other reason.
      */
     public @Nonnull Session startSession(Session.Ordering requestedOrdering);
-
-    /**
-     * Initiate the (possibly asynchronous) shutdown of this {@link DataBus}.
-     * Once this DataBus is shut down, it will no longer be possible to
-     * consume or produce data. This state cannot be undone.
-     * <p/>
-     * The shutdown commences immediately with the call to this method; it
-     * does not require the resulting {@link Observable} to be subscribed.
-     * That Observable behaves as if {@link Observable#cache() cached}: the
-     * same result will be emitted to any subscriber.
-     * <p/>
-     * <b>Design Rationale</b>: Why does this class not implement a
-     * synchronous shutdown analogous to the synchronous {@link #start()},
-     * and perhaps even implement {@link AutoCloseable}? Because that would
-     * encourage block-structured code, such as with try-with-resources, and
-     * asynchronous data processing is not naturally block structured.
-     * Applications would tend to inadvertently shut down their
-     * {@link DataBus} underneath their asynchronously-running I/O operations.
-     *
-     * @return  A zero-element {@link Observable}. It will report
-     *          {@link Observer#onCompleted() onCompleted} on successful
-     *          shutdown, or {@link Observer#onError(Throwable) onError} if
-     *          an error occurred.
-     */
-    public Observable<Void> shutdown();
 
 }

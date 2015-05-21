@@ -78,7 +78,7 @@ import rx.Subscriber;
     }
 
     @Override
-    public Observable<Void> stop() {
+    public Observable<Void> shutdown() {
         return this.worker.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {

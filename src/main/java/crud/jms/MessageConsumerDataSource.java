@@ -54,7 +54,7 @@ import rx.Subscription;
     }
 
     @Override
-    public Observable<Void> stop() {
+    public Observable<Void> shutdown() {
         try {
             /* TODO: JMS allows close() to be called from any thread.
              * However, it may block, to better to move it elsewhere.
