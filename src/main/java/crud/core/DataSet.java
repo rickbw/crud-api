@@ -14,6 +14,8 @@
  */
 package crud.core;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 
@@ -22,38 +24,87 @@ import javax.annotation.Nonnull;
  * table, or a JMS topic (in which every element would be typed by
  * {@javax.jms.Message}).
  *
+ * @param <K>   The type of the keys.
+ * @param <E>   The type of the data elements, identified by those keys.
+ *
  * @author Rick Warren
  */
 public interface DataSet<K, E> {
 
     /**
-     * @return  A {@link DataSetId} equal to the one provided to the call to
-     *          {@link DataBus#dataSet(DataSetId)} that created this
-     *          {@link DataSet}.
+     * @return  An {@link Id} equal to the one provided when this
+     *          {@link DataSet} was created.
      */
-    public @Nonnull DataSetId<K, E> getId();
+    public @Nonnull Id<K, E> getId();
+
 
     /**
-     * @return  true if this {@link DataSet} can be read by means of
-     *          {@link #dataSource(Session, Object)}, or false otherwise.
-     *          Clients may assume that this property is immutable over the
-     *          lifetime of a particular DataSet instance.
+     * Identifies a {@link DataSet}: a named collection of homogeneously-typed
+     * data elements in the target middleware. Subsets of these elements are
+     * identified by keys.
+     *
+     * @param <K>   The type of the keys.
+     * @param <E>   The type of the data elements, identified by those keys.
      */
-    public boolean isReadable();
+    public static abstract class Id<K, E> {
+        private @Nonnull final String name;
+        private @Nonnull final Class<K> keyType;
+        private @Nonnull final Class<E> elementType;
 
-    /**
-     * Return a readable source of those data elements of type {@code E}
-     * identified by the given key. Those elements must be read in the
-     * thread associated with the given {@link Session}.
-     *
-     * @throws ClassCastException               If the {@link Session} was not
-     *              obtained from a {@link DataBus} compatible with this
-     *              {@link DataSet}.
-     * @throws UnsupportedOperationException    If this {@link DataSet} cannot
-     *              be read.
-     *
-     * @see #isReadable()
-     */
-    public @Nonnull DataSource<E> dataSource(@Nonnull Session session, @Nonnull K key);
+        protected Id(
+                @Nonnull final String name,
+                @Nonnull final Class<K> keyType,
+                @Nonnull final Class<E> type) {
+            this.name = Objects.requireNonNull(name);
+            this.keyType = Objects.requireNonNull(keyType);
+            this.elementType = Objects.requireNonNull(type);
+        }
+
+        public final @Nonnull String getName() {
+            return this.name;
+        }
+
+        public final @Nonnull Class<K> getKeyType() {
+            return this.keyType;
+        }
+
+        public final @Nonnull Class<E> getElementType() {
+            return this.elementType;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Id<?, ?> other = (Id<?, ?>) obj;
+            if (!this.name.equals(other.name)) {
+                return false;
+            }
+            if (this.keyType != other.keyType) {
+                return false;
+            }
+            if (this.elementType != other.elementType) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + this.name.hashCode();
+            result = prime * result + this.keyType.hashCode();
+            result = prime * result + this.elementType.hashCode();
+            return result;
+        }
+    }
 
 }

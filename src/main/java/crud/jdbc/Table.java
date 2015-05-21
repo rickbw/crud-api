@@ -17,30 +17,24 @@ package crud.jdbc;
 import java.sql.Connection;
 import java.util.Objects;
 
-import crud.core.DataSet;
-import crud.core.DataSetId;
 import crud.core.DataSource;
+import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.util.SessionWorker;
 
 
-/*package*/ class Table implements DataSet<StatementTemplate, ResultSetRow> {
+/*package*/ class Table implements ReadableDataSet<StatementTemplate, ResultSetRow> {
 
-    private final DataSetId<StatementTemplate, ResultSetRow> id;
+    private final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id;
 
 
-    public Table(final DataSetId<StatementTemplate, ResultSetRow> id) {
+    public Table(final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id) {
         this.id = Objects.requireNonNull(id);
     }
 
     @Override
-    public DataSetId<StatementTemplate, ResultSetRow> getId() {
+    public ReadableDataSet.Id<StatementTemplate, ResultSetRow> getId() {
         return this.id;
-    }
-
-    @Override
-    public boolean isReadable() {
-        return true;
     }
 
     @SuppressWarnings("resource")

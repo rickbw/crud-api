@@ -22,34 +22,28 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 
-import crud.core.DataSet;
-import crud.core.DataSetId;
 import crud.core.DataSource;
 import crud.core.MiddlewareException;
+import crud.core.ReadableDataSet;
 import crud.core.Session;
 
 
-/*package*/ class JmsDataSet<M extends Message> implements DataSet<String, M> {
+/*package*/ class JmsDataSet<M extends Message> implements ReadableDataSet<String, M> {
 
-    private @Nonnull final DataSetId<String, M> id;
+    private @Nonnull final ReadableDataSet.Id<String, M> id;
     private @Nonnull final Destination destination;
 
 
     public JmsDataSet(
-            @Nonnull final DataSetId<String, M> id,
+            @Nonnull final ReadableDataSet.Id<String, M> id,
             @Nonnull final Destination destination) {
         this.id = Objects.requireNonNull(id);
         this.destination = Objects.requireNonNull(destination);
     }
 
     @Override
-    public DataSetId<String, M> getId() {
+    public ReadableDataSet.Id<String, M> getId() {
         return this.id;
-    }
-
-    @Override
-    public boolean isReadable() {
-        return true;
     }
 
     @Override

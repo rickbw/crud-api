@@ -33,11 +33,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import crud.core.DataBus;
-import crud.core.DataSet;
-import crud.core.DataSetId;
 import crud.core.MiddlewareException;
+import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.core.Session.Ordering;
+import crud.core.WritableDataSet;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -80,15 +80,16 @@ public class JmsDataBus implements DataBus {
     }
 
     /**
-     * All JMS {@link DataSet}s have key type String -- a message selector --
+     * All JMS {@link ReadableDataSet}s have key type String -- a message selector --
      * and element type Message. Passing any other types will result in a
      * result of {@link Optional#asSet()}.
      *
-     * The {@link DataSetId#getName() name} of the {@link DataSetId} is taken
-     * to be the name of a JMS {@link Destination}.
+     * The {@link crud.core.ReadableDataSet.Id#getName() name} of the
+     * {@link crud.core.ReadableDataSet.Id} is taken to be the name of a JMS
+     * {@link Destination}.
      */
     @Override
-    public <K, E> Optional<DataSet<K, E>> dataSet(final DataSetId<K, E> id) {
+    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
         if (!Message.class.isAssignableFrom(id.getElementType())) {
             // JMS only support DataSets of type Message (or a subtype)
             log.warn("JMS DataSets have element type Message, not {}", id.getElementType().getName());
@@ -105,6 +106,11 @@ public class JmsDataBus implements DataBus {
         }
 
         return createDataSet(id, destination);
+    }
+
+    @Override
+    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
+        return Optional.absent();   // TODO
     }
 
     @Override
@@ -137,20 +143,20 @@ public class JmsDataBus implements DataBus {
         }
     }
 
-    private static <K, E> Optional<DataSet<K, E>> createDataSet(
-            final DataSetId<K, E> id,
+    private static <K, E> Optional<ReadableDataSet<K, E>> createDataSet(
+            final ReadableDataSet.Id<K, E> id,
             final Destination destination) {
         /* All of these unchecked conversions are necessary, because the
          * method signature requires dynamic typing, but in this case, the
          * types are actually static.
          */
         @SuppressWarnings("unchecked")
-        final DataSetId<String, ? extends Message> msgDataSetId = (DataSetId<String, ? extends Message>) id;
-        final DataSet<String, ? extends Message> jmsDataSet = new JmsDataSet<>(msgDataSetId, destination);
+        final ReadableDataSet.Id<String, ? extends Message> msgDataSetId = (ReadableDataSet.Id<String, ? extends Message>) id;
+        final ReadableDataSet<String, ? extends Message> jmsDataSet = new JmsDataSet<>(msgDataSetId, destination);
         @SuppressWarnings("rawtypes")
         final Optional untypedDataSet = Optional.of(jmsDataSet);
         @SuppressWarnings("unchecked")
-        final Optional<DataSet<K, E>> typedDataSet = untypedDataSet;
+        final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
         return typedDataSet;
     }
 

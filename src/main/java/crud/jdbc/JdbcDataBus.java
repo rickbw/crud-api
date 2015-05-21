@@ -31,10 +31,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import crud.core.DataBus;
-import crud.core.DataSet;
-import crud.core.DataSetId;
 import crud.core.MiddlewareException;
+import crud.core.ReadableDataSet;
 import crud.core.Session;
+import crud.core.WritableDataSet;
 import rx.Observable;
 
 
@@ -79,7 +79,7 @@ public class JdbcDataBus implements DataBus {
     }
 
     @Override
-    public <K, E> Optional<DataSet<K, E>> dataSet(final DataSetId<K, E> id) {
+    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
         if (StatementTemplate.class != id.getKeyType()) {
             log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
             return Optional.absent();
@@ -90,6 +90,11 @@ public class JdbcDataBus implements DataBus {
             return Optional.absent();
         }
         return createDataSet(id);
+    }
+
+    @Override
+    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
+        return Optional.absent();   // TODO
     }
 
     @Override
@@ -115,18 +120,18 @@ public class JdbcDataBus implements DataBus {
         return Observable.empty();  // nothing to do
     }
 
-    private static <K, E> Optional<DataSet<K, E>> createDataSet(final DataSetId<K, E> id) {
+    private static <K, E> Optional<ReadableDataSet<K, E>> createDataSet(final ReadableDataSet.Id<K, E> id) {
         /* All of these unchecked conversions are necessary, because the
          * method signature requires dynamic typing, but in this case, the
          * types are actually static.
          */
         @SuppressWarnings("unchecked")
-        final DataSetId<StatementTemplate, ResultSetRow> resultSetDataSetId = (DataSetId<StatementTemplate, ResultSetRow>) id;
-        final DataSet<StatementTemplate, ResultSetRow> table = new Table(resultSetDataSetId);
+        final ReadableDataSet.Id<StatementTemplate, ResultSetRow> resultSetDataSetId = (ReadableDataSet.Id<StatementTemplate, ResultSetRow>) id;
+        final ReadableDataSet<StatementTemplate, ResultSetRow> table = new Table(resultSetDataSetId);
         @SuppressWarnings("rawtypes")
         final Optional untypedDataSet = Optional.of(table);
         @SuppressWarnings("unchecked")
-        final Optional<DataSet<K, E>> typedDataSet = untypedDataSet;
+        final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
         return typedDataSet;
     }
 
