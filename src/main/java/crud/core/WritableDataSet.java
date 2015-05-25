@@ -17,6 +17,7 @@ package crud.core;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 
 /**
@@ -56,6 +57,7 @@ public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
      *
      * @author Rick Warren
      */
+    @Immutable
     public static final class Id<K, E, R> extends DataSet.Id<K, E> {
         private @Nonnull final Class<R> writeResultType;
 

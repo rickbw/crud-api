@@ -15,6 +15,7 @@
 package crud.core;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 
 /**
@@ -49,6 +50,7 @@ public interface ReadableDataSet<K, E> extends DataSet<K, E> {
      * @param <K>   The type of the keys.
      * @param <E>   The type of the data elements, identified by those keys.
      */
+    @Immutable
     public static final class Id<K, E> extends DataSet.Id<K, E> {
         public Id(
                 @Nonnull final String name,

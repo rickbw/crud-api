@@ -17,6 +17,7 @@ package crud.core;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 
 /**
@@ -46,6 +47,7 @@ public interface DataSet<K, E> {
      * @param <K>   The type of the keys.
      * @param <E>   The type of the data elements, identified by those keys.
      */
+    @Immutable
     public static abstract class Id<K, E> {
         private @Nonnull final String name;
         private @Nonnull final Class<K> keyType;
