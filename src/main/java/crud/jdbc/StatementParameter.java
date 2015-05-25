@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,11 +35,12 @@ import com.google.common.base.Preconditions;
  *
  * @author Rick Warren
  */
-public final class Parameter {
+@Immutable
+public final class StatementParameter {
 
     private @Nullable final Object value;
     private final Optional<Type> type;
-    private final int position;
+    private final int index;
 
 
     public static Builder ofValue(@Nullable final Object value) {
@@ -151,23 +153,7 @@ public final class Parameter {
     @Override
     public final String toString() {
         final StringBuilder buf = new StringBuilder(getClass().getSimpleName());
-        buf.append('(');
-        buf.append(this.position);
-        buf.append(": ");
-
-        final Object nullChecked = this.value;
-        if (nullChecked != null) {
-            // Don't call value.toString: might be huge and complicated
-            buf.append(nullChecked.getClass().getName())
-               .append('@')
-               .append(System.identityHashCode(this.value));
-        }
-
-        if (this.type.isPresent()) {
-            buf.append(" as ").append(this.type.get().name());
-        }
-
-        buf.append(')');
+        toShortString(buf);
         return buf.toString();
     }
 
@@ -182,9 +168,9 @@ public final class Parameter {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Parameter other = (Parameter) obj;
+        final StatementParameter other = (StatementParameter) obj;
         // Compare fields in order of cheapness:
-        if (this.position != other.position) {
+        if (this.index != other.index) {
             return false;
         }
         if (!this.type.equals(other.type)) {
@@ -202,31 +188,50 @@ public final class Parameter {
         int result = 1;
         result = prime * result + Objects.hashCode(this.value);
         result = prime * result + this.type.hashCode();
-        result = prime * result + this.position;
+        result = prime * result + this.index;
         return result;
     }
 
     /**
      * Set this parameter on the given {@link PreparedStatement}.
      */
-    /*package*/ void apply(final PreparedStatement statement) throws SQLException {
+    /*package*/ void substitute(final PreparedStatement statement) throws SQLException {
         if (this.type.isPresent()) {
             if (this.value != null) {
-                statement.setObject(this.position, this.value, this.type.get().targetSqlType);
+                statement.setObject(this.index, this.value, this.type.get().targetSqlType);
             } else {
-                statement.setNull(this.position, this.type.get().targetSqlType);
+                statement.setNull(this.index, this.type.get().targetSqlType);
             }
         } else {
             // DB may or may not support setting NULL that's not explicitly typed. Try.
-            statement.setObject(this.position, this.value);
+            statement.setObject(this.index, this.value);
         }
     }
 
-    private Parameter(@Nullable final Object value, final Optional<Type> type, final int position) {
+    /*package*/ int getIndex() {
+        return this.index;
+    }
+
+    /*package*/ String toShortString() {
+        final StringBuilder buf = new StringBuilder();
+        toShortString(buf);
+        return buf.toString();
+    }
+
+    private StatementParameter(@Nullable final Object value, final Optional<Type> type, final int index) {
         this.value = value;
         this.type = Objects.requireNonNull(type);
-        this.position = position;
-        Preconditions.checkArgument(this.position >= 1, "Positions start at 1");
+        this.index = index;
+        Preconditions.checkArgument(this.index >= 1, "Indexes start at 1");
+    }
+
+    private void toShortString(final StringBuilder buf) {
+        buf.append('{');
+        buf.append(this.index).append(": ").append(this.value);
+        if (this.type.isPresent()) {
+            buf.append(" as ").append(this.type.get().name());
+        }
+        buf.append('}');
     }
 
 
@@ -397,8 +402,8 @@ public final class Parameter {
             return this;
         }
 
-        public Parameter atPosition(final int position) {
-            return new Parameter(this.value, this.type, position);
+        public StatementParameter atIndex(final int position) {
+            return new StatementParameter(this.value, this.type, position);
         }
     }
 

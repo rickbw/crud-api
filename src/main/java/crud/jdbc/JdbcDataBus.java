@@ -85,16 +85,27 @@ public class JdbcDataBus implements DataBus {
             return Optional.absent();
         }
         if (ResultSetRow.class != id.getElementType()) {
-            // JDBC only support DataSets of type ResultSetRow
-            log.warn("JDBC DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
+            log.warn("JDBC readable DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
             return Optional.absent();
         }
-        return createDataSet(id);
+        return createReadableDataSet(id);
     }
 
     @Override
     public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        return Optional.absent();   // TODO
+        if (StatementTemplate.class != id.getKeyType()) {
+            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            return Optional.absent();
+        }
+        if (StatementParameters.class != id.getElementType()) {
+            log.warn("JDBC writable DataSets have element type StatementParameters, not {}", id.getElementType().getName());
+            return Optional.absent();
+        }
+        if (Integer.class != id.getWriteResultType()) {
+            log.warn("JDBC DataSets have write-result type Integer, not {}", id.getWriteResultType().getName());
+            return Optional.absent();
+        }
+        return createWritableDataSet(id);
     }
 
     @Override
@@ -120,18 +131,33 @@ public class JdbcDataBus implements DataBus {
         return Observable.empty();  // nothing to do
     }
 
-    private static <K, E> Optional<ReadableDataSet<K, E>> createDataSet(final ReadableDataSet.Id<K, E> id) {
+    private static <K, E> Optional<ReadableDataSet<K, E>> createReadableDataSet(final ReadableDataSet.Id<K, E> id) {
         /* All of these unchecked conversions are necessary, because the
          * method signature requires dynamic typing, but in this case, the
          * types are actually static.
          */
         @SuppressWarnings("unchecked")
         final ReadableDataSet.Id<StatementTemplate, ResultSetRow> resultSetDataSetId = (ReadableDataSet.Id<StatementTemplate, ResultSetRow>) id;
-        final ReadableDataSet<StatementTemplate, ResultSetRow> table = new Table(resultSetDataSetId);
+        final ReadableDataSet<StatementTemplate, ResultSetRow> table = new ReadableTable(resultSetDataSetId);
         @SuppressWarnings("rawtypes")
         final Optional untypedDataSet = Optional.of(table);
         @SuppressWarnings("unchecked")
         final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
+        return typedDataSet;
+    }
+
+    private static <K, E, R> Optional<WritableDataSet<K, E, R>> createWritableDataSet(final WritableDataSet.Id<K, E, R> id) {
+        /* All of these unchecked conversions are necessary, because the
+         * method signature requires dynamic typing, but in this case, the
+         * types are actually static.
+         */
+        @SuppressWarnings("unchecked")
+        final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> resultSetDataSetId = (WritableDataSet.Id<StatementTemplate, StatementParameters, Integer>) id;
+        final WritableDataSet<StatementTemplate, StatementParameters, Integer> table = new WritableTable(resultSetDataSetId);
+        @SuppressWarnings("rawtypes")
+        final Optional untypedDataSet = Optional.of(table);
+        @SuppressWarnings("unchecked")
+        final Optional<WritableDataSet<K, E, R>> typedDataSet = untypedDataSet;
         return typedDataSet;
     }
 

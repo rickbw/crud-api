@@ -17,33 +17,33 @@ package crud.jdbc;
 import java.sql.Connection;
 import java.util.Objects;
 
-import crud.core.DataSource;
-import crud.core.ReadableDataSet;
+import crud.core.DataSink;
 import crud.core.Session;
+import crud.core.WritableDataSet;
 import crud.util.SessionWorker;
 
 
-/*package*/ class Table implements ReadableDataSet<StatementTemplate, ResultSetRow> {
+/*package*/ class WritableTable implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
 
-    private final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id;
+    private final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id;
 
 
-    public Table(final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id) {
+    public WritableTable(final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id) {
         this.id = Objects.requireNonNull(id);
     }
 
     @Override
-    public ReadableDataSet.Id<StatementTemplate, ResultSetRow> getId() {
+    public WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> getId() {
         return this.id;
     }
 
     @SuppressWarnings("resource")
     @Override
-    public DataSource<ResultSetRow> dataSource(final Session session, final StatementTemplate query) {
+    public DataSink<StatementParameters, Integer> dataSink(final Session session, final StatementTemplate query) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         final Connection connection = jdbcSession.getConnection();
         final SessionWorker worker = jdbcSession.getWorker();
-        return new QueryDataSource(connection, query, worker);
+        return new UpdateDataSink(connection, query, worker);
     }
 
     @Override

@@ -20,45 +20,39 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
-
-import com.google.common.collect.ImmutableList;
+import javax.annotation.concurrent.Immutable;
 
 
 /**
  * An immutable representation of a {@link PreparedStatement} with its
- * {@link Parameter parameters}. Also serves as a factory for
- * {@code PreparedStatement}s; see {@link #prepareStatement(Connection)}.
+ * {@link StatementParameters parameters}.
  *
  * @author Rick Warren
  */
+@Immutable
 public final class StatementTemplate {
 
     private final String sql;
-    private final ImmutableList<Parameter> parameters;
+    private final StatementParameters parameters;
 
 
-    /**
-     * Create a statement with no parameters.
-     */
-    public static StatementTemplate fromSimpleSql(@Nonnull final String sql) {
-        return new StatementTemplate(sql, ImmutableList.<Parameter>of());
+    public StatementTemplate(@Nonnull final String sql, @Nonnull final StatementParameters params) {
+        this.sql = Objects.requireNonNull(sql);
+        this.parameters = Objects.requireNonNull(params);
     }
 
-    /**
-     * Begin the construction of a statement with parameters. Continue the
-     * construction with {@link Builder#substitute(Parameter)}.
-     */
-    public static Builder fromSql(@Nonnull final String sql) {
-        return new Builder(sql);
+    public StatementTemplate(@Nonnull final String sql) {
+        this(sql, StatementParameters.none());
     }
 
-    public @Nonnull PreparedStatement prepareStatement(final Connection connection)
-    throws SQLException {
-        final PreparedStatement statement = connection.prepareStatement(this.sql);
-        for (final Parameter param : this.parameters) {
-            param.apply(statement);
-        }
-        return statement;
+    @Override
+    public String toString() {
+        final StringBuilder buf = new StringBuilder(getClass().getSimpleName());
+        buf.append('(');
+        final String withSubstitutions = this.parameters.substituteString(this.sql);
+        buf.append(withSubstitutions);
+        buf.append(')');
+        return buf.toString();
     }
 
     @Override
@@ -91,28 +85,11 @@ public final class StatementTemplate {
         return result;
     }
 
-    private StatementTemplate(@Nonnull final String sql, final Iterable<Parameter> params) {
-        this.sql = Objects.requireNonNull(sql);
-        this.parameters = ImmutableList.copyOf(params);
-    }
-
-
-    public static final class Builder {
-        private final String sql;
-        private final ImmutableList.Builder<Parameter> parameters = ImmutableList.builder();
-
-        public Builder substitute(@Nonnull final Parameter param) {
-            this.parameters.add(param);
-            return this;
-        }
-
-        public StatementTemplate build() {
-            return new StatementTemplate(this.sql, this.parameters.build());
-        }
-
-        private Builder(@Nonnull final String sql) {
-            this.sql = Objects.requireNonNull(sql);
-        }
+    /*package*/ @Nonnull PreparedStatement prepareStatement(final Connection connection)
+    throws SQLException {
+        final PreparedStatement statement = connection.prepareStatement(this.sql);
+        this.parameters.substituteAll(statement);
+        return statement;
     }
 
 }

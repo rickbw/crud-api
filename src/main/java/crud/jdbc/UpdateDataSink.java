@@ -16,20 +16,20 @@ package crud.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.DataSink;
 import crud.util.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ class QueryDataSource extends StatementProvider implements DataSource<ResultSetRow> {
+/*package*/ class UpdateDataSink extends StatementProvider implements DataSink<StatementParameters, Integer> {
 
-    public QueryDataSource(
+    public UpdateDataSink(
             @Nonnull final Connection connection,
             @Nonnull final StatementTemplate statementTemplate,
             @Nonnull final SessionWorker worker) {
@@ -37,23 +37,20 @@ import rx.Subscriber;
     }
 
     @Override
-    public Observable<ResultSetRow> read() {
-        return Observable.create(new Observable.OnSubscribe<ResultSetRow>() {
+    public Observable<Integer> write(final StatementParameters params) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
-            public void call(final Subscriber<? super ResultSetRow> sub) {
+            public void call(final Subscriber<? super Integer> sub) {
                 submit(new Callable<Void>() {
                     @SuppressWarnings("resource")
                     @Override
-                    public Void call() throws Exception {
-                        final PreparedStatement queryStmt = getStatement();
-                        try (ResultSet results = queryStmt.executeQuery()) {
-                            while (results.next()) {
-                                final ResultSetRow currentRow = new ResultSetRow(results);
-                                sub.onNext(currentRow);
-                            }
-                            // Don't call onCompleted(): that's called by submit()
-                            //sub.onCompleted();
-                        }
+                    public Void call() throws SQLException {
+                        final PreparedStatement updateStmt = getStatement();
+                        params.substituteAll(updateStmt);
+                        final int nRowsUpdated = updateStmt.executeUpdate();
+                        sub.onNext(nRowsUpdated);
+                        // Don't call onCompleted(): that's called by submit()
+                        //sub.onCompleted();
                         return null;
                     }
                 });
