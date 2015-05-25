@@ -62,13 +62,14 @@ import rx.Subscriber;
                     @SuppressWarnings("resource")
                     @Override
                     public Void call() throws Exception {
-                        final PreparedStatement raceFreeStmt = getStatement();
-                        try (ResultSet results = raceFreeStmt.executeQuery()) {
+                        final PreparedStatement queryStmt = getStatement();
+                        try (ResultSet results = queryStmt.executeQuery()) {
                             while (results.next()) {
                                 final ResultSetRow currentRow = new ResultSetRow(results);
                                 sub.onNext(currentRow);
                             }
-                            sub.onCompleted();
+                            // Don't call onCompleted(): that's called by submit()
+                            //sub.onCompleted();
                         }
                         return null;
                     }
