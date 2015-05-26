@@ -15,44 +15,42 @@
 package crud.jms;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.jms.JMSException;
 
-import crud.core.MiddlewareException;
-import crud.core.Session;
+import crud.core.AsyncCloseable;
+import crud.util.SessionWorker;
 import rx.Observable;
 
 
-/*package*/ abstract class SessionWrapper implements Session {
+/*package*/ abstract class SessionWrapper implements AsyncCloseable {
 
+    private final SessionWorker worker = new SessionWorker();
     private @Nonnull final javax.jms.Session delegate;
 
+    private final Callable<Void> closeTask = new Callable<Void>() {
+        @Override
+        public Void call() throws JMSException {
+            getDelegate().close();
+            return null;
+        }
+    };
+
 
     @Override
-    public Session.Ordering getOrdering() {
-        try {
-            final boolean isTransacted = this.delegate.getTransacted();
-            return isTransacted
-                    ? Session.Ordering.TRANSACTED
-                    : Session.Ordering.ORDERED;
-        } catch (final JMSException jx) {
-            throw new MiddlewareException(jx.getMessage(), jx);
-        }
-    }
-
-    @Override
-    public Observable<Void> shutdown() {
-        try {
-            this.delegate.close();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
+    public final Observable<Void> shutdown() {
+        return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
     protected SessionWrapper(@Nonnull final javax.jms.Session delegate) {
         this.delegate = Objects.requireNonNull(delegate);
+    }
+
+    protected final Observable<Void> submit(final Callable<Void> task) {
+        return this.worker.submit(task);
     }
 
     protected final @Nonnull javax.jms.Session getDelegate() {

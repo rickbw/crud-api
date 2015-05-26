@@ -15,6 +15,7 @@
 package crud.jms;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 import javax.jms.JMSException;
@@ -29,15 +30,18 @@ import rx.Subscriber;
 import rx.Subscription;
 
 
-/*package*/ class MessageConsumerDataSource<M extends Message> implements DataSource<M> {
+/*package*/ final class MessageConsumerDataSource<M extends Message> implements DataSource<M> {
 
+    private @Nonnull final SessionWrapper session;
     private @Nonnull final MessageConsumer consumer;
-    private final Observable<M> hotObservable;
+    private @Nonnull final Observable<M> hotObservable;
 
 
     public MessageConsumerDataSource(
+            @Nonnull final SessionWrapper session,
             @Nonnull final MessageConsumer consumer,
             @Nonnull final Class<M> messageType) {
+        this.session = Objects.requireNonNull(session);
         this.consumer = Objects.requireNonNull(consumer);
 
         this.hotObservable = Observable.create(new MessageListenerToSubscriberHandoff(messageType)).share();
@@ -55,19 +59,17 @@ import rx.Subscription;
 
     @Override
     public Observable<Void> shutdown() {
-        try {
-            /* TODO: JMS allows close() to be called from any thread.
-             * However, it may block, to better to move it elsewhere.
-             */
-            this.consumer.close();
-            /* TODO: Should this result in an onCompleted() to the
-             * hotObservable? Or perhaps an onError() with a specific
-             * source-termination "exception"?
-             */
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
+        return this.session.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws JMSException {
+                /* TODO: Should this result in an onCompleted() to the
+                 * hotObservable? Or perhaps an onError() with a specific
+                 * source-termination "exception"?
+                 */
+                MessageConsumerDataSource.this.consumer.close();
+                return null;
+            }
+        });
     }
 
 

@@ -14,53 +14,48 @@
  */
 package crud.jms;
 
+import java.util.concurrent.Callable;
+
 import javax.jms.JMSException;
-import javax.jms.Session;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-
-import crud.core.MiddlewareException;
+import crud.core.Session;
 import crud.core.TransactedSession;
 import rx.Observable;
 
 
 /*package*/ final class TransactedJmsSession extends SessionWrapper implements TransactedSession {
 
-    private static final Logger log = LoggerFactory.getLogger(TransactedJmsSession.class);
-
-
-    public TransactedJmsSession(final Session delegate) {
+    public TransactedJmsSession(final javax.jms.Session delegate) {
         super(delegate);
-        try {
-            Preconditions.checkArgument(
-                    getDelegate().getTransacted(),
-                    "Session must be transacted");
-        } catch (final JMSException jx) {
-            log.warn("Unable to determine whether Session is transacted; assuming YES", jx);
-        }
+        // Assumed, but illegal to check in this thread:
+        //assert getDelegate().getTransacted();
+    }
+
+    @Override
+    public Session.Ordering getOrdering() {
+        return Session.Ordering.TRANSACTED;
     }
 
     @Override
     public Observable<Void> commit() {
-        try {
-            getDelegate().commit();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
+        return submit(new Callable<Void>() {
+            @Override
+            public Void call() throws JMSException {
+                getDelegate().commit();
+                return null;
+            }
+        });
     }
 
     @Override
     public Observable<Void> rollback() {
-        try {
-            getDelegate().rollback();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
+        return submit(new Callable<Void>() {
+            @Override
+            public Void call() throws JMSException {
+                getDelegate().rollback();
+                return null;
+            }
+        });
     }
 
 }

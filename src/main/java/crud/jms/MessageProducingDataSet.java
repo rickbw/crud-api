@@ -58,10 +58,11 @@ import crud.core.WritableDataSet;
             log.warn("Ignoring key {}", key);
         }
 
-        final javax.jms.Session realSession = ((SessionWrapper) session).getDelegate();
+        final SessionWrapper sessionImpl = (SessionWrapper) session;
+        final javax.jms.Session realSession = sessionImpl.getDelegate();
         try {
             final MessageProducer messageProducer = realSession.createProducer(this.destination);
-            return new MessageProducerDataSink<>(messageProducer);
+            return new MessageProducerDataSink<>(sessionImpl, messageProducer);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

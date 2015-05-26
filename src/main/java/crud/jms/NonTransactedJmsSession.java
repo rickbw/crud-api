@@ -14,29 +14,20 @@
  */
 package crud.jms;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
+import crud.core.Session;
 
 
-/*package*/ final class NonTransactedJmsSession extends SessionWrapper {
+/*package*/ final class NonTransactedJmsSession extends SessionWrapper implements Session {
 
-    private static final Logger log = LoggerFactory.getLogger(NonTransactedJmsSession.class);
-
-
-    public NonTransactedJmsSession(final Session delegate) {
+    public NonTransactedJmsSession(final javax.jms.Session delegate) {
         super(delegate);
-        try {
-            Preconditions.checkArgument(
-                    !getDelegate().getTransacted(),
-                    "Session must not be transacted");
-        } catch (final JMSException jx) {
-            log.warn("Unable to determine whether Session is transacted; assuming NO", jx);
-        }
+        // Assumed, but illegal to check in this thread:
+        //assert !getDelegate().getTransacted();
+    }
+
+    @Override
+    public Session.Ordering getOrdering() {
+        return Session.Ordering.ORDERED;
     }
 
 }

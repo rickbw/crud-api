@@ -15,6 +15,7 @@
 package crud.jms;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 import javax.jms.CompletionListener;
@@ -28,12 +29,16 @@ import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ class MessageProducerDataSink<M extends Message> implements DataSink<M, Void> {
+/*package*/ final class MessageProducerDataSink<M extends Message> implements DataSink<M, Void> {
 
+    private @Nonnull final SessionWrapper session;
     private @Nonnull final MessageProducer producer;
 
 
-    public MessageProducerDataSink(@Nonnull final MessageProducer producer) {
+    public MessageProducerDataSink(
+            @Nonnull final SessionWrapper session,
+            @Nonnull final MessageProducer producer) {
+        this.session = Objects.requireNonNull(session);
         this.producer = Objects.requireNonNull(producer);
     }
 
@@ -50,15 +55,13 @@ import rx.Subscriber;
 
     @Override
     public Observable<Void> shutdown() {
-        try {
-            /* TODO: JMS allows close() to be called from any thread.
-             * However, it may block, to better to move it elsewhere.
-             */
-            this.producer.close();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
+        return this.session.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                MessageProducerDataSink.this.producer.close();
+                return null;
+            }
+        });
     }
 
 
