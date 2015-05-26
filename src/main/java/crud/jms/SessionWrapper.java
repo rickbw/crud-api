@@ -21,8 +21,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.jms.JMSException;
 
+import crud.implementer.SessionWorker;
+
 import crud.core.AsyncCloseable;
-import crud.util.SessionWorker;
 import rx.Observable;
 
 

@@ -20,10 +20,11 @@ import java.util.Objects;
 import crud.core.DataSink;
 import crud.core.Session;
 import crud.core.WritableDataSet;
-import crud.util.SessionWorker;
+import crud.implementer.SessionWorker;
 
 
-/*package*/ class WritableTable implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
+/*package*/ final class WritableTable
+implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
 
     private final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id;
 

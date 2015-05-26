@@ -25,7 +25,7 @@ import crud.core.TransactedSession;
 import rx.Observable;
 
 
-/*package*/ class JdbcTransactedSession extends JdbcSession implements TransactedSession {
+/*package*/ final class JdbcTransactedSession extends JdbcSession implements TransactedSession {
 
     private final Callable<Void> commitTask = new Callable<Void>() {
         @Override

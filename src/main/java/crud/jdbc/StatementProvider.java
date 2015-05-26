@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import crud.core.AsyncCloseable;
-import crud.util.SessionWorker;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 
 

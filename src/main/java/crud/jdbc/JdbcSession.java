@@ -22,8 +22,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
+import crud.implementer.SessionWorker;
+
 import crud.core.Session;
-import crud.util.SessionWorker;
 import rx.Observable;
 
 

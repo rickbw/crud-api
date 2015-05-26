@@ -22,12 +22,14 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 
 import crud.core.DataSink;
-import crud.util.SessionWorker;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ class UpdateDataSink extends StatementProvider implements DataSink<StatementParameters, Integer> {
+/*package*/ final class UpdateDataSink
+extends StatementProvider
+implements DataSink<StatementParameters, Integer> {
 
     public UpdateDataSink(
             @Nonnull final Connection connection,

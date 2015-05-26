@@ -20,10 +20,10 @@ import java.util.Objects;
 import crud.core.DataSource;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
-import crud.util.SessionWorker;
+import crud.implementer.SessionWorker;
 
 
-/*package*/ class ReadableTable implements ReadableDataSet<StatementTemplate, ResultSetRow> {
+/*package*/ final class ReadableTable implements ReadableDataSet<StatementTemplate, ResultSetRow> {
 
     private final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id;
 

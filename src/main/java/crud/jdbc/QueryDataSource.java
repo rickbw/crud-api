@@ -22,12 +22,12 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 
 import crud.core.DataSource;
-import crud.util.SessionWorker;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ class QueryDataSource extends StatementProvider implements DataSource<ResultSetRow> {
+/*package*/ final class QueryDataSource extends StatementProvider implements DataSource<ResultSetRow> {
 
     public QueryDataSource(
             @Nonnull final Connection connection,
