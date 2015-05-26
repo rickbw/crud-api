@@ -83,28 +83,38 @@ public interface DataBus extends AsyncCloseable {
 
     /**
      * Return the set of {@link crud.core.Session.Ordering} values that would
-     * result in a successful return from
-     * {@link #startSession(crud.core.Session.Ordering)}, without an
+     * result in a successful return from {@link #startSession(boolean)} or
+     * {@link #startTransactedSession()} without an
      * {@link UnsupportedSessionOrderingException} being thrown. Because this
-     * {@link DataBus} is always allowed to silently upgrade the requested
-     * ordering, the set will always contain at least the element
+     * {@link DataBus} is always allowed to silently upgrade unordered to
+     * ordered, the set will always contain at least the element
      * {@link crud.core.Session.Ordering#UNORDERED}.
      */
     public Set<Session.Ordering> getSupportedSessionOrderings();
 
     /**
-     * Start a new {@link Session}.
+     * Start a new {@link Session}. If {@code requireOrdering} is true, the
+     * new Session must be <em>ordered</em>, and return
+     * {@link crud.core.Session.Ordering#ORDERED} from
+     * {@link Session#getOrdering()}. If {@code requireOrdering} is false,
+     * the Session may be either ordered or unordered, depending on the
+     * implementation.
      *
-     * @param requestedOrdering The ordering guarantee that the application
-     *          requires of the resulting {@link Session}. The newly started
-     *          Session may offer a more-stringent ordering than that
-     *          requested, but can never be less.
-     *
-     * @throws UnsupportedSessionOrderingException   If the requested ordering
-     *              is higher than any supported by this {@link DataBus}.
-     * @throws MiddlewareException          If a Session could not be started
-     *              for any other reason.
+     * @throws UnsupportedSessionOrderingException  If ordering is required,
+     *              but this {@link DataBus} only supports unordered Sessions.
+     * @throws MiddlewareException                  If a Session could not be
+     *              started for any other reason.
      */
-    public @Nonnull Session startSession(Session.Ordering requestedOrdering);
+    public @Nonnull Session startSession(boolean requireOrdering);
+
+    /**
+     * Start a new {@link TransactedSession}.
+     *
+     * @throws UnsupportedSessionOrderingException  If this {@link DataBus}
+     *              does not support transacted Sessions.
+     * @throws MiddlewareException                  If a Session could not be
+     *              started for any other reason.
+     */
+    public @Nonnull TransactedSession startTransactedSession();
 
 }

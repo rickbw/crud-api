@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 
 import crud.core.DataBus;
 import crud.core.DataSet;
@@ -38,6 +37,7 @@ import crud.core.MiddlewareException;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.core.Session.Ordering;
+import crud.core.TransactedSession;
 import crud.core.WritableDataSet;
 import rx.Observable;
 import rx.functions.Func1;
@@ -51,14 +51,10 @@ public class JmsDataBus implements DataBus {
             EnumSet.allOf(Session.Ordering.class));
 
     /**
-     * TODO: All this mapping to be injected, or otherwise configured.
-     *
      * TODO: Add support for application-level acknowledgments.
      */
-    private static final ImmutableMap<Session.Ordering, Integer> acknowledgeModes = ImmutableMap.of(
-            Session.Ordering.UNORDERED, javax.jms.Session.DUPS_OK_ACKNOWLEDGE,
-            Session.Ordering.ORDERED, javax.jms.Session.AUTO_ACKNOWLEDGE,
-            Session.Ordering.TRANSACTIONAL, javax.jms.Session.AUTO_ACKNOWLEDGE);
+    private static final int ORDERED_ACKNOWLEDGE_MODE = javax.jms.Session.AUTO_ACKNOWLEDGE;
+    private static final int UNORDERED_ACKNOWLEDGE_MODE = javax.jms.Session.DUPS_OK_ACKNOWLEDGE;
 
     private @Nonnull final Connection connection;
     private @Nonnull final Func1<String, Destination> destinationLookup;
@@ -128,14 +124,25 @@ public class JmsDataBus implements DataBus {
 
     @SuppressWarnings("resource")
     @Override
-    public Session startSession(final Session.Ordering requestedOrdering) {
+    public Session startSession(final boolean requireOrdering) {
         try {
-            final boolean transacted = (requestedOrdering == Session.Ordering.TRANSACTIONAL);
-            final int acknowledgeMode = acknowledgeModes.get(requestedOrdering);
             final javax.jms.Session delegateSession = this.connection.createSession(
-                    transacted,
-                    acknowledgeMode);
-            return new SessionWrapper(delegateSession);
+                    false,
+                    requireOrdering ? ORDERED_ACKNOWLEDGE_MODE : UNORDERED_ACKNOWLEDGE_MODE);
+            return new NonTransactedJmsSession(delegateSession);
+        } catch (final JMSException jx) {
+            throw new MiddlewareException(jx.getMessage(), jx);
+        }
+    }
+
+    @SuppressWarnings("resource")
+    @Override
+    public TransactedSession startTransactedSession() {
+        try {
+            final javax.jms.Session delegateSession = this.connection.createSession(
+                    true,
+                    ORDERED_ACKNOWLEDGE_MODE);
+            return new TransactedJmsSession(delegateSession);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

@@ -24,44 +24,20 @@ import crud.core.Session;
 import rx.Observable;
 
 
-/*package*/ class SessionWrapper implements Session {
+/*package*/ abstract class SessionWrapper implements Session {
 
     private @Nonnull final javax.jms.Session delegate;
 
-
-    public SessionWrapper(@Nonnull final javax.jms.Session delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
-    }
 
     @Override
     public Session.Ordering getOrdering() {
         try {
             final boolean isTransacted = this.delegate.getTransacted();
             return isTransacted
-                    ? Session.Ordering.TRANSACTIONAL
+                    ? Session.Ordering.TRANSACTED
                     : Session.Ordering.ORDERED;
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
-        }
-    }
-
-    @Override
-    public Observable<Void> commit() {
-        try {
-            this.delegate.commit();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
-        }
-    }
-
-    @Override
-    public Observable<Void> rollback() {
-        try {
-            this.delegate.rollback();
-            return Observable.empty();
-        } catch (final JMSException jx) {
-            return Observable.error(new MiddlewareException(jx.getMessage(), jx));
         }
     }
 
@@ -75,7 +51,11 @@ import rx.Observable;
         }
     }
 
-    /*package*/ javax.jms.Session getDelegate() {
+    protected SessionWrapper(@Nonnull final javax.jms.Session delegate) {
+        this.delegate = Objects.requireNonNull(delegate);
+    }
+
+    protected final @Nonnull javax.jms.Session getDelegate() {
         return this.delegate;
     }
 

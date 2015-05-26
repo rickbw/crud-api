@@ -34,6 +34,7 @@ import crud.core.DataBus;
 import crud.core.MiddlewareException;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
+import crud.core.TransactedSession;
 import crud.core.WritableDataSet;
 import rx.Observable;
 
@@ -115,12 +116,23 @@ public class JdbcDataBus implements DataBus {
 
     @SuppressWarnings("resource")
     @Override
-    public Session startSession(final Session.Ordering requestedOrdering) {
+    public Session startSession(final boolean requireOrdering) {
         try {
-            final Connection connection = this.username.isPresent()
-                ? this.dataSource.getConnection(this.username.get(), this.password.get())
-                : this.dataSource.getConnection();
-            return new JdbcSession(connection, requestedOrdering);
+            final Connection connection = getConnection();
+            connection.setAutoCommit(true);
+            return new JdbcSession(connection);
+        } catch (final SQLException sqx) {
+            throw new MiddlewareException(sqx.getMessage(), sqx);
+        }
+    }
+
+    @SuppressWarnings("resource")
+    @Override
+    public TransactedSession startTransactedSession() {
+        try {
+            final Connection connection = getConnection();
+            connection.setAutoCommit(false);
+            return new JdbcTransactedSession(connection);
         } catch (final SQLException sqx) {
             throw new MiddlewareException(sqx.getMessage(), sqx);
         }
@@ -129,6 +141,12 @@ public class JdbcDataBus implements DataBus {
     @Override
     public Observable<Void> shutdown() {
         return Observable.empty();  // nothing to do
+    }
+
+    private Connection getConnection() throws SQLException {
+        return this.username.isPresent()
+            ? this.dataSource.getConnection(this.username.get(), this.password.get())
+            : this.dataSource.getConnection();
     }
 
     private static <K, E> Optional<ReadableDataSet<K, E>> createReadableDataSet(final ReadableDataSet.Id<K, E> id) {

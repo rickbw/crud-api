@@ -27,7 +27,7 @@ package crud.core;
  * only be thrown when the application requires too-high a contract, and the
  * DataBus is unable to meet it: for example, if the DataBus supports only
  * {@link Session.Ordering#ORDERED}, and the application requests
- * {@link Session.Ordering#TRANSACTIONAL}.
+ * {@link Session.Ordering#TRANSACTED}.
  *
  * @author Rick Warren
  */

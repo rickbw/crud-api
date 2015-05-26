@@ -16,9 +16,6 @@ package crud.core;
 
 import javax.annotation.Nonnull;
 
-import rx.Observable;
-import rx.Observer;
-
 
 /**
  * A context for {@link Ordering ordering} data reads and writes. For
@@ -39,44 +36,6 @@ public interface Session extends AsyncCloseable {
      * order in which data elements will be observed.
      */
     public @Nonnull Ordering getOrdering();
-
-    /**
-     * Commit all data observations, both reads and writes, that previously
-     * occurred in the context of this {@link Session}. They will not be
-     * repeated. This action only takes effect if {@link #getOrdering()}
-     * returns {@link Ordering#TRANSACTIONAL}; in all other cases, it will be
-     * ignored, and the returned {@link Observable} will
-     * {@link Observer#onCompleted() complete} successfully.
-     * <p/>
-     * The commit commences immediately with the call to this method; it
-     * does not require the resulting {@link Observable} to be subscribed.
-     * That Observable behaves as if {@link Observable#cache() cached}: the
-     * same result will be emitted to any subscriber.
-     *
-     * @return  An {@link Observable} that will
-     *          {@link Observer#onCompleted() complete} when the commit has
-     *          taken place, or otherwise reflect any failure that occurred.
-     */
-    public Observable<Void> commit();
-
-    /**
-     * Roll back all data observations, both reads and writes, that previously
-     * occurred in the context of this {@link Session}, such that they may be
-     * repeated. This action only takes effect if {@link #getOrdering()}
-     * returns {@link Ordering#TRANSACTIONAL}; in all other cases, it will be
-     * ignored, and the returned {@link Observable} will
-     * {@link Observer#onCompleted() complete} successfully.
-     * <p/>
-     * The roll-back commences immediately with the call to this method; it
-     * does not require the resulting {@link Observable} to be subscribed.
-     * That Observable behaves as if {@link Observable#cache() cached}: the
-     * same result will be emitted to any subscriber.
-     *
-     * @return  An {@link Observable} that will
-     *          {@link Observer#onCompleted() complete} when the roll-back has
-     *          taken place, or otherwise reflect any failure that occurred.
-     */
-    public Observable<Void> rollback();
 
 
     /**
@@ -102,9 +61,11 @@ public interface Session extends AsyncCloseable {
          * The reading and writing of data elements in the context of this
          * {@link Session} are transactional: if a failure occurs along the
          * way, all modifications may be rolled back and subsequently
-         * reconstructed.
+         * reconstructed. Sessions that return this value from
+         * {@link Session#getOrdering()} must additionally implement the
+         * sub-interface {@link TransactedSession}.
          */
-        TRANSACTIONAL
+        TRANSACTED
     }
 
 }

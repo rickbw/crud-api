@@ -16,51 +16,50 @@ package crud.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 import crud.core.Session;
-import crud.util.SessionWorker;
+import crud.core.TransactedSession;
 import rx.Observable;
 
 
-/*package*/ class JdbcSession implements Session {
+/*package*/ class JdbcTransactedSession extends JdbcSession implements TransactedSession {
 
-    private final SessionWorker worker = new SessionWorker();
-    private @Nonnull final Connection connection;
-
-    private final Callable<Void> closeTask = new Callable<Void>() {
+    private final Callable<Void> commitTask = new Callable<Void>() {
         @Override
         public Void call() throws SQLException {
-            JdbcSession.this.connection.close();
+            getConnection().commit();
+            return null;
+        }
+    };
+    private final Callable<Void> rollbackTask = new Callable<Void>() {
+        @Override
+        public Void call() throws SQLException {
+            getConnection().rollback();
             return null;
         }
     };
 
 
-    public JdbcSession(@Nonnull final Connection connection) {
-        this.connection = Objects.requireNonNull(connection);
+    public JdbcTransactedSession(@Nonnull final Connection connection) {
+        super(connection);
     }
 
     @Override
     public Session.Ordering getOrdering() {
-        return Session.Ordering.ORDERED;
+        return Session.Ordering.TRANSACTED;
     }
 
     @Override
-    public Observable<Void> shutdown() {
-        return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    public Observable<Void> commit() {
+        return getWorker().submit(this.commitTask);
     }
 
-    protected @Nonnull Connection getConnection() {
-        return this.connection;
-    }
-
-    protected @Nonnull SessionWorker getWorker() {
-        return this.worker;
+    @Override
+    public Observable<Void> rollback() {
+        return getWorker().submit(this.rollbackTask);
     }
 
 }
