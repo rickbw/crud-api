@@ -40,7 +40,7 @@ implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
 
     @SuppressWarnings("resource")
     @Override
-    public DataSink<StatementParameters, Integer> dataSink(final Session session, final StatementTemplate query) {
+    public DataSink<StatementParameters, Integer> dataSink(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         final Connection connection = jdbcSession.getConnection();
         final SessionWorker worker = jdbcSession.getWorker();

@@ -48,7 +48,7 @@ import crud.core.Session;
 
     @Override
     @SuppressWarnings("resource")
-    public DataSource<M> dataSource(final Session session, final String key) {
+    public DataSource<M> dataSource(final String key, final Session session) {
         final SessionWrapper sessionImpl = (SessionWrapper) session;
         final javax.jms.Session realSession = sessionImpl.getDelegate();
         try {

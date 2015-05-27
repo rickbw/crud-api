@@ -43,7 +43,7 @@ public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
      * @throws UnsupportedOperationException    If this {@link WritableDataSet} cannot
      *              be written.
      */
-    public @Nonnull DataSink<E, R> dataSink(@Nonnull Session session, @Nonnull K key);
+    public @Nonnull DataSink<E, R> dataSink(@Nonnull K key, @Nonnull Session session);
 
 
     /**

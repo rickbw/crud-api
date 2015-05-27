@@ -39,7 +39,7 @@ import crud.implementer.SessionWorker;
 
     @SuppressWarnings("resource")
     @Override
-    public DataSource<ResultSetRow> dataSource(final Session session, final StatementTemplate query) {
+    public DataSource<ResultSetRow> dataSource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         final Connection connection = jdbcSession.getConnection();
         final SessionWorker worker = jdbcSession.getWorker();

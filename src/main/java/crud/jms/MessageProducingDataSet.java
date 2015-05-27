@@ -53,7 +53,7 @@ import crud.core.WritableDataSet;
 
     @SuppressWarnings("resource")
     @Override
-    public DataSink<M, Void> dataSink(final Session session, final String key) {
+    public DataSink<M, Void> dataSink(final String key, final Session session) {
         if (!key.isEmpty()) {
             log.warn("Ignoring key {}", key);
         }
