@@ -14,7 +14,6 @@
  */
 package crud.implementer;
 
-import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
@@ -26,11 +25,8 @@ import rx.Subscriber;
 
 
 public abstract class AbstractDataSink<E, R>
-extends AbstractAsyncCloseable
+extends AbstractSessionParticipant
 implements DataSink<E, R> {
-
-    private @Nonnull final SessionWorker worker;
-
 
     /**
      * Write the given value in the background thread belonging to the
@@ -53,14 +49,7 @@ implements DataSink<E, R> {
     }
 
     protected AbstractDataSink(@Nonnull final SessionWorker worker) {
-        this.worker = Objects.requireNonNull(worker);
-    }
-
-    /**
-     * Submit a task to the {@link SessionWorker} provided in the constructor.
-     */
-    protected final Observable<Void> submit(final Callable<Void> task) {
-        return this.worker.submit(task);
+        super(worker);
     }
 
     /**
@@ -69,8 +58,20 @@ implements DataSink<E, R> {
      * {@link SessionWorker}. It is not necessary to call
      * {@link Observer#onCompleted()} at the end; it will be called
      * automatically.
+     *
+     * This base implementation throws {@link AssertionError}. If a subclass
+     * wishes to use the template implementation in {@link #write(Object)}, it
+     * must override this method. However, if it overrides
+     * {@link #write(Object)} directly, then there is no need to override this
+     * method.
+     *
+     * @param writeMe   The value to write.
+     * @param resultSub The subscriber to which the result of the write should
+     *                  be reported.
      */
-    protected abstract void doWrite(E writeMe, Subscriber<? super R> resultSub);
+    protected void doWrite(final E writeMe, final Subscriber<? super R> resultSub) {
+        throw new AssertionError("Must override this method if not overriding write()");
+    }
 
 
     private final class SubmitWriteOnSubscribe implements Observable.OnSubscribe<R> {

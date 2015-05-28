@@ -16,33 +16,25 @@ package crud.implementer;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
-import crud.core.Session;
+import crud.core.AsyncCloseable;
+import crud.core.DataSink;
+import crud.core.DataSource;
 import rx.Observable;
 import rx.Observer;
 
 
-public abstract class AbstractSession extends AbstractAsyncCloseable implements Session {
+/**
+ * An abstract base class for a {@link DataSource} or {@link DataSink}.
+ *
+ * @author Rick Warren
+ */
+public abstract class AbstractSessionParticipant implements AsyncCloseable {
 
     private @Nonnull final SessionWorker worker;
-    private @Nonnull final Session.Ordering ordering;
 
-    private final Callable<Void> shutdownTask = new Callable<Void>() {
-        @Override
-        public Void call() throws Exception {
-            doShutdown();
-            return null;
-        }
-    };
-
-
-    @Override
-    public Session.Ordering getOrdering() {
-        return this.ordering;
-    }
 
     /**
      * Subclasses should override {@link #doShutdown()} in preference to
@@ -50,18 +42,17 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
      */
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.shutdown(this.shutdownTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        return submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                doShutdown();
+                return null;
+            }
+        });
     }
 
-    protected AbstractSession(
-            @Nonnull final SessionWorker worker,
-            @Nonnull final Session.Ordering ordering) {
+    protected AbstractSessionParticipant(@Nonnull final SessionWorker worker) {
         this.worker = Objects.requireNonNull(worker);
-        this.ordering = Objects.requireNonNull(ordering);
-    }
-
-    protected AbstractSession(@Nonnull final Session.Ordering ordering) {
-        this(new SessionWorker(), ordering);
     }
 
     /**
@@ -81,8 +72,8 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
         // do nothing
     }
 
-    protected final SessionWorker getWorker() {
-        return this.worker;
+    protected final Observable<Void> submit(final Callable<Void> task) {
+        return this.worker.submit(task);
     }
 
 }

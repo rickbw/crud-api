@@ -22,11 +22,13 @@ import com.google.common.base.Optional;
 
 import crud.core.DataBus;
 import crud.core.DataSet;
+import crud.core.MiddlewareException;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
 import crud.core.UnsupportedSessionOrderingException;
 import crud.core.WritableDataSet;
+import rx.Observer;
 
 
 /**
@@ -35,7 +37,7 @@ import crud.core.WritableDataSet;
  * and/or {@link #dataSet(crud.core.WritableDataSet.Id)} to access data sets,
  * and one or more of {@link #startSession(boolean)},
  * {@link #doStartUnorderedSession()}, {@link #doStartOrderedSession()},
- * and/or {@link #startTransactedSession()} to star {@link Session}s.
+ * and/or {@link #doStartTransactedSession()} to star {@link Session}s.
  *
  * @author Rick Warren
  */
@@ -58,16 +60,22 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
             return Optional.absent();
         }
 
-        /* It's up to subclasses to ensure that isDataSetAvailable() and
-         * resolveDataSet() agree with each other, and thus make the following
-         * casts safe.
-         */
-        @SuppressWarnings("rawtypes")
-        final ReadableDataSet rawResult = resolveDataSet(id);
-        assert rawResult.getId().equals(id);
-        @SuppressWarnings("unchecked")
-        final ReadableDataSet<K, E> typedResult = rawResult;
-        return Optional.of(typedResult);
+        try {
+            /* It's up to subclasses to ensure that isDataSetAvailable() and
+             * resolveDataSet() agree with each other, and thus make the
+             * following casts safe.
+             */
+            @SuppressWarnings("rawtypes")
+            final ReadableDataSet rawResult = resolveDataSet(id);
+            assert rawResult.getId().equals(id);
+            @SuppressWarnings("unchecked")
+            final ReadableDataSet<K, E> typedResult = rawResult;
+            return Optional.of(typedResult);
+        } catch (final MiddlewareException mx) {
+            throw mx;   // pass through
+        } catch (final Exception ex) {
+            throw new MiddlewareException(ex.getMessage(), ex);
+        }
     }
 
     /**
@@ -79,16 +87,22 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
             return Optional.absent();
         }
 
-        /* It's up to subclasses to ensure that isDataSetAvailable() and
-         * resolveDataSet() agree with each other, and thus make the following
-         * casts safe.
-         */
-        @SuppressWarnings("rawtypes")
-        final WritableDataSet rawResult = resolveDataSet(id);
-        assert rawResult.getId().equals(id);
-        @SuppressWarnings("unchecked")
-        final WritableDataSet<K, E, R> typedResult = rawResult;
-        return Optional.of(typedResult);
+        try {
+            /* It's up to subclasses to ensure that isDataSetAvailable() and
+             * resolveDataSet() agree with each other, and thus make the
+             * following casts safe.
+             */
+            @SuppressWarnings("rawtypes")
+            final WritableDataSet rawResult = resolveDataSet(id);
+            assert rawResult.getId().equals(id);
+            @SuppressWarnings("unchecked")
+            final WritableDataSet<K, E, R> typedResult = rawResult;
+            return Optional.of(typedResult);
+        } catch (final MiddlewareException mx) {
+            throw mx;   // pass through
+        } catch (final Exception ex) {
+            throw new MiddlewareException(ex.getMessage(), ex);
+        }
     }
 
     /**
@@ -110,25 +124,39 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      */
     @Override
     public Session startSession(final boolean requireOrdering) {
-        final Session result;
-        if (requireOrdering) {
-            result = doStartOrderedSession();
-            assert result.getOrdering() == Session.Ordering.ORDERED;
-        } else {
-            result = doStartUnorderedSession();
-            assert result.getOrdering() == Session.Ordering.UNORDERED
-                || result.getOrdering() == Session.Ordering.ORDERED;
+        try {
+            final Session result;
+            if (requireOrdering) {
+                result = doStartOrderedSession();
+                assert result.getOrdering() == Session.Ordering.ORDERED;
+            } else {
+                result = doStartUnorderedSession();
+                assert result.getOrdering() == Session.Ordering.UNORDERED
+                        || result.getOrdering() == Session.Ordering.ORDERED;
+            }
+            return result;
+        } catch (final MiddlewareException mx) {
+            throw mx;   // pass through
+        } catch (final Exception ex) {
+            throw new MiddlewareException(ex.getMessage(), ex);
         }
-        return result;
     }
 
     /**
-     * Throws {@link UnsupportedSessionOrderingException}. Subclasses that
-     * support {@link TransactedSession}s must override this method.
+     * Calls {@link #doStartTransactedSession()}, wrapping any exception in
+     * a new {@link MiddlewareException}.
      */
     @Override
     public TransactedSession startTransactedSession() {
-        throw new UnsupportedSessionOrderingException();
+        try {
+            final TransactedSession session = doStartTransactedSession();
+            assert session.getOrdering() == Session.Ordering.TRANSACTED;
+            return session;
+        } catch (final MiddlewareException mx) {
+            throw mx;   // pass through
+        } catch (final Exception ex) {
+            throw new MiddlewareException(ex.getMessage(), ex);
+        }
     }
 
     protected AbstractDataBus() {
@@ -140,16 +168,36 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      * the fact that unordered {@link Session}s can always be upgraded to
      * ordered. Subclasses that support ordered Sessions therefore only need
      * to override that method, not both that one and this one.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected @Nonnull Session doStartUnorderedSession() {
+    protected @Nonnull Session doStartUnorderedSession() throws Exception {
         return doStartOrderedSession();
     }
 
     /**
      * Throws {@link UnsupportedSessionOrderingException}. Subclasses that
      * support ordered {@link Session}s must override this method.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected @Nonnull Session doStartOrderedSession() {
+    protected @Nonnull Session doStartOrderedSession() throws Exception {
+        throw new UnsupportedSessionOrderingException();
+    }
+
+    /**
+     * Throws {@link UnsupportedSessionOrderingException}. Subclasses that
+     * support {@link TransactedSession}s must override this method.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
+     */
+    protected @Nonnull TransactedSession doStartTransactedSession() throws Exception {
         throw new UnsupportedSessionOrderingException();
     }
 
@@ -210,8 +258,12 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      *
      * @see #isDataSetAvailable(crud.core.ReadableDataSet.Id)
      * @see #resolveDataSet(crud.core.WritableDataSet.Id)
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) {
+    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) throws Exception {
         throw new AssertionError("isDataSetAvailable() indicated DataSet available, but this method was not overridden");
     }
 
@@ -238,8 +290,12 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      *
      * @see #isDataSetAvailable(crud.core.WritableDataSet.Id)
      * @see #resolveDataSet(crud.core.ReadableDataSet.Id)
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) {
+    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) throws Exception {
         throw new AssertionError("isDataSetAvailable() indicated DataSet available, but this method was not overridden");
     }
 

@@ -14,7 +14,6 @@
  */
 package crud.implementer;
 
-import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
@@ -25,10 +24,7 @@ import rx.Observer;
 import rx.Subscriber;
 
 
-public abstract class AbstractDataSource<E> extends AbstractAsyncCloseable implements DataSource<E> {
-
-    private @Nonnull final SessionWorker worker;
-
+public abstract class AbstractDataSource<E> extends AbstractSessionParticipant implements DataSource<E> {
 
     @Override
     public Observable<E> read() {
@@ -47,14 +43,7 @@ public abstract class AbstractDataSource<E> extends AbstractAsyncCloseable imple
     }
 
     protected AbstractDataSource(@Nonnull final SessionWorker worker) {
-        this.worker = Objects.requireNonNull(worker);
-    }
-
-    /**
-     * Submit a task to the {@link SessionWorker} provided in the constructor.
-     */
-    protected final Observable<Void> submit(final Callable<Void> task) {
-        return this.worker.submit(task);
+        super(worker);
     }
 
     /**
@@ -62,7 +51,16 @@ public abstract class AbstractDataSource<E> extends AbstractAsyncCloseable imple
      * method will be called from a task executed by the {@link SessionWorker}.
      * It is not necessary to call {@link Observer#onCompleted()} at the end;
      * it will be called automatically.
+     *
+     * This base implementation throws {@link AssertionError}. If a subclass
+     * wishes to use the template implementation in {@link #read()}, it must
+     * override this method. However, if it overrides {@link #read()}
+     * directly, then there is no need to override this method.
+     *
+     * @param sub   The {@link Subscriber} to notify of the elements being read.
      */
-    protected abstract void onReadSubscribe(final Subscriber<? super E> sub);
+    protected void onReadSubscribe(final Subscriber<? super E> sub) {
+        throw new AssertionError("Must override this method if not overriding read()");
+    }
 
 }
