@@ -15,10 +15,13 @@
 package crud.implementer;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 import crud.core.Session;
+import rx.Observable;
 
 
 public abstract class AbstractSession extends AbstractAsyncCloseable implements Session {
@@ -26,10 +29,27 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final Session.Ordering ordering;
 
+    private final Callable<Void> shutdownTask = new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+            doShutdown();
+            return null;
+        }
+    };
+
 
     @Override
     public Session.Ordering getOrdering() {
         return this.ordering;
+    }
+
+    /**
+     * Subclasses should override {@link #doShutdown()} in preference to
+     * this method.
+     */
+    @Override
+    public Observable<Void> shutdown() {
+        return this.worker.shutdown(this.shutdownTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
     protected AbstractSession(
@@ -41,6 +61,19 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
 
     protected AbstractSession(@Nonnull final Session.Ordering ordering) {
         this(new SessionWorker(), ordering);
+    }
+
+    /**
+     * Subclasses should override this method to perform any shutdown task
+     * they have to do. It will be run in the context of the
+     * {@link SessionWorker}'s thread.
+     *
+     * By default, this method does nothing.
+     *
+     * @see #shutdown()
+     */
+    protected void doShutdown() {
+        // do nothing
     }
 
     protected final SessionWorker getWorker() {

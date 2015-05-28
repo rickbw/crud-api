@@ -48,7 +48,7 @@ public final class SessionWorker {
      * Return a {@link Observable#cache() cached} {@link Observable} that
      * will emit the success or error result of the task to all subscribers.
      * <p/>
-     * If {@link #stop(Callable, long, TimeUnit)} was already called, the
+     * If {@link #shutdown(Callable, long, TimeUnit)} was already called, the
      * resulting {@link Observable} will emit
      * {@link RejectedExecutionException}.
      */
@@ -73,25 +73,40 @@ public final class SessionWorker {
      *                  {@link #submit(Callable)} to avoid race conditions on
      *                  shutdown.
      */
-    public Observable<Void> stop(
+    public Observable<Void> shutdown(
             final @Nonnull Callable<Void> finalTask,
             final long waitDuration, @Nonnull final TimeUnit waitUnit) {
-        if (this.stopped.getAndSet(true)) {
+        if (!this.stopped.getAndSet(true)) {
             final Observable<Void> taskResult = doSubmit(finalTask);
-            final Observable<Void> terminationResult = doSubmit(new Callable<Void>() {
+            this.executor.shutdown();   // non-blocking
+            final Observable<Void> await = Observable.create(new Observable.OnSubscribe<Void>() {
                 @Override
-                public Void call() throws Exception {
-                    SessionWorker.this.executor.shutdown();
-                    final boolean completed = SessionWorker.this.executor.awaitTermination(waitDuration, waitUnit);
-                    if (completed) {
-                        return null;
-                    } else {
-                        throw new TimeoutException(
-                                "Shutdown timed out after " + waitDuration + " " + waitUnit.toString().toLowerCase());
+                public void call(final Subscriber<? super Void> sub) {
+                    try {
+                        final boolean completed = SessionWorker.this.executor.awaitTermination(waitDuration, waitUnit);
+                        if (completed) {
+                            sub.onCompleted();
+                        } else {
+                            sub.onError(new TimeoutException(
+                                    "Shutdown timed out after " + waitDuration + " " + waitUnit.toString().toLowerCase()));
+                        }
+                    } catch (final InterruptedException ix) {
+                        sub.onError(ix);
                     }
                 }
             });
-            return Observable.merge(taskResult, terminationResult);
+            /* The final task is submitted, and the Executor is shut down, no
+             * matter what happens now. If the app decides to observe the
+             * result, it will see first the result of the final task it
+             * submitted, which in the success case will be empty. In the
+             * failure case, it will observe the failure of its own task. If
+             * its task succeeds, then it will observe the termination of the
+             * Executor, which should again be empty, and non-blocking, since
+             * we know at that point there are no more tasks to wait for. But
+             * if it does fail for some reason, that app will have a chance
+             * to observe that.
+             */
+            return Observable.concat(taskResult, await);
         } else {
             return Observable.empty(); // do nothing
         }

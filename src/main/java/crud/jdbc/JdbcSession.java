@@ -53,7 +53,7 @@ import rx.Observable;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        return this.worker.shutdown(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
     protected @Nonnull Connection getConnection() {

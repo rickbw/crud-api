@@ -43,7 +43,7 @@ import rx.Observable;
 
     @Override
     public final Observable<Void> shutdown() {
-        return this.worker.stop(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        return this.worker.shutdown(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
     protected SessionWrapper(@Nonnull final javax.jms.Session delegate) {
