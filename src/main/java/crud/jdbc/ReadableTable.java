@@ -15,26 +15,18 @@
 package crud.jdbc;
 
 import java.sql.Connection;
-import java.util.Objects;
 
 import crud.core.DataSource;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
+import crud.implementer.AbstractReadableDataSet;
 import crud.implementer.SessionWorker;
 
 
-/*package*/ final class ReadableTable implements ReadableDataSet<StatementTemplate, ResultSetRow> {
-
-    private final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id;
-
+/*package*/ final class ReadableTable extends AbstractReadableDataSet<StatementTemplate, ResultSetRow> {
 
     public ReadableTable(final ReadableDataSet.Id<StatementTemplate, ResultSetRow> id) {
-        this.id = Objects.requireNonNull(id);
-    }
-
-    @Override
-    public ReadableDataSet.Id<StatementTemplate, ResultSetRow> getId() {
-        return this.id;
+        super(id);
     }
 
     @SuppressWarnings("resource")
@@ -42,13 +34,13 @@ import crud.implementer.SessionWorker;
     public DataSource<ResultSetRow> dataSource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         final Connection connection = jdbcSession.getConnection();
-        final SessionWorker worker = jdbcSession.getWorker();
+        final SessionWorker worker = jdbcSession.worker();
         return new QueryDataSource(connection, query, worker);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '(' + this.id + ')';
+        return getClass().getSimpleName() + '(' + getId() + ')';
     }
 
 }

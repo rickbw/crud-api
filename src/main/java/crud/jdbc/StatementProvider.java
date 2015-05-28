@@ -18,21 +18,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import crud.core.AsyncCloseable;
+import crud.implementer.AbstractSessionParticipant;
 import crud.implementer.SessionWorker;
-import rx.Observable;
 
 
-/*package*/ class StatementProvider implements AsyncCloseable {
+/*package*/ class StatementProvider extends AbstractSessionParticipant {
 
     private @Nonnull final Connection connection;
     private @Nonnull final StatementTemplate statementTemplate;
-    private @Nonnull final SessionWorker worker;
 
     /**
      * A query to be executed, cached for reuse. Should only be accessed in
@@ -42,27 +39,13 @@ import rx.Observable;
     private @Nullable PreparedStatement statement = null;
 
 
-    @Override
-    public Observable<Void> shutdown() {
-        return submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                final PreparedStatement raceFreeStmt = StatementProvider.this.statement;
-                if (raceFreeStmt != null) {
-                    raceFreeStmt.close();
-                }
-                return null;
-            }
-        });
-    }
-
     protected StatementProvider(
             @Nonnull final Connection connection,
             @Nonnull final StatementTemplate statementTemplate,
             @Nonnull final SessionWorker worker) {
+        super(worker);
         this.connection = Objects.requireNonNull(connection);
         this.statementTemplate = Objects.requireNonNull(statementTemplate);
-        this.worker = Objects.requireNonNull(worker);
     }
 
     protected final @Nonnull PreparedStatement getStatement() throws SQLException {
@@ -75,8 +58,12 @@ import rx.Observable;
         return raceFreeStmt;
     }
 
-    protected final Observable<Void> submit(final Callable<Void> task) {
-        return this.worker.submit(task);
+    @Override
+    protected void doShutdown() throws SQLException {
+        final PreparedStatement raceFreeStmt = StatementProvider.this.statement;
+        if (raceFreeStmt != null) {
+            raceFreeStmt.close();
+        }
     }
 
 }

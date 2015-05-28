@@ -17,51 +17,35 @@ package crud.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
+import crud.core.Session;
+import crud.implementer.AbstractSession;
 import crud.implementer.SessionWorker;
 
-import crud.core.Session;
-import rx.Observable;
 
+/*package*/ class JdbcSession extends AbstractSession {
 
-/*package*/ class JdbcSession implements Session {
-
-    private final SessionWorker worker = new SessionWorker();
     private @Nonnull final Connection connection;
-
-    private final Callable<Void> closeTask = new Callable<Void>() {
-        @Override
-        public Void call() throws SQLException {
-            JdbcSession.this.connection.close();
-            return null;
-        }
-    };
 
 
     public JdbcSession(@Nonnull final Connection connection) {
+        super(Session.Ordering.ORDERED);
         this.connection = Objects.requireNonNull(connection);
     }
 
-    @Override
-    public Session.Ordering getOrdering() {
-        return Session.Ordering.ORDERED;
-    }
-
-    @Override
-    public Observable<Void> shutdown() {
-        return this.worker.shutdown(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    }
-
-    protected @Nonnull Connection getConnection() {
+    protected final @Nonnull Connection getConnection() {
         return this.connection;
     }
 
-    protected @Nonnull SessionWorker getWorker() {
-        return this.worker;
+    @Override
+    protected void doShutdown() throws SQLException {
+        this.connection.close();
+    }
+
+    /*package*/ final @Nonnull SessionWorker worker() {
+        return getWorker();
     }
 
 }

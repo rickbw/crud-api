@@ -15,27 +15,19 @@
 package crud.jdbc;
 
 import java.sql.Connection;
-import java.util.Objects;
 
 import crud.core.DataSink;
 import crud.core.Session;
 import crud.core.WritableDataSet;
+import crud.implementer.AbstractWritableDataSet;
 import crud.implementer.SessionWorker;
 
 
 /*package*/ final class WritableTable
-implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
-
-    private final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id;
-
+extends AbstractWritableDataSet<StatementTemplate, StatementParameters, Integer> {
 
     public WritableTable(final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id) {
-        this.id = Objects.requireNonNull(id);
-    }
-
-    @Override
-    public WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> getId() {
-        return this.id;
+        super(id);
     }
 
     @SuppressWarnings("resource")
@@ -43,13 +35,13 @@ implements WritableDataSet<StatementTemplate, StatementParameters, Integer> {
     public DataSink<StatementParameters, Integer> dataSink(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         final Connection connection = jdbcSession.getConnection();
-        final SessionWorker worker = jdbcSession.getWorker();
+        final SessionWorker worker = jdbcSession.worker();
         return new UpdateDataSink(connection, query, worker);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '(' + this.id + ')';
+        return getClass().getSimpleName() + '(' + getId() + ')';
     }
 
 }

@@ -30,16 +30,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import crud.core.DataBus;
-import crud.core.MiddlewareException;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
 import crud.core.WritableDataSet;
-import rx.Observable;
+import crud.implementer.AbstractDataBus;
 
 
-public class JdbcDataBus implements DataBus {
+public class JdbcDataBus extends AbstractDataBus {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcDataBus.class);
 
@@ -75,108 +73,74 @@ public class JdbcDataBus implements DataBus {
     }
 
     @Override
-    public void start() {
-        // nothing to do
-    }
-
-    @Override
-    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
-        if (StatementTemplate.class != id.getKeyType()) {
-            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
-            return Optional.absent();
-        }
-        if (ResultSetRow.class != id.getElementType()) {
-            log.warn("JDBC readable DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
-            return Optional.absent();
-        }
-        return createReadableDataSet(id);
-    }
-
-    @Override
-    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        if (StatementTemplate.class != id.getKeyType()) {
-            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
-            return Optional.absent();
-        }
-        if (StatementParameters.class != id.getElementType()) {
-            log.warn("JDBC writable DataSets have element type StatementParameters, not {}", id.getElementType().getName());
-            return Optional.absent();
-        }
-        if (Integer.class != id.getWriteResultType()) {
-            log.warn("JDBC DataSets have write-result type Integer, not {}", id.getWriteResultType().getName());
-            return Optional.absent();
-        }
-        return createWritableDataSet(id);
-    }
-
-    @Override
     public Set<Session.Ordering> getSupportedSessionOrderings() {
         return supportedOrderings;
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public Session startSession(final boolean requireOrdering) {
-        try {
-            final Connection connection = getConnection();
-            connection.setAutoCommit(true);
-            return new JdbcSession(connection);
-        } catch (final SQLException sqx) {
-            throw new MiddlewareException(sqx.getMessage(), sqx);
-        }
-    }
-
     @SuppressWarnings("resource")
-    @Override
-    public TransactedSession startTransactedSession() {
-        try {
-            final Connection connection = getConnection();
-            connection.setAutoCommit(false);
-            return new JdbcTransactedSession(connection);
-        } catch (final SQLException sqx) {
-            throw new MiddlewareException(sqx.getMessage(), sqx);
-        }
+    protected Session doStartOrderedSession() throws SQLException {
+        final Connection connection = getConnection();
+        connection.setAutoCommit(true);
+        return new JdbcSession(connection);
     }
 
     @Override
-    public Observable<Void> shutdown() {
-        return Observable.empty();  // nothing to do
+    @SuppressWarnings("resource")
+    protected TransactedSession doStartTransactedSession() throws SQLException {
+        final Connection connection = getConnection();
+        connection.setAutoCommit(false);
+        return new JdbcTransactedSession(connection);
+    }
+
+    @Override
+    protected boolean isDataSetAvailable(final ReadableDataSet.Id<?, ?> id) {
+        if (StatementTemplate.class != id.getKeyType()) {
+            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            return false;
+        }
+        if (ResultSetRow.class != id.getElementType()) {
+            log.warn("JDBC readable DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) {
+        @SuppressWarnings("unchecked")
+        final ReadableDataSet.Id<StatementTemplate, ResultSetRow> resultSetDataSetId = (ReadableDataSet.Id<StatementTemplate, ResultSetRow>) id;
+        return new ReadableTable(resultSetDataSetId);
+    }
+
+    @Override
+    protected boolean isDataSetAvailable(final WritableDataSet.Id<?, ?, ?> id) {
+        if (StatementTemplate.class != id.getKeyType()) {
+            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            return false;
+        }
+        if (StatementParameters.class != id.getElementType()) {
+            log.warn("JDBC writable DataSets have element type StatementParameters, not {}", id.getElementType().getName());
+            return false;
+        }
+        if (Integer.class != id.getWriteResultType()) {
+            log.warn("JDBC DataSets have write-result type Integer, not {}", id.getWriteResultType().getName());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) {
+        @SuppressWarnings("unchecked")
+        final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> resultSetDataSetId = (WritableDataSet.Id<StatementTemplate, StatementParameters, Integer>) id;
+        return new WritableTable(resultSetDataSetId);
     }
 
     private Connection getConnection() throws SQLException {
         return this.username.isPresent()
             ? this.dataSource.getConnection(this.username.get(), this.password.get())
             : this.dataSource.getConnection();
-    }
-
-    private static <K, E> Optional<ReadableDataSet<K, E>> createReadableDataSet(final ReadableDataSet.Id<K, E> id) {
-        /* All of these unchecked conversions are necessary, because the
-         * method signature requires dynamic typing, but in this case, the
-         * types are actually static.
-         */
-        @SuppressWarnings("unchecked")
-        final ReadableDataSet.Id<StatementTemplate, ResultSetRow> resultSetDataSetId = (ReadableDataSet.Id<StatementTemplate, ResultSetRow>) id;
-        final ReadableDataSet<StatementTemplate, ResultSetRow> table = new ReadableTable(resultSetDataSetId);
-        @SuppressWarnings("rawtypes")
-        final Optional untypedDataSet = Optional.of(table);
-        @SuppressWarnings("unchecked")
-        final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
-        return typedDataSet;
-    }
-
-    private static <K, E, R> Optional<WritableDataSet<K, E, R>> createWritableDataSet(final WritableDataSet.Id<K, E, R> id) {
-        /* All of these unchecked conversions are necessary, because the
-         * method signature requires dynamic typing, but in this case, the
-         * types are actually static.
-         */
-        @SuppressWarnings("unchecked")
-        final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> resultSetDataSetId = (WritableDataSet.Id<StatementTemplate, StatementParameters, Integer>) id;
-        final WritableDataSet<StatementTemplate, StatementParameters, Integer> table = new WritableTable(resultSetDataSetId);
-        @SuppressWarnings("rawtypes")
-        final Optional untypedDataSet = Optional.of(table);
-        @SuppressWarnings("unchecked")
-        final Optional<WritableDataSet<K, E, R>> typedDataSet = untypedDataSet;
-        return typedDataSet;
     }
 
 }
