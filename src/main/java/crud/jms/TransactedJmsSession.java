@@ -26,19 +26,14 @@ import rx.Observable;
 /*package*/ final class TransactedJmsSession extends SessionWrapper implements TransactedSession {
 
     public TransactedJmsSession(final javax.jms.Session delegate) {
-        super(delegate);
+        super(Session.Ordering.TRANSACTED, delegate);
         // Assumed, but illegal to check in this thread:
         //assert getDelegate().getTransacted();
     }
 
     @Override
-    public Session.Ordering getOrdering() {
-        return Session.Ordering.TRANSACTED;
-    }
-
-    @Override
     public Observable<Void> commit() {
-        return submit(new Callable<Void>() {
+        return getWorker().submit(new Callable<Void>() {
             @Override
             public Void call() throws JMSException {
                 getDelegate().commit();
@@ -49,7 +44,7 @@ import rx.Observable;
 
     @Override
     public Observable<Void> rollback() {
-        return submit(new Callable<Void>() {
+        return getWorker().submit(new Callable<Void>() {
             @Override
             public Void call() throws JMSException {
                 getDelegate().rollback();

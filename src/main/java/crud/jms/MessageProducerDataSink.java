@@ -25,20 +25,21 @@ import javax.jms.MessageProducer;
 
 import crud.core.DataSink;
 import crud.core.MiddlewareException;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
 /*package*/ final class MessageProducerDataSink<M extends Message> implements DataSink<M, Void> {
 
-    private @Nonnull final SessionWrapper session;
+    private @Nonnull final SessionWorker worker;
     private @Nonnull final MessageProducer producer;
 
 
     public MessageProducerDataSink(
-            @Nonnull final SessionWrapper session,
+            @Nonnull final SessionWorker worker,
             @Nonnull final MessageProducer producer) {
-        this.session = Objects.requireNonNull(session);
+        this.worker = Objects.requireNonNull(worker);
         this.producer = Objects.requireNonNull(producer);
     }
 
@@ -55,7 +56,7 @@ import rx.Subscriber;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.session.submit(new Callable<Void>() {
+        return this.worker.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
                 MessageProducerDataSink.this.producer.close();

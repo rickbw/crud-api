@@ -20,14 +20,9 @@ import crud.core.Session;
 /*package*/ final class NonTransactedJmsSession extends SessionWrapper implements Session {
 
     public NonTransactedJmsSession(final javax.jms.Session delegate) {
-        super(delegate);
+        super(Session.Ordering.ORDERED, delegate);
         // Assumed, but illegal to check in this thread:
         //assert !getDelegate().getTransacted();
-    }
-
-    @Override
-    public Session.Ordering getOrdering() {
-        return Session.Ordering.ORDERED;
     }
 
 }

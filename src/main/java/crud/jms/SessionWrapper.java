@@ -15,47 +15,36 @@
 package crud.jms;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.jms.JMSException;
 
+import crud.core.Session;
+import crud.implementer.AbstractSession;
 import crud.implementer.SessionWorker;
 
-import crud.core.AsyncCloseable;
-import rx.Observable;
 
+/*package*/ abstract class SessionWrapper extends AbstractSession {
 
-/*package*/ abstract class SessionWrapper implements AsyncCloseable {
-
-    private final SessionWorker worker = new SessionWorker();
     private @Nonnull final javax.jms.Session delegate;
 
-    private final Callable<Void> closeTask = new Callable<Void>() {
-        @Override
-        public Void call() throws JMSException {
-            getDelegate().close();
-            return null;
-        }
-    };
 
-
-    @Override
-    public final Observable<Void> shutdown() {
-        return this.worker.shutdown(this.closeTask, Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    }
-
-    protected SessionWrapper(@Nonnull final javax.jms.Session delegate) {
+    protected SessionWrapper(@Nonnull final Session.Ordering ordering, @Nonnull final javax.jms.Session delegate) {
+        super(ordering);
         this.delegate = Objects.requireNonNull(delegate);
     }
 
-    protected final Observable<Void> submit(final Callable<Void> task) {
-        return this.worker.submit(task);
+    protected final @Nonnull SessionWorker worker() {
+        return getWorker();
     }
 
     protected final @Nonnull javax.jms.Session getDelegate() {
         return this.delegate;
+    }
+
+    @Override
+    protected void doShutdown() throws JMSException {
+        getDelegate().close();
     }
 
 }

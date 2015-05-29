@@ -25,6 +25,7 @@ import javax.jms.MessageListener;
 
 import crud.core.DataSource;
 import crud.core.MiddlewareException;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -32,16 +33,16 @@ import rx.Subscription;
 
 /*package*/ final class MessageConsumerDataSource<M extends Message> implements DataSource<M> {
 
-    private @Nonnull final SessionWrapper session;
+    private @Nonnull final SessionWorker worker;
     private @Nonnull final MessageConsumer consumer;
     private @Nonnull final Observable<M> hotObservable;
 
 
     public MessageConsumerDataSource(
-            @Nonnull final SessionWrapper session,
+            @Nonnull final SessionWorker worker,
             @Nonnull final MessageConsumer consumer,
             @Nonnull final Class<M> messageType) {
-        this.session = Objects.requireNonNull(session);
+        this.worker = Objects.requireNonNull(worker);
         this.consumer = Objects.requireNonNull(consumer);
 
         this.hotObservable = Observable.create(new MessageListenerToSubscriberHandoff(messageType)).share();
@@ -59,7 +60,7 @@ import rx.Subscription;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.session.submit(new Callable<Void>() {
+        return this.worker.submit(new Callable<Void>() {
             @Override
             public Void call() throws JMSException {
                 /* TODO: Should this result in an onCompleted() to the
@@ -84,6 +85,7 @@ import rx.Subscription;
         public void call(final Subscriber<? super M> sub) {
             try {
                 sub.add(new MessageListenerRemover());
+                // FIXME: Adding listener in wrong thread?
                 MessageConsumerDataSource.this.consumer.setMessageListener(new MessageListener() {
                     @Override
                     public void onMessage(final Message message) {
