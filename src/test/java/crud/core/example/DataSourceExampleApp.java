@@ -19,12 +19,11 @@ import java.io.InputStreamReader;
 
 import com.google.common.base.Optional;
 
-import crud.core.DataBus;
-import crud.core.DataSource;
 import crud.core.ReadableDataSet;
-import crud.core.Session;
-import rx.Observable;
-import rx.functions.Action1;
+import crud.sync.SyncDataBus;
+import crud.sync.SyncDataSource;
+import crud.sync.SyncReadableDataSet;
+import crud.sync.SyncSession;
 
 
 /**
@@ -40,21 +39,16 @@ public class DataSourceExampleApp {
             String.class,           // key type
             String.class);          // data element type
 
-    private final DataBus dataBus;
-
 
     public static void main(final String... args) throws Exception {
-        Observable<Void> sessionShutdownResult = Observable.empty();
-        Observable<Void> dataBusShutdownResult = Observable.empty();
-
-        final DataSourceExampleApp app = new DataSourceExampleApp();
-        try {
-            final Optional<ReadableDataSet<String, String>> optDataSet = app.dataBus.dataSet(dataSetId);
+        try (SyncDataBus dataBus = new SyncDataBus(new ExampleDataBus())) {
+            final Optional<SyncReadableDataSet<String, String>> optDataSet = dataBus.dataSet(dataSetId);
             assert optDataSet.isPresent();  // ...since this is an example
-            final ReadableDataSet<String, String> echoDataSet = optDataSet.get();
+            final SyncReadableDataSet<String, String> echoDataSet = optDataSet.get();
 
-            final Session session = app.dataBus.startSession(true);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            try (SyncSession session = dataBus.startSession(true)) {
+                // Don't close standard in!
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 while (true) {
                     System.out.print("Echo (\"exit\" to quit): ");
                     final String echoMe = reader.readLine();
@@ -63,37 +57,14 @@ public class DataSourceExampleApp {
                         break;
                     }
 
-                    final DataSource<String> echoDataSource = echoDataSet.dataSource(echoMe, session);
-                    try {
-                        echoDataSource.read().forEach(new Action1<String>() {
-                            @Override
-                            public void call(final String value) {
-                                System.out.println("You typed: " + value);
-                            }
-                        });
-                    } finally {
-                        // Schedule asynchronously and ignore result
-                        echoDataSource.shutdown();
+                    try (SyncDataSource<String> echoDataSource = echoDataSet.dataSource(echoMe, session)) {
+                        for (final String value : echoDataSource.read()) {
+                            System.out.println("You typed: " + value);
+                        }
                     }
                 }
-            } finally {
-                // Schedule asynchronously and check result later:
-                sessionShutdownResult = session.shutdown();
             }
-        } finally {
-            // Schedule asynchronously and check result later:
-            dataBusShutdownResult = app.dataBus.shutdown();
         }
-
-        // Check for errors:
-        sessionShutdownResult
-                .concatWith(dataBusShutdownResult)
-                .toBlocking()
-                .lastOrDefault(null);
-    }
-
-    private DataSourceExampleApp() {
-        this.dataBus = new ExampleDataBus();
     }
 
 }

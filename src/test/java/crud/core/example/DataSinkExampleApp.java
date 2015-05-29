@@ -21,12 +21,11 @@ import java.io.Writer;
 
 import com.google.common.base.Optional;
 
-import crud.core.DataBus;
-import crud.core.DataSink;
-import crud.core.Session;
 import crud.core.WritableDataSet;
-import rx.Observable;
-import rx.functions.Action1;
+import crud.sync.SyncDataBus;
+import crud.sync.SyncDataSink;
+import crud.sync.SyncSession;
+import crud.sync.SyncWritableDataSet;
 
 
 /**
@@ -43,22 +42,18 @@ public class DataSinkExampleApp {
             String.class,           // data element type
             Integer.class);         // result type
 
-    private final OutputStreamWriter writer = new OutputStreamWriter(System.err);
-    private final DataBus dataBus;
-
 
     public static void main(final String... args) throws Exception {
-        Observable<Void> sessionShutdownResult = Observable.empty();
-        Observable<Void> dataBusShutdownResult = Observable.empty();
-
-        final DataSinkExampleApp app = new DataSinkExampleApp();
-        try {
-            final Optional<WritableDataSet<Writer, String, Integer>> optDataSet = app.dataBus.dataSet(dataSetId);
+        try (SyncDataBus dataBus = new SyncDataBus(new ExampleDataBus())) {
+            final Optional<SyncWritableDataSet<Writer, String, Integer>> optDataSet = dataBus.dataSet(dataSetId);
             assert optDataSet.isPresent();  // ...since this is an example
-            final WritableDataSet<Writer, String, Integer> echoDataSet = optDataSet.get();
+            final SyncWritableDataSet<Writer, String, Integer> echoDataSet = optDataSet.get();
 
-            final Session session = app.dataBus.startSession(true);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            try (SyncSession session = dataBus.startSession(true)) {
+                // Don't close standard in and standard error!
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                final OutputStreamWriter writer = new OutputStreamWriter(System.err);
+
                 while (true) {
                     System.out.print("Echo (\"exit\" to quit): ");
                     final String echoMe = reader.readLine();
@@ -67,37 +62,15 @@ public class DataSinkExampleApp {
                         break;
                     }
 
-                    final DataSink<String, Integer> echoDataSource = echoDataSet.dataSink(app.writer, session);
-                    try {
-                        echoDataSource.write(echoMe).forEach(new Action1<Integer>() {
-                            @Override
-                            public void call(final Integer value) {
-                                System.out.println("Printed " + value + " bytes.");
-                            }
-                        });
-                    } finally {
-                        // Schedule asynchronously and ignore result
-                        echoDataSource.shutdown();
+                    try (SyncDataSink<String, Integer> echoDataSource = echoDataSet.dataSink(writer, session)) {
+                        for (final Integer nBytes : echoDataSource.write(echoMe)) {
+                            // Expect just one
+                            System.out.println("Printed " + nBytes + " bytes.");
+                        }
                     }
                 }
-            } finally {
-                // Schedule asynchronously and check result later:
-                sessionShutdownResult = session.shutdown();
             }
-        } finally {
-            // Schedule asynchronously and check result later:
-            dataBusShutdownResult = app.dataBus.shutdown();
         }
-
-        // Check for errors:
-        sessionShutdownResult
-                .concatWith(dataBusShutdownResult)
-                .toBlocking()
-                .lastOrDefault(null);
-    }
-
-    private DataSinkExampleApp() {
-        this.dataBus = new ExampleDataBus();
     }
 
 }
