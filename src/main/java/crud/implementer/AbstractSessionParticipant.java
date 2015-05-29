@@ -15,7 +15,6 @@
 package crud.implementer;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
@@ -24,6 +23,7 @@ import crud.core.DataSink;
 import crud.core.DataSource;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 
 
 /**
@@ -42,11 +42,10 @@ public abstract class AbstractSessionParticipant implements AsyncCloseable {
      */
     @Override
     public Observable<Void> shutdown() {
-        return submit(new Callable<Void>() {
+        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
             @Override
-            public Void call() throws Exception {
+            public void call(final Subscriber<? super Void> sub) throws Exception {
                 doShutdown();
-                return null;
             }
         });
     }
@@ -72,8 +71,8 @@ public abstract class AbstractSessionParticipant implements AsyncCloseable {
         // do nothing
     }
 
-    protected final Observable<Void> submit(final Callable<Void> task) {
-        return this.worker.submit(task);
+    public final @Nonnull SessionWorker getWorker() {
+        return this.worker;
     }
 
 }

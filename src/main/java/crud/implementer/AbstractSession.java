@@ -15,7 +15,6 @@
 package crud.implementer;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -23,6 +22,7 @@ import javax.annotation.Nonnull;
 import crud.core.Session;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 
 
 public abstract class AbstractSession extends AbstractAsyncCloseable implements Session {
@@ -30,11 +30,10 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final Session.Ordering ordering;
 
-    private final Callable<Void> shutdownTask = new Callable<Void>() {
+    private final SessionWorker.Task<Void> shutdownTask = new SessionWorker.Task<Void>() {
         @Override
-        public Void call() throws Exception {
+        public void call(final Subscriber<? super Void> sub) throws Exception {
             doShutdown();
-            return null;
         }
     };
 

@@ -17,7 +17,6 @@ package crud.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
@@ -40,39 +39,16 @@ implements DataSink<StatementParameters, Integer> {
 
     @Override
     public Observable<Integer> write(final StatementParameters params) {
-        final Observable<Integer> result = Observable.create(new StatementExecutor(params)).cache();
-        /* Start a subscription now, so that the executeUpdate() occurs
-         * immediately. The no-argument subscribe() does not handle errors, so
-         * materialize() to prevent it from seeing any.
-         */
-        result.materialize().subscribe();
-        return result;
-    }
-
-
-    private final class StatementExecutor implements Observable.OnSubscribe<Integer> {
-        private final StatementParameters params;
-
-        public StatementExecutor(final StatementParameters params) {
-            this.params = params;
-        }
-
-        @Override
-        public void call(final Subscriber<? super Integer> sub) {
-            submit(new Callable<Void>() {
+        return getWorker().scheduleHot(new SessionWorker.Task<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> sub) throws SQLException {
                 @SuppressWarnings("resource")
-                @Override
-                public Void call() throws SQLException {
-                    final PreparedStatement updateStmt = getStatement();
-                    StatementExecutor.this.params.substituteAll(updateStmt);
-                    final int nRowsUpdated = updateStmt.executeUpdate();
-                    sub.onNext(nRowsUpdated);
-                    // Don't call onCompleted(): that's called by submit()
-                    //sub.onCompleted();
-                    return null;
-                }
-            });
-        }
+                final PreparedStatement updateStmt = getStatement();
+                params.substituteAll(updateStmt);
+                final int nRowsUpdated = updateStmt.executeUpdate();
+                sub.onNext(nRowsUpdated);
+            }
+        });
     }
 
 }

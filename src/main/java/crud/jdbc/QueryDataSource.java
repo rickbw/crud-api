@@ -17,7 +17,7 @@ package crud.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.concurrent.Callable;
+import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
@@ -38,25 +38,18 @@ import rx.Subscriber;
 
     @Override
     public Observable<ResultSetRow> read() {
-        return Observable.create(new Observable.OnSubscribe<ResultSetRow>() {
+        return getWorker().scheduleCold(new SessionWorker.Task<ResultSetRow>() {
             @Override
-            public void call(final Subscriber<? super ResultSetRow> sub) {
-                submit(new Callable<Void>() {
-                    @SuppressWarnings("resource")
-                    @Override
-                    public Void call() throws Exception {
-                        final PreparedStatement queryStmt = getStatement();
-                        try (ResultSet results = queryStmt.executeQuery()) {
-                            while (results.next()) {
-                                final ResultSetRow currentRow = new ResultSetRow(results);
-                                sub.onNext(currentRow);
-                            }
-                            // Don't call onCompleted(): that's called by submit()
-                            //sub.onCompleted();
-                        }
-                        return null;
+            public void call(final Subscriber<? super ResultSetRow> sub) throws SQLException {
+                @SuppressWarnings("resource")
+                final PreparedStatement queryStmt = getStatement();
+                try (ResultSet results = queryStmt.executeQuery()) {
+                    while (results.next()) {
+                        @SuppressWarnings("resource")
+                        final ResultSetRow currentRow = new ResultSetRow(results);
+                        sub.onNext(currentRow);
                     }
-                });
+                }
             }
         });
     }

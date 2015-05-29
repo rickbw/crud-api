@@ -15,7 +15,6 @@
 package crud.jms;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 import javax.jms.JMSException;
@@ -37,6 +36,8 @@ import rx.Subscription;
     private @Nonnull final MessageConsumer consumer;
     private @Nonnull final Observable<M> hotObservable;
 
+    private final MessageListenerRemover messageListenerRemover = new MessageListenerRemover();
+
 
     public MessageConsumerDataSource(
             @Nonnull final SessionWorker worker,
@@ -46,11 +47,7 @@ import rx.Subscription;
         this.consumer = Objects.requireNonNull(consumer);
 
         this.hotObservable = Observable.create(new MessageListenerToSubscriberHandoff(messageType)).share();
-        /* Start a subscription now, so that the MessageListener will be
-         * immediately installed. The no-argument subscribe() does not handle
-         * errors, so materialize() to prevent it from seeing any.
-         */
-        this.hotObservable.materialize().subscribe();
+        this.worker.subscribeHot(this.hotObservable);
     }
 
     @Override
@@ -60,15 +57,14 @@ import rx.Subscription;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.submit(new Callable<Void>() {
+        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
             @Override
-            public Void call() throws JMSException {
+            public void call(final Subscriber<? super Void> sub) throws JMSException {
                 /* TODO: Should this result in an onCompleted() to the
                  * hotObservable? Or perhaps an onError() with a specific
                  * source-termination "exception"?
                  */
                 MessageConsumerDataSource.this.consumer.close();
-                return null;
             }
         });
     }
@@ -84,8 +80,7 @@ import rx.Subscription;
         @Override
         public void call(final Subscriber<? super M> sub) {
             try {
-                sub.add(new MessageListenerRemover());
-                // FIXME: Adding listener in wrong thread?
+                sub.add(MessageConsumerDataSource.this.messageListenerRemover);
                 MessageConsumerDataSource.this.consumer.setMessageListener(new MessageListener() {
                     @Override
                     public void onMessage(final Message message) {

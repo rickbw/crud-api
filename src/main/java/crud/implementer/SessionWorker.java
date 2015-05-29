@@ -14,10 +14,8 @@
  */
 package crud.implementer;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,7 +26,10 @@ import crud.core.MiddlewareException;
 import crud.core.Session;
 import rx.Observable;
 import rx.Observer;
+import rx.Scheduler;
 import rx.Subscriber;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -41,27 +42,67 @@ public final class SessionWorker {
 
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Scheduler scheduler = Schedulers.from(this.executor);
 
 
     /**
-     * Schedule the given task to run on this worker's asynchronous thread.
-     * Return a {@link Observable#cache() cached} {@link Observable} that
-     * will emit the success or error result of the task to all subscribers.
-     * <p/>
-     * If {@link #shutdown(Callable, long, TimeUnit)} was already called, the
-     * resulting {@link Observable} will emit
-     * {@link RejectedExecutionException}.
+     * Wrap the given {@link Action1 action} in an {@link Observable} and
+     * schedule its subscription to run on the {@link Scheduler} encapsulated
+     * by this {@link SessionWorker worker}. This method only creates the
+     * {@link Observable}; it does not subscribe to it.
+     *
+     * @see #subscribeHot(Observable)
      */
-    public Observable<Void> submit(@Nonnull final Callable<Void> task) {
-        if (!this.stopped.get()) {
-            return doSubmit(task);
-        } else {
-            return Observable.error(new RejectedExecutionException("Already stopped"));
-        }
+    public <T> Observable<T> scheduleCold(@Nonnull final Task<T> task) {
+        final Observable.OnSubscribe<T> onSubscribe = new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(final Subscriber<? super T> sub) {
+                try {
+                    task.call(sub);
+                    sub.onCompleted();
+                } catch (final MiddlewareException mx) {
+                    sub.onError(mx);
+                } catch (final Exception ex) {
+                    sub.onError(new MiddlewareException(ex.getMessage(), ex));
+                }
+            }
+        };
+        return Observable.create(onSubscribe).subscribeOn(this.scheduler);
     }
 
     /**
-     * Stop accepting new tasks via {@link #submit(Callable)}, and initiate
+     * Wrap the given {@link Action1 action} in an {@link Observable} and
+     * schedule its subscription to run on the {@link Scheduler} encapsulated
+     * by this {@link SessionWorker worker}. Then
+     * {@link Observable#cache() cache} the result, and begin the
+     * subscription. This allows the subscription action to begin immediately,
+     * but allows the caller to see every resulting value. Note that the use
+     * of cache() assumes that the number of those results is relatively
+     * small.
+     *
+     * @see #scheduleCold(Task)
+     * @see #subscribeHot(Observable)
+     */
+    public <T> Observable<T> scheduleHot(@Nonnull final Task<T> task) {
+        final Observable<T> result = scheduleCold(task).cache();
+        doSubscribeHot(result);
+        return result;
+    }
+
+    /**
+     * Start subscribing to the given {@link Observable} on the
+     * {@link Scheduler} encapsulated by this {@link SessionWorker worker}.
+     * Note that the caller may miss some results if it does not e.g.
+     * {@link Observable#share() share} the input Observable before calling
+     * this method.
+     */
+    public <T> void subscribeHot(final Observable<T> obs) {
+        doSubscribeHot(obs.subscribeOn(this.scheduler));
+    }
+
+    /**
+     * {@link #scheduleHot(Task) Schedule} the given
+     * task, then stop accepting any new tasks, and initiate
      * the termination of this worker's background thread. The resulting
      * {@link Observable} will emit {@link Observer#onCompleted()} once the
      * termination is complete, a {@link TimeoutException} if it fails to
@@ -69,15 +110,13 @@ public final class SessionWorker {
      * the shutdown is interrupted.
      *
      * @param finalTask The caller should perform any of its own cleanup in
-     *                  this task, scheduled here as opposed to in
-     *                  {@link #submit(Callable)} to avoid race conditions on
-     *                  shutdown.
+     *                  this task, scheduled here to avoid race conditions.
      */
     public Observable<Void> shutdown(
-            final @Nonnull Callable<Void> finalTask,
+            @Nonnull final Task<Void> finalTask,
             final long waitDuration, @Nonnull final TimeUnit waitUnit) {
         if (!this.stopped.getAndSet(true)) {
-            final Observable<Void> taskResult = doSubmit(finalTask);
+            final Observable<Void> taskResult = scheduleHot(finalTask);
             this.executor.shutdown();   // non-blocking
             final Observable<Void> await = Observable.create(new Observable.OnSubscribe<Void>() {
                 @Override
@@ -112,53 +151,23 @@ public final class SessionWorker {
         }
     }
 
-    private Observable<Void> doSubmit(final Callable<Void> task) {
-        final Observable<Void> result = Observable.create(actionOf(task)).cache();
-        /* Start a subscription now, so that the given task is immediately
-         * scheduled. The no-argument subscribe() does not handle errors, so
-         * materialize so that it won't see any.
+    private static <T> void doSubscribeHot(final Observable<T> obs) {
+        /* The no-argument subscribe() does not handle errors, so
+         * materialize() so that it won't see any.
          */
-        result.materialize().subscribe();
-        return result;
+        obs.materialize().subscribe();
     }
 
-    private Observable.OnSubscribe<Void> actionOf(final Callable<Void> task) {
-        return new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(final Subscriber<? super Void> sub) {
-                SessionWorker.this.executor.submit(runAndNotify(task, sub));
-            }
-        };
-    }
 
-    private static Runnable runAndNotify(
-            final Callable<Void> runMe,
-            final Subscriber<? super Void> notifyMe) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runMe.call();
-                    notifyMe.onCompleted();
-                } catch (final RuntimeException rex) {
-                    /* RuntimeExceptions are assumed to indicate program bugs.
-                     * Report them to the subscriber as-is. This clause will
-                     * also include MiddlewareExceptions as-is, which is
-                     * desirable.
-                     */
-                    notifyMe.onError(rex);
-                } catch (final Exception ex) {
-                    /* Any checked exception is assumed to represent a
-                     * middleware-specific failure condition, and so is mapped
-                     * to MiddlewareException.
-                     *
-                     * TODO: Provide a pluggable exception-translation
-                     * capability.
-                     */
-                    notifyMe.onError(new MiddlewareException(ex.getMessage(), ex));
-                }
-            }
-        };
+    /**
+     * An asynchronous task to be scheduled by a {@link SessionWorker}.
+     * It will be wrapped by an instance of {@link rx.Observable.OnSubscribe},
+     * and execution of {@link Observer#onCompleted()} and
+     * {@link Observer#onError(Throwable)} will be taken care of on behalf of
+     * the task; it need only invoke {@link Observer#onNext(Object)}.
+     */
+    public static interface Task<T> {
+        void call(Subscriber<? super T> sub) throws Exception;
     }
 
 }

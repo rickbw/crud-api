@@ -14,8 +14,6 @@
  */
 package crud.implementer;
 
-import java.util.concurrent.Callable;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSink;
@@ -39,13 +37,12 @@ implements DataSink<E, R> {
      */
     @Override
     public Observable<R> write(final E value) {
-        final Observable<R> result = Observable.create(new SubmitWriteOnSubscribe(value)).cache();
-        /* Start a subscription now, so that the write is scheduled
-         * immediately. The no-argument subscribe() does not handle errors,
-         * so materialize() to prevent it from seeing any.
-         */
-        result.materialize().subscribe();
-        return result;
+        return getWorker().scheduleHot(new SessionWorker.Task<R>() {
+            @Override
+            public void call(final Subscriber<? super R> sub) throws Exception {
+                doWrite(value, sub);
+            }
+        });
     }
 
     protected AbstractDataSink(@Nonnull final SessionWorker worker) {
@@ -68,29 +65,13 @@ implements DataSink<E, R> {
      * @param writeMe   The value to write.
      * @param resultSub The subscriber to which the result of the write should
      *                  be reported.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected void doWrite(final E writeMe, final Subscriber<? super R> resultSub) {
+    protected void doWrite(final E writeMe, final Subscriber<? super R> resultSub) throws Exception {
         throw new AssertionError("Must override this method if not overriding write()");
-    }
-
-
-    private final class SubmitWriteOnSubscribe implements Observable.OnSubscribe<R> {
-        private final E writeMe;
-
-        public SubmitWriteOnSubscribe(final E writeMe) {
-            this.writeMe = writeMe;
-        }
-
-        @Override
-        public void call(final Subscriber<? super R> sub) {
-            submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    doWrite(SubmitWriteOnSubscribe.this.writeMe, sub);
-                    return null;
-                }
-            });
-        }
     }
 
 }

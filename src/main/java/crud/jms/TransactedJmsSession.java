@@ -14,16 +14,30 @@
  */
 package crud.jms;
 
-import java.util.concurrent.Callable;
-
 import javax.jms.JMSException;
 
 import crud.core.Session;
 import crud.core.TransactedSession;
+import crud.implementer.SessionWorker;
 import rx.Observable;
+import rx.Subscriber;
 
 
 /*package*/ final class TransactedJmsSession extends SessionWrapper implements TransactedSession {
+
+    private final SessionWorker.Task<Void> commitTask = new SessionWorker.Task<Void>() {
+        @Override
+        public void call(final Subscriber<? super Void> sub) throws JMSException {
+            getDelegate().commit();
+        }
+    };
+    private final SessionWorker.Task<Void> rollbackTask = new SessionWorker.Task<Void>() {
+        @Override
+        public void call(final Subscriber<? super Void> sub) throws JMSException {
+            getDelegate().rollback();
+        }
+    };
+
 
     public TransactedJmsSession(final javax.jms.Session delegate) {
         super(Session.Ordering.TRANSACTED, delegate);
@@ -33,24 +47,12 @@ import rx.Observable;
 
     @Override
     public Observable<Void> commit() {
-        return getWorker().submit(new Callable<Void>() {
-            @Override
-            public Void call() throws JMSException {
-                getDelegate().commit();
-                return null;
-            }
-        });
+        return getWorker().scheduleHot(this.commitTask);
     }
 
     @Override
     public Observable<Void> rollback() {
-        return getWorker().submit(new Callable<Void>() {
-            @Override
-            public Void call() throws JMSException {
-                getDelegate().rollback();
-                return null;
-            }
-        });
+        return getWorker().scheduleHot(this.rollbackTask);
     }
 
 }

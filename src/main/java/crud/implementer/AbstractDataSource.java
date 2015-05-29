@@ -14,8 +14,6 @@
  */
 package crud.implementer;
 
-import java.util.concurrent.Callable;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSource;
@@ -28,16 +26,10 @@ public abstract class AbstractDataSource<E> extends AbstractSessionParticipant i
 
     @Override
     public Observable<E> read() {
-        return Observable.create(new Observable.OnSubscribe<E>() {
+        return getWorker().scheduleCold(new SessionWorker.Task<E>() {
             @Override
-            public void call(final Subscriber<? super E> sub) {
-                submit(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        onReadSubscribe(sub);
-                        return null;
-                    }
-                });
+            public void call(final Subscriber<? super E> sub) throws Exception {
+                onReadSubscribe(sub);
             }
         });
     }
@@ -58,8 +50,12 @@ public abstract class AbstractDataSource<E> extends AbstractSessionParticipant i
      * directly, then there is no need to override this method.
      *
      * @param sub   The {@link Subscriber} to notify of the elements being read.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
      */
-    protected void onReadSubscribe(final Subscriber<? super E> sub) {
+    protected void onReadSubscribe(final Subscriber<? super E> sub) throws Exception {
         throw new AssertionError("Must override this method if not overriding read()");
     }
 

@@ -16,29 +16,28 @@ package crud.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
 import crud.core.Session;
 import crud.core.TransactedSession;
+import crud.implementer.SessionWorker;
 import rx.Observable;
+import rx.Subscriber;
 
 
 /*package*/ final class JdbcTransactedSession extends JdbcSession implements TransactedSession {
 
-    private final Callable<Void> commitTask = new Callable<Void>() {
+    private final SessionWorker.Task<Void> commitTask = new SessionWorker.Task<Void>() {
         @Override
-        public Void call() throws SQLException {
+        public void call(final Subscriber<? super Void> sub) throws SQLException {
             getConnection().commit();
-            return null;
         }
     };
-    private final Callable<Void> rollbackTask = new Callable<Void>() {
+    private final SessionWorker.Task<Void> rollbackTask = new SessionWorker.Task<Void>() {
         @Override
-        public Void call() throws SQLException {
+        public void call(final Subscriber<? super Void> sub) throws SQLException {
             getConnection().rollback();
-            return null;
         }
     };
 
@@ -54,12 +53,12 @@ import rx.Observable;
 
     @Override
     public Observable<Void> commit() {
-        return getWorker().submit(this.commitTask);
+        return getWorker().scheduleHot(this.commitTask);
     }
 
     @Override
     public Observable<Void> rollback() {
-        return getWorker().submit(this.rollbackTask);
+        return getWorker().scheduleHot(this.rollbackTask);
     }
 
 }
