@@ -14,8 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSource;
@@ -29,53 +27,25 @@ import crud.core.Session;
  *
  * @author Rick Warren
  */
-public class SyncReadableDataSet<K, E> {
-
-    private @Nonnull final ReadableDataSet<K, E> delegate;
-
+public class SyncReadableDataSet<K, E> extends SyncDelegateHolder<ReadableDataSet<K, E>> {
 
     public SyncReadableDataSet(@Nonnull final ReadableDataSet<K, E> delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see ReadableDataSet#getId()
      */
     public @Nonnull Id<K, E> getId() {
-        return this.delegate.getId();
+        return getDelegate().getId();
     }
 
     /**
      * @see ReadableDataSet#dataSource(Object, Session)
      */
     public @Nonnull SyncDataSource<E> dataSource(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final DataSource<E> delegateSource = this.delegate.dataSource(key, session.getDelegate());
+        final DataSource<E> delegateSource = getDelegate().dataSource(key, session.getDelegate());
         return new SyncDataSource<>(delegateSource);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncReadableDataSet<?, ?> other = (SyncReadableDataSet<?, ?>) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
     }
 
 }

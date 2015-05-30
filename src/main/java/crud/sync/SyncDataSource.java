@@ -14,8 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSource;
@@ -27,20 +25,17 @@ import crud.implementer.AsyncResults;
  *
  * @author Rick Warren
  */
-public class SyncDataSource<E> implements AutoCloseable {
-
-    private @Nonnull final DataSource<E> delegate;
-
+public class SyncDataSource<E> extends SyncDelegateHolder<DataSource<E>> implements AutoCloseable {
 
     public SyncDataSource(@Nonnull final DataSource<E> delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see DataSource#read()
      */
     public Iterable<E> read() {
-        return this.delegate.read().toBlocking().toIterable();
+        return getDelegate().read().toBlocking().toIterable();
     }
 
     /**
@@ -48,32 +43,7 @@ public class SyncDataSource<E> implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        AsyncResults.awaitShutdown(this.delegate);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncDataSource<?> other = (SyncDataSource<?>) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
+        AsyncResults.awaitShutdown(getDelegate());
     }
 
 }

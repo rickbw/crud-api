@@ -14,8 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSink;
@@ -29,53 +27,25 @@ import crud.core.WritableDataSet.Id;
  *
  * @author Rick Warren
  */
-public class SyncWritableDataSet<K, E, R> {
-
-    private @Nonnull final WritableDataSet<K, E, R> delegate;
-
+public class SyncWritableDataSet<K, E, R> extends SyncDelegateHolder<WritableDataSet<K, E, R>> {
 
     public SyncWritableDataSet(@Nonnull final WritableDataSet<K, E, R> delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see WritableDataSet#getId()
      */
     public @Nonnull Id<K, E, R> getId() {
-        return this.delegate.getId();
+        return getDelegate().getId();
     }
 
     /**
      * @see WritableDataSet#dataSink(Object, Session)
      */
     public @Nonnull SyncDataSink<E, R> dataSink(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final DataSink<E, R> delegateSink = this.delegate.dataSink(key, session.getDelegate());
+        final DataSink<E, R> delegateSink = getDelegate().dataSink(key, session.getDelegate());
         return new SyncDataSink<>(delegateSink);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncWritableDataSet<?, ?, ?> other = (SyncWritableDataSet<?, ?, ?>) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
     }
 
 }

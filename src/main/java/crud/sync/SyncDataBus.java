@@ -14,7 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -36,27 +35,24 @@ import crud.implementer.AsyncResults;
  * @author Rick Warren
  */
 @ThreadSafe
-public class SyncDataBus implements AutoCloseable {
-
-    private @Nonnull final DataBus delegate;
-
+public class SyncDataBus extends SyncDelegateHolder<DataBus> implements AutoCloseable {
 
     public SyncDataBus(@Nonnull final DataBus delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see DataBus#start()
      */
     public void start() {
-        this.delegate.start();
+        getDelegate().start();
     }
 
     /**
      * @see DataBus#dataSet(crud.core.ReadableDataSet.Id)
      */
     public <K, E> Optional<SyncReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
-        final Optional<ReadableDataSet<K, E>> optDataSet = this.delegate.dataSet(id);
+        final Optional<ReadableDataSet<K, E>> optDataSet = getDelegate().dataSet(id);
         if (optDataSet.isPresent()) {
             return Optional.of(new SyncReadableDataSet<>(optDataSet.get()));
         } else {
@@ -68,7 +64,7 @@ public class SyncDataBus implements AutoCloseable {
      * @see DataBus#dataSet(crud.core.WritableDataSet.Id)
      */
     public <K, E, R> Optional<SyncWritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        final Optional<WritableDataSet<K, E, R>> optDataSet = this.delegate.dataSet(id);
+        final Optional<WritableDataSet<K, E, R>> optDataSet = getDelegate().dataSet(id);
         if (optDataSet.isPresent()) {
             return Optional.of(new SyncWritableDataSet<>(optDataSet.get()));
         } else {
@@ -80,14 +76,14 @@ public class SyncDataBus implements AutoCloseable {
      * @see DataBus#getSupportedSessionOrderings()
      */
     public Set<Session.Ordering> getSupportedSessionOrderings() {
-        return this.delegate.getSupportedSessionOrderings();
+        return getDelegate().getSupportedSessionOrderings();
     }
 
     /**
      * @see DataBus#startSession(boolean)
      */
     public @Nonnull SyncSession startSession(final boolean requireOrdering) {
-        final Session delegateSession = this.delegate.startSession(requireOrdering);
+        final Session delegateSession = getDelegate().startSession(requireOrdering);
         return new SyncSession(delegateSession);
     }
 
@@ -95,7 +91,7 @@ public class SyncDataBus implements AutoCloseable {
      * @see DataBus#startTransactedSession()
      */
     public @Nonnull SyncTransactedSession startTransactedSession() {
-        final TransactedSession delegateSession = this.delegate.startTransactedSession();
+        final TransactedSession delegateSession = getDelegate().startTransactedSession();
         return new SyncTransactedSession(delegateSession);
     }
 
@@ -104,32 +100,7 @@ public class SyncDataBus implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        AsyncResults.awaitShutdown(this.delegate);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncDataBus other = (SyncDataBus) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
+        AsyncResults.awaitShutdown(getDelegate());
     }
 
 }

@@ -14,8 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import crud.core.DataSink;
@@ -27,20 +25,17 @@ import crud.implementer.AsyncResults;
  *
  * @author Rick Warren
  */
-public class SyncDataSink<E, R> implements AutoCloseable {
-
-    private @Nonnull final DataSink<E, R> delegate;
-
+public class SyncDataSink<E, R> extends SyncDelegateHolder<DataSink<E, R>> implements AutoCloseable {
 
     public SyncDataSink(@Nonnull final DataSink<E, R> delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see DataSink#write(Object)
      */
     public Iterable<R> write(final E value) {
-        return this.delegate.write(value).toBlocking().toIterable();
+        return getDelegate().write(value).toBlocking().toIterable();
     }
 
     /**
@@ -48,32 +43,7 @@ public class SyncDataSink<E, R> implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        AsyncResults.awaitShutdown(this.delegate);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncDataSink<?, ?> other = (SyncDataSink<?, ?>) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
+        AsyncResults.awaitShutdown(getDelegate());
     }
 
 }

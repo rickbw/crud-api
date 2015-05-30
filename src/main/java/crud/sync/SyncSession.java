@@ -14,8 +14,6 @@
  */
 package crud.sync;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import crud.core.Session;
@@ -27,20 +25,17 @@ import crud.implementer.AsyncResults;
  *
  * @author Rick Warren
  */
-public class SyncSession implements AutoCloseable {
-
-    private @Nonnull final Session delegate;
-
+public class SyncSession extends SyncDelegateHolder<Session> implements AutoCloseable {
 
     public SyncSession(@Nonnull final Session delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
+        super(delegate);
     }
 
     /**
      * @see Session#getOrdering()
      */
     public @Nonnull Session.Ordering getOrdering() {
-        return this.delegate.getOrdering();
+        return getDelegate().getOrdering();
     }
 
     /**
@@ -48,36 +43,7 @@ public class SyncSession implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        AsyncResults.awaitShutdown(this.delegate);
-    }
-
-    @Override
-    public String toString() {
-        return "Sync(" + this.delegate + ')';
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SyncSession other = (SyncSession) obj;
-        return this.delegate.equals(other.delegate);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + this.delegate.hashCode();
-    }
-
-    protected final @Nonnull Session getDelegate() {
-        return this.delegate;
+        AsyncResults.awaitShutdown(getDelegate());
     }
 
 }
