@@ -14,13 +14,10 @@
  */
 package crud.jdbc;
 
-import java.sql.Connection;
-
 import crud.core.DataSource;
 import crud.core.ReadableDataSet;
 import crud.core.Session;
 import crud.implementer.AbstractReadableDataSet;
-import crud.implementer.SessionWorker;
 
 
 /*package*/ final class ReadableTable extends AbstractReadableDataSet<StatementTemplate, ResultSetRow> {
@@ -29,18 +26,10 @@ import crud.implementer.SessionWorker;
         super(id);
     }
 
-    @SuppressWarnings("resource")
     @Override
     public DataSource<ResultSetRow> dataSource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
-        final Connection connection = jdbcSession.getConnection();
-        final SessionWorker worker = jdbcSession.worker();
-        return new QueryDataSource(connection, query, worker);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '(' + getId() + ')';
+        return jdbcSession.dataSource(query);
     }
 
 }

@@ -37,6 +37,11 @@ public abstract class AbstractDataSet<K, E> implements DataSet<K, E> {
         return this.id;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '(' + getId() + ')';
+    }
+
     protected AbstractDataSet(@Nonnull final DataSet.Id<K, E> id) {
         this.id = Objects.requireNonNull(id);
     }

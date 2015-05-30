@@ -20,9 +20,10 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import crud.core.DataSink;
+import crud.core.DataSource;
 import crud.core.Session;
 import crud.implementer.AbstractSession;
-import crud.implementer.SessionWorker;
 
 
 /*package*/ class JdbcSession extends AbstractSession {
@@ -44,8 +45,12 @@ import crud.implementer.SessionWorker;
         this.connection.close();
     }
 
-    /*package*/ final @Nonnull SessionWorker worker() {
-        return getWorker();
+    /*package*/ final @Nonnull DataSource<ResultSetRow> dataSource(final StatementTemplate query) {
+        return new QueryDataSource(this.connection, query, getWorker());
+    }
+
+    /*package*/ final @Nonnull DataSink<StatementParameters, Integer> dataSink(final StatementTemplate update) {
+        return new UpdateDataSink(this.connection, update, getWorker());
     }
 
 }

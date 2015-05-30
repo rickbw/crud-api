@@ -14,13 +14,10 @@
  */
 package crud.jdbc;
 
-import java.sql.Connection;
-
 import crud.core.DataSink;
 import crud.core.Session;
 import crud.core.WritableDataSet;
 import crud.implementer.AbstractWritableDataSet;
-import crud.implementer.SessionWorker;
 
 
 /*package*/ final class WritableTable
@@ -30,18 +27,10 @@ extends AbstractWritableDataSet<StatementTemplate, StatementParameters, Integer>
         super(id);
     }
 
-    @SuppressWarnings("resource")
     @Override
     public DataSink<StatementParameters, Integer> dataSink(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
-        final Connection connection = jdbcSession.getConnection();
-        final SessionWorker worker = jdbcSession.worker();
-        return new UpdateDataSink(connection, query, worker);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '(' + getId() + ')';
+        return jdbcSession.dataSink(query);
     }
 
 }
