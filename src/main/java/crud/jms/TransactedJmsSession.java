@@ -14,45 +14,42 @@
  */
 package crud.jms;
 
-import javax.jms.JMSException;
-
 import crud.core.Session;
 import crud.core.TransactedSession;
-import crud.implementer.SessionWorker;
+import crud.implementer.TransactionLifecycle;
 import rx.Observable;
-import rx.Subscriber;
 
 
 /*package*/ final class TransactedJmsSession extends SessionWrapper implements TransactedSession {
 
-    private final SessionWorker.Task<Void> commitTask = new SessionWorker.Task<Void>() {
-        @Override
-        public void call(final Subscriber<? super Void> sub) throws JMSException {
-            getDelegate().commit();
-        }
-    };
-    private final SessionWorker.Task<Void> rollbackTask = new SessionWorker.Task<Void>() {
-        @Override
-        public void call(final Subscriber<? super Void> sub) throws JMSException {
-            getDelegate().rollback();
-        }
-    };
+    private final TransactionLifecycle tx;
 
 
     public TransactedJmsSession(final javax.jms.Session delegate) {
         super(Session.Ordering.TRANSACTED, delegate);
         // Assumed, but illegal to check in this thread:
         //assert getDelegate().getTransacted();
+        this.tx = new TransactionLifecycle(getWorker()) {
+            @Override
+            protected void doCommit() throws Exception {
+                getDelegate().commit();
+            }
+
+            @Override
+            protected void doRollback() throws Exception {
+                getDelegate().rollback();
+            }
+        };
     }
 
     @Override
     public Observable<Void> commit() {
-        return getWorker().scheduleHot(this.commitTask);
+        return this.tx.commit();
     }
 
     @Override
     public Observable<Void> rollback() {
-        return getWorker().scheduleHot(this.rollbackTask);
+        return this.tx.rollback();
     }
 
 }

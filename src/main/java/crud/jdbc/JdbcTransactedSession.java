@@ -15,35 +15,33 @@
 package crud.jdbc;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
 import crud.core.Session;
 import crud.core.TransactedSession;
-import crud.implementer.SessionWorker;
+import crud.implementer.TransactionLifecycle;
 import rx.Observable;
-import rx.Subscriber;
 
 
 /*package*/ final class JdbcTransactedSession extends JdbcSession implements TransactedSession {
 
-    private final SessionWorker.Task<Void> commitTask = new SessionWorker.Task<Void>() {
-        @Override
-        public void call(final Subscriber<? super Void> sub) throws SQLException {
-            getConnection().commit();
-        }
-    };
-    private final SessionWorker.Task<Void> rollbackTask = new SessionWorker.Task<Void>() {
-        @Override
-        public void call(final Subscriber<? super Void> sub) throws SQLException {
-            getConnection().rollback();
-        }
-    };
+    private final TransactionLifecycle tx;
 
 
     public JdbcTransactedSession(@Nonnull final Connection connection) {
         super(connection);
+        this.tx = new TransactionLifecycle(getWorker()) {
+            @Override
+            protected void doCommit() throws Exception {
+                getConnection().commit();
+            }
+
+            @Override
+            protected void doRollback() throws Exception {
+                getConnection().rollback();
+            }
+        };
     }
 
     @Override
@@ -53,12 +51,12 @@ import rx.Subscriber;
 
     @Override
     public Observable<Void> commit() {
-        return getWorker().scheduleHot(this.commitTask);
+        return this.tx.commit();
     }
 
     @Override
     public Observable<Void> rollback() {
-        return getWorker().scheduleHot(this.rollbackTask);
+        return this.tx.rollback();
     }
 
 }
