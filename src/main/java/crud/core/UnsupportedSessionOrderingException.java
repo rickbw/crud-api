@@ -17,8 +17,8 @@ package crud.core;
 
 /**
  * Indicates that the application requested a
- * {@link crud.core.Session.Ordering}, via
- * {@link DataBus#startSession(crud.core.Session.Ordering)}, that the DataBus
+ * {@link crud.core.Session.Ordering}, via e.g.
+ * {@link DataBus#startSession(boolean)}, that the DataBus
  * implementation does not support. <em>Note</em> that a DataBus
  * implementation is always free to silently <em>upgrade</em> the requested
  * ordering -- for example, if the application requested
