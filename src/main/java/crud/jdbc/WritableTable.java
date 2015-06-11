@@ -16,14 +16,14 @@ package crud.jdbc;
 
 import crud.core.DataSink;
 import crud.core.Session;
-import crud.core.WritableDataSet;
-import crud.implementer.AbstractWritableDataSet;
+import crud.core.WritableResourceSet;
+import crud.implementer.AbstractWritableResourceSet;
 
 
 /*package*/ final class WritableTable
-extends AbstractWritableDataSet<StatementTemplate, StatementParameters, Integer> {
+extends AbstractWritableResourceSet<StatementTemplate, StatementParameters, Integer> {
 
-    public WritableTable(final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> id) {
+    public WritableTable(final WritableResourceSet.Id<StatementTemplate, StatementParameters, Integer> id) {
         super(id);
     }
 

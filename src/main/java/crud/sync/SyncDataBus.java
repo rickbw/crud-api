@@ -22,10 +22,10 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.google.common.base.Optional;
 
 import crud.core.DataBus;
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import crud.implementer.AsyncResults;
 
 
@@ -49,24 +49,24 @@ public class SyncDataBus extends SyncDelegateHolder<DataBus> implements AutoClos
     }
 
     /**
-     * @see DataBus#dataSet(crud.core.ReadableDataSet.Id)
+     * @see DataBus#resources(crud.core.ReadableResourceSet.Id)
      */
-    public <K, E> Optional<SyncReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
-        final Optional<ReadableDataSet<K, E>> optDataSet = getDelegate().dataSet(id);
-        if (optDataSet.isPresent()) {
-            return Optional.of(new SyncReadableDataSet<>(optDataSet.get()));
+    public <K, E> Optional<SyncReadableResourceSet<K, E>> resources(final ReadableResourceSet.Id<K, E> id) {
+        final Optional<ReadableResourceSet<K, E>> optResources = getDelegate().resources(id);
+        if (optResources.isPresent()) {
+            return Optional.of(new SyncReadableResourceSet<>(optResources.get()));
         } else {
             return Optional.absent();
         }
     }
 
     /**
-     * @see DataBus#dataSet(crud.core.WritableDataSet.Id)
+     * @see DataBus#resources(crud.core.WritableResourceSet.Id)
      */
-    public <K, E, R> Optional<SyncWritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        final Optional<WritableDataSet<K, E, R>> optDataSet = getDelegate().dataSet(id);
-        if (optDataSet.isPresent()) {
-            return Optional.of(new SyncWritableDataSet<>(optDataSet.get()));
+    public <K, E, R> Optional<SyncWritableResourceSet<K, E, R>> resources(final WritableResourceSet.Id<K, E, R> id) {
+        final Optional<WritableResourceSet<K, E, R>> optResources = getDelegate().resources(id);
+        if (optResources.isPresent()) {
+            return Optional.of(new SyncWritableResourceSet<>(optResources.get()));
         } else {
             return Optional.absent();
         }

@@ -17,31 +17,31 @@ package crud.sync;
 import javax.annotation.Nonnull;
 
 import crud.core.DataSource;
-import crud.core.ReadableDataSet;
-import crud.core.ReadableDataSet.Id;
+import crud.core.ReadableResourceSet;
+import crud.core.ReadableResourceSet.Id;
 import crud.core.Session;
 
 
 /**
- * @see ReadableDataSet
+ * @see ReadableResourceSet
  *
  * @author Rick Warren
  */
-public class SyncReadableDataSet<K, E> extends SyncDelegateHolder<ReadableDataSet<K, E>> {
+public class SyncReadableResourceSet<K, E> extends SyncDelegateHolder<ReadableResourceSet<K, E>> {
 
-    public SyncReadableDataSet(@Nonnull final ReadableDataSet<K, E> delegate) {
+    public SyncReadableResourceSet(@Nonnull final ReadableResourceSet<K, E> delegate) {
         super(delegate);
     }
 
     /**
-     * @see ReadableDataSet#getId()
+     * @see ReadableResourceSet#getId()
      */
     public @Nonnull Id<K, E> getId() {
         return getDelegate().getId();
     }
 
     /**
-     * @see ReadableDataSet#dataSource(Object, Session)
+     * @see ReadableResourceSet#dataSource(Object, Session)
      */
     public @Nonnull SyncDataSource<E> dataSource(@Nonnull final K key, @Nonnull final SyncSession session) {
         final DataSource<E> delegateSource = getDelegate().dataSource(key, session.getDelegate());

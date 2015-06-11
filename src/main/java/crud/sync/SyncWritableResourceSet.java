@@ -18,30 +18,30 @@ import javax.annotation.Nonnull;
 
 import crud.core.DataSink;
 import crud.core.Session;
-import crud.core.WritableDataSet;
-import crud.core.WritableDataSet.Id;
+import crud.core.WritableResourceSet;
+import crud.core.WritableResourceSet.Id;
 
 
 /**
- * @see WritableDataSet
+ * @see WritableResourceSet
  *
  * @author Rick Warren
  */
-public class SyncWritableDataSet<K, E, R> extends SyncDelegateHolder<WritableDataSet<K, E, R>> {
+public class SyncWritableResourceSet<K, E, R> extends SyncDelegateHolder<WritableResourceSet<K, E, R>> {
 
-    public SyncWritableDataSet(@Nonnull final WritableDataSet<K, E, R> delegate) {
+    public SyncWritableResourceSet(@Nonnull final WritableResourceSet<K, E, R> delegate) {
         super(delegate);
     }
 
     /**
-     * @see WritableDataSet#getId()
+     * @see WritableResourceSet#getId()
      */
     public @Nonnull Id<K, E, R> getId() {
         return getDelegate().getId();
     }
 
     /**
-     * @see WritableDataSet#dataSink(Object, Session)
+     * @see WritableResourceSet#dataSink(Object, Session)
      */
     public @Nonnull SyncDataSink<E, R> dataSink(@Nonnull final K key, @Nonnull final SyncSession session) {
         final DataSink<E, R> delegateSink = getDelegate().dataSink(key, session.getDelegate());

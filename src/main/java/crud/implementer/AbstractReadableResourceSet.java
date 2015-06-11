@@ -12,24 +12,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.jdbc;
+package crud.implementer;
 
-import crud.core.DataSource;
+import javax.annotation.Nonnull;
+
 import crud.core.ReadableResourceSet;
-import crud.core.Session;
-import crud.implementer.AbstractReadableResourceSet;
 
 
-/*package*/ final class ReadableTable extends AbstractReadableResourceSet<StatementTemplate, ResultSetRow> {
-
-    public ReadableTable(final ReadableResourceSet.Id<StatementTemplate, ResultSetRow> id) {
-        super(id);
-    }
+/**
+ * An implementation of {@link ReadableResourceSet} that stores the
+ * {@link crud.core.ReadableResourceSet.Id} on behalf of its subclasses.
+ *
+ * @author Rick Warren
+ */
+public abstract class AbstractReadableResourceSet<K, E>
+extends AbstractResourceSet<K, E>
+implements ReadableResourceSet<K, E> {
 
     @Override
-    public DataSource<ResultSetRow> dataSource(final StatementTemplate query, final Session session) {
-        final JdbcSession jdbcSession = (JdbcSession) session;
-        return jdbcSession.dataSource(query);
+    public ReadableResourceSet.Id<K, E> getId() {
+        return (ReadableResourceSet.Id<K, E>) super.getId();
+    }
+
+    protected AbstractReadableResourceSet(@Nonnull final ReadableResourceSet.Id<K, E> id) {
+        super(id);
     }
 
 }

@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 import crud.core.DataBus;
-import crud.core.DataSet;
 import crud.core.MiddlewareException;
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
+import crud.core.ResourceSet;
 import crud.core.Session;
 import crud.core.Session.Ordering;
 import crud.core.TransactedSession;
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -77,16 +77,16 @@ public class JmsDataBus implements DataBus {
     }
 
     /**
-     * All JMS {@link ReadableDataSet}s have key type String -- a message selector --
+     * All JMS {@link ReadableResourceSet}s have key type String -- a message selector --
      * and element type Message. Passing any other types will result in a
      * result of {@link Optional#asSet()}.
      *
-     * The {@link crud.core.ReadableDataSet.Id#getName() name} of the
-     * {@link crud.core.ReadableDataSet.Id} is taken to be the name of a JMS
+     * The {@link crud.core.ReadableResourceSet.Id#getName() name} of the
+     * {@link crud.core.ReadableResourceSet.Id} is taken to be the name of a JMS
      * {@link Destination}.
      */
     @Override
-    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
+    public <K, E> Optional<ReadableResourceSet<K, E>> resources(final ReadableResourceSet.Id<K, E> id) {
         if (!keyAndElementTypesAcceptable(id)) {
             return Optional.absent();
         }
@@ -96,16 +96,16 @@ public class JmsDataBus implements DataBus {
             return Optional.absent();
         }
 
-        return createReadableDataSet(id, destination);
+        return createReadableResourceSet(id, destination);
     }
 
     @Override
-    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
+    public <K, E, R> Optional<WritableResourceSet<K, E, R>> resources(final WritableResourceSet.Id<K, E, R> id) {
         if (!keyAndElementTypesAcceptable(id)) {
             return Optional.absent();
         }
         if (Void.class != id.getWriteResultType()) {
-            log.warn("JMS DataSets have write-result type Void, not {}", id.getWriteResultType().getName());
+            log.warn("JMS ResourceSets have write-result type Void, not {}", id.getWriteResultType().getName());
             return Optional.absent();
         }
 
@@ -114,7 +114,7 @@ public class JmsDataBus implements DataBus {
             return Optional.absent();
         }
 
-        return createWritableDataSet(id, destination);
+        return createWritableResourceSet(id, destination);
     }
 
     @Override
@@ -158,47 +158,47 @@ public class JmsDataBus implements DataBus {
         }
     }
 
-    private static <K, E> Optional<ReadableDataSet<K, E>> createReadableDataSet(
-            final ReadableDataSet.Id<K, E> id,
+    private static <K, E> Optional<ReadableResourceSet<K, E>> createReadableResourceSet(
+            final ReadableResourceSet.Id<K, E> id,
             final Destination destination) {
         /* All of these unchecked conversions are necessary, because the
          * method signature requires dynamic typing, but in this case, the
          * types are actually static.
          */
         @SuppressWarnings("unchecked")
-        final ReadableDataSet.Id<String, ? extends Message> msgDataSetId = (ReadableDataSet.Id<String, ? extends Message>) id;
-        final ReadableDataSet<String, ? extends Message> jmsDataSet = new MessageConsumingDataSet<>(msgDataSetId, destination);
+        final ReadableResourceSet.Id<String, ? extends Message> msgResourceSetId = (ReadableResourceSet.Id<String, ? extends Message>) id;
+        final ReadableResourceSet<String, ? extends Message> jmsResourceSet = new MessageConsumingResourceSet<>(msgResourceSetId, destination);
         @SuppressWarnings("rawtypes")
-        final Optional untypedDataSet = Optional.of(jmsDataSet);
+        final Optional untypedResourceSet = Optional.of(jmsResourceSet);
         @SuppressWarnings("unchecked")
-        final Optional<ReadableDataSet<K, E>> typedDataSet = untypedDataSet;
-        return typedDataSet;
+        final Optional<ReadableResourceSet<K, E>> typedResourceSet = untypedResourceSet;
+        return typedResourceSet;
     }
 
-    private static <K, E, R> Optional<WritableDataSet<K, E, R>> createWritableDataSet(
-            final WritableDataSet.Id<K, E, R> id,
+    private static <K, E, R> Optional<WritableResourceSet<K, E, R>> createWritableResourceSet(
+            final WritableResourceSet.Id<K, E, R> id,
             final Destination destination) {
         /* All of these unchecked conversions are necessary, because the
          * method signature requires dynamic typing, but in this case, the
          * types are actually static.
          */
         @SuppressWarnings("unchecked")
-        final WritableDataSet.Id<String, ? extends Message, Void> msgDataSetId = (WritableDataSet.Id<String, ? extends Message, Void>) id;
-        final WritableDataSet<String, ? extends Message, Void> jmsDataSet = new MessageProducingDataSet<>(msgDataSetId, destination);
+        final WritableResourceSet.Id<String, ? extends Message, Void> msgResourceSetId = (WritableResourceSet.Id<String, ? extends Message, Void>) id;
+        final WritableResourceSet<String, ? extends Message, Void> jmsResourceSet = new MessageProducingResourceSet<>(msgResourceSetId, destination);
         @SuppressWarnings("rawtypes")
-        final Optional untypedDataSet = Optional.of(jmsDataSet);
+        final Optional untypedResourceSet = Optional.of(jmsResourceSet);
         @SuppressWarnings("unchecked")
-        final Optional<WritableDataSet<K, E, R>> typedDataSet = untypedDataSet;
-        return typedDataSet;
+        final Optional<WritableResourceSet<K, E, R>> typedResourceSet = untypedResourceSet;
+        return typedResourceSet;
     }
 
-    private static boolean keyAndElementTypesAcceptable(final DataSet.Id<?, ?> id) {
+    private static boolean keyAndElementTypesAcceptable(final ResourceSet.Id<?, ?> id) {
         if (String.class != id.getKeyType()) {
-            log.warn("JMS DataSets have key type String, not {}", id.getKeyType().getName());
+            log.warn("JMS ResourceSets have key type String, not {}", id.getKeyType().getName());
             return false;
         }
         if (!Message.class.isAssignableFrom(id.getElementType())) {
-            log.warn("JMS DataSets have element type Message, not {}", id.getElementType().getName());
+            log.warn("JMS ResourceSets have element type Message, not {}", id.getElementType().getName());
             return false;
         }
         return true;

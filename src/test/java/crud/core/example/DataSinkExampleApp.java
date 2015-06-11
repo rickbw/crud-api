@@ -21,11 +21,11 @@ import java.io.Writer;
 
 import com.google.common.base.Optional;
 
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import crud.sync.SyncDataBus;
 import crud.sync.SyncDataSink;
 import crud.sync.SyncSession;
-import crud.sync.SyncWritableDataSet;
+import crud.sync.SyncWritableResourceSet;
 
 
 /**
@@ -36,7 +36,7 @@ import crud.sync.SyncWritableDataSet;
  */
 public class DataSinkExampleApp {
 
-    private static final WritableDataSet.Id<Writer, String, Integer> dataSetId = new WritableDataSet.Id<>(
+    private static final WritableResourceSet.Id<Writer, String, Integer> resourceSetId = new WritableResourceSet.Id<>(
             "Printing Data Set",    // descriptive name
             Writer.class,           // key type
             String.class,           // data element type
@@ -45,9 +45,9 @@ public class DataSinkExampleApp {
 
     public static void main(final String... args) throws Exception {
         try (SyncDataBus dataBus = new SyncDataBus(new ExampleDataBus())) {
-            final Optional<SyncWritableDataSet<Writer, String, Integer>> optDataSet = dataBus.dataSet(dataSetId);
-            assert optDataSet.isPresent();  // ...since this is an example
-            final SyncWritableDataSet<Writer, String, Integer> echoDataSet = optDataSet.get();
+            final Optional<SyncWritableResourceSet<Writer, String, Integer>> optResources = dataBus.resources(resourceSetId);
+            assert optResources.isPresent();  // ...since this is an example
+            final SyncWritableResourceSet<Writer, String, Integer> echoResourcesSet = optResources.get();
 
             try (SyncSession session = dataBus.startSession(true)) {
                 // Don't close standard in and standard error!
@@ -62,7 +62,7 @@ public class DataSinkExampleApp {
                         break;
                     }
 
-                    try (SyncDataSink<String, Integer> echoDataSource = echoDataSet.dataSink(writer, session)) {
+                    try (SyncDataSink<String, Integer> echoDataSource = echoResourcesSet.dataSink(writer, session)) {
                         for (final Integer nBytes : echoDataSource.write(echoMe)) {
                             // Expect just one
                             System.out.println("Printed " + nBytes + " bytes.");

@@ -63,23 +63,23 @@ public interface DataBus extends AsyncCloseable {
 
     /**
      * Access the set of data elements for reading, identified by the given
-     * {@link ReadableDataSet.Id}. If no such set exists, return
+     * {@link ReadableResourceSet.Id}. If no such set exists, return
      * {@link Optional#absent()}.
      *
      * @throws MiddlewareException  If it is not possible to determine whether
      *                              such a data set exists.
      */
-    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(ReadableDataSet.Id<K, E> id);
+    public <K, E> Optional<ReadableResourceSet<K, E>> resources(ReadableResourceSet.Id<K, E> id);
 
     /**
      * Access the set of data elements for writing, identified by the given
-     * {@link ReadableDataSet.Id}. If no such set exists, return
+     * {@link ReadableResourceSet.Id}. If no such set exists, return
      * {@link Optional#absent()}.
      *
      * @throws MiddlewareException  If it is not possible to determine whether
      *                              such a data set exists.
      */
-    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(WritableDataSet.Id<K, E, R> id);
+    public <K, E, R> Optional<WritableResourceSet<K, E, R>> resources(WritableResourceSet.Id<K, E, R> id);
 
     /**
      * Return the set of {@link crud.core.Session.Ordering} values that would

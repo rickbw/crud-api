@@ -30,17 +30,17 @@ import javax.annotation.concurrent.Immutable;
  *
  * @author Rick Warren
  */
-public interface DataSet<K, E> {
+public interface ResourceSet<K, E> {
 
     /**
      * @return  An {@link Id} equal to the one provided when this
-     *          {@link DataSet} was created.
+     *          {@link ResourceSet} was created.
      */
     public @Nonnull Id<K, E> getId();
 
 
     /**
-     * Identifies a {@link DataSet}: a named collection of homogeneously-typed
+     * Identifies a {@link ResourceSet}: a named collection of homogeneously-typed
      * data elements in the target middleware. Subsets of these elements are
      * identified by keys.
      *

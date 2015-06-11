@@ -21,13 +21,13 @@ import javax.annotation.concurrent.Immutable;
 
 
 /**
- * A {@link DataSet} that can be written to by the application.
+ * A {@link ResourceSet} that can be written to by the application.
  *
- * @see ReadableDataSet
+ * @see ReadableResourceSet
  *
  * @author Rick Warren
  */
-public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
+public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
 
     @Override
     public @Nonnull Id<K, E, R> getId();
@@ -39,15 +39,15 @@ public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
      *
      * @throws ClassCastException               If the {@link Session} was not
      *              obtained from a {@link DataBus} compatible with this
-     *              {@link WritableDataSet}.
-     * @throws UnsupportedOperationException    If this {@link WritableDataSet} cannot
+     *              {@link WritableResourceSet}.
+     * @throws UnsupportedOperationException    If this {@link WritableResourceSet} cannot
      *              be written.
      */
     public @Nonnull DataSink<E, R> dataSink(@Nonnull K key, @Nonnull Session session);
 
 
     /**
-     * Identifies {@link WritableDataSet}: a named collection of homogeneously-typed data
+     * Identifies {@link WritableResourceSet}: a named collection of homogeneously-typed data
      * elements in the target middleware. Subsets of these elements are identified
      * by keys.
      *
@@ -58,7 +58,7 @@ public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
      * @author Rick Warren
      */
     @Immutable
-    public static final class Id<K, E, R> extends DataSet.Id<K, E> {
+    public static final class Id<K, E, R> extends ResourceSet.Id<K, E> {
         private @Nonnull final Class<R> writeResultType;
 
         public Id(
@@ -76,7 +76,7 @@ public interface WritableDataSet<K, E, R> extends DataSet<K, E> {
 
         @Override
         public String toString() {
-            return WritableDataSet.class.getSimpleName()
+            return WritableResourceSet.class.getSimpleName()
                     + '.' + getClass().getSimpleName() + "(\""
                     + getName() + "\", "
                     + getKeyType().getName() + " -> " + getElementType().getName()

@@ -19,9 +19,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
 import crud.core.Session;
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import crud.implementer.AbstractDataBus;
 
 
@@ -40,32 +40,32 @@ public class ExampleDataBus extends AbstractDataBus {
     }
 
     @Override
-    protected boolean isDataSetAvailable(final ReadableDataSet.Id<?, ?> id) {
+    protected boolean isResourceSetAvailable(final ReadableResourceSet.Id<?, ?> id) {
         return id.getKeyType() == id.getElementType();
     }
 
     @Override
-    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) {
-        // isDataSetAvailable() ensures type conversion is safe:
+    protected ReadableResourceSet<?, ?> resolveResourceSet(final ReadableResourceSet.Id<?, ?> id) {
+        // isResourceSetAvailable() ensures type conversion is safe:
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        final EchoReadableDataSet result = new EchoReadableDataSet(id);
+        final EchoReadableResourceSet result = new EchoReadableResourceSet(id);
         return result;
     }
 
     @Override
-    protected boolean isDataSetAvailable(final WritableDataSet.Id<?, ?, ?> id) {
+    protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
         return Writer.class.isAssignableFrom(id.getKeyType())
             && String.class.isAssignableFrom(id.getElementType())
             && id.getWriteResultType().isAssignableFrom(Integer.class);
     }
 
     @Override
-    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) {
+    protected WritableResourceSet<?, ?, ?> resolveResourceSet(final WritableResourceSet.Id<?, ?, ?> id) {
         @SuppressWarnings("rawtypes")
-        final WritableDataSet.Id rawId = id;
+        final WritableResourceSet.Id rawId = id;
         @SuppressWarnings("unchecked")
-        final WritableDataSet.Id<Writer, String, Integer> typedId = rawId;
-        return new PrintingDataSet(typedId);
+        final WritableResourceSet.Id<Writer, String, Integer> typedId = rawId;
+        return new PrintingResourceSet(typedId);
     }
 
 }

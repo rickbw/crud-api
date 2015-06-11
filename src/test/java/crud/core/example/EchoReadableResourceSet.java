@@ -12,30 +12,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.implementer;
+package crud.core.example;
 
-import javax.annotation.Nonnull;
+import crud.core.DataSource;
+import crud.core.ReadableResourceSet;
+import crud.core.Session;
+import crud.implementer.AbstractReadableResourceSet;
 
-import crud.core.ReadableDataSet;
 
+/*package*/ final class EchoReadableResourceSet<T> extends AbstractReadableResourceSet<T, T> {
 
-/**
- * An implementation of {@link ReadableDataSet} that stores the
- * {@link crud.core.ReadableDataSet.Id} on behalf of its subclasses.
- *
- * @author Rick Warren
- */
-public abstract class AbstractReadableDataSet<K, E>
-extends AbstractDataSet<K, E>
-implements ReadableDataSet<K, E> {
-
-    @Override
-    public ReadableDataSet.Id<K, E> getId() {
-        return (ReadableDataSet.Id<K, E>) super.getId();
+    public EchoReadableResourceSet(final ReadableResourceSet.Id<T, T> id) {
+        super(id);
     }
 
-    protected AbstractReadableDataSet(@Nonnull final ReadableDataSet.Id<K, E> id) {
-        super(id);
+    @Override
+    public DataSource<T> dataSource(final T key, final Session session) {
+        return new EchoDataSource<>(((ExampleSession) session).worker(), key);
     }
 
 }

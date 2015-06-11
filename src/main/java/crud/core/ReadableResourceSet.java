@@ -19,13 +19,13 @@ import javax.annotation.concurrent.Immutable;
 
 
 /**
- * A {@link DataSet} that can be read by the application.
+ * A {@link ResourceSet} that can be read by the application.
  *
- * @see WritableDataSet
+ * @see WritableResourceSet
  *
  * @author Rick Warren
  */
-public interface ReadableDataSet<K, E> extends DataSet<K, E> {
+public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
 
     @Override
     public @Nonnull Id<K, E> getId();
@@ -37,13 +37,13 @@ public interface ReadableDataSet<K, E> extends DataSet<K, E> {
      *
      * @throws ClassCastException               If the {@link Session} was not
      *              obtained from a {@link DataBus} compatible with this
-     *              {@link ReadableDataSet}.
+     *              {@link ReadableResourceSet}.
      */
     public @Nonnull DataSource<E> dataSource(@Nonnull K key, @Nonnull Session session);
 
 
     /**
-     * Identifies {@link ReadableDataSet}: a named collection of homogeneously-typed data
+     * Identifies {@link ReadableResourceSet}: a named collection of homogeneously-typed data
      * elements in the target middleware. Subsets of these elements are identified
      * by keys.
      *
@@ -51,7 +51,7 @@ public interface ReadableDataSet<K, E> extends DataSet<K, E> {
      * @param <E>   The type of the data elements, identified by those keys.
      */
     @Immutable
-    public static final class Id<K, E> extends DataSet.Id<K, E> {
+    public static final class Id<K, E> extends ResourceSet.Id<K, E> {
         public Id(
                 @Nonnull final String name,
                 @Nonnull final Class<K> keyType,
@@ -61,7 +61,7 @@ public interface ReadableDataSet<K, E> extends DataSet<K, E> {
 
         @Override
         public String toString() {
-            return ReadableDataSet.class.getSimpleName()
+            return ReadableResourceSet.class.getSimpleName()
                     + '.' + getClass().getSimpleName() + "(\""
                     + getName() + "\", "
                     + getKeyType().getName() + " -> " + getElementType().getName()

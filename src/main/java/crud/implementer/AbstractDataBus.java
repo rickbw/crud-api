@@ -21,20 +21,20 @@ import javax.annotation.Nonnull;
 import com.google.common.base.Optional;
 
 import crud.core.DataBus;
-import crud.core.DataSet;
 import crud.core.MiddlewareException;
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
+import crud.core.ResourceSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
 import crud.core.UnsupportedSessionOrderingException;
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import rx.Observer;
 
 
 /**
  * A {@link DataBus} implementation that does nothing. Subclasses must
- * override one or both of {@link #dataSet(crud.core.ReadableDataSet.Id)}
- * and/or {@link #dataSet(crud.core.WritableDataSet.Id)} to access data sets,
+ * override one or both of {@link #resources(crud.core.ReadableResourceSet.Id)}
+ * and/or {@link #resources(crud.core.WritableResourceSet.Id)} to access data sets,
  * and one or more of {@link #startSession(boolean)},
  * {@link #doStartUnorderedSession()}, {@link #doStartOrderedSession()},
  * and/or {@link #doStartTransactedSession()} to star {@link Session}s.
@@ -55,21 +55,21 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      * @return  {@link Optional#absent()}. Subclasses can override this behavior.
      */
     @Override
-    public <K, E> Optional<ReadableDataSet<K, E>> dataSet(final ReadableDataSet.Id<K, E> id) {
-        if (!isDataSetAvailable(id)) {
+    public <K, E> Optional<ReadableResourceSet<K, E>> resources(final ReadableResourceSet.Id<K, E> id) {
+        if (!isResourceSetAvailable(id)) {
             return Optional.absent();
         }
 
         try {
-            /* It's up to subclasses to ensure that isDataSetAvailable() and
-             * resolveDataSet() agree with each other, and thus make the
+            /* It's up to subclasses to ensure that isResourceSetAvailable() and
+             * resolveResourceSet() agree with each other, and thus make the
              * following casts safe.
              */
             @SuppressWarnings("rawtypes")
-            final ReadableDataSet rawResult = resolveDataSet(id);
+            final ReadableResourceSet rawResult = resolveResourceSet(id);
             assert rawResult.getId().equals(id);
             @SuppressWarnings("unchecked")
-            final ReadableDataSet<K, E> typedResult = rawResult;
+            final ReadableResourceSet<K, E> typedResult = rawResult;
             return Optional.of(typedResult);
         } catch (final MiddlewareException mx) {
             throw mx;   // pass through
@@ -82,21 +82,21 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      * @return  {@link Optional#absent()}. Subclasses can override this behavior.
      */
     @Override
-    public <K, E, R> Optional<WritableDataSet<K, E, R>> dataSet(final WritableDataSet.Id<K, E, R> id) {
-        if (!isDataSetAvailable(id)) {
+    public <K, E, R> Optional<WritableResourceSet<K, E, R>> resources(final WritableResourceSet.Id<K, E, R> id) {
+        if (!isResourceSetAvailable(id)) {
             return Optional.absent();
         }
 
         try {
-            /* It's up to subclasses to ensure that isDataSetAvailable() and
-             * resolveDataSet() agree with each other, and thus make the
+            /* It's up to subclasses to ensure that isResourceSetAvailable() and
+             * resolveResourceSet() agree with each other, and thus make the
              * following casts safe.
              */
             @SuppressWarnings("rawtypes")
-            final WritableDataSet rawResult = resolveDataSet(id);
+            final WritableResourceSet rawResult = resolveResourceSet(id);
             assert rawResult.getId().equals(id);
             @SuppressWarnings("unchecked")
-            final WritableDataSet<K, E, R> typedResult = rawResult;
+            final WritableResourceSet<K, E, R> typedResult = rawResult;
             return Optional.of(typedResult);
         } catch (final MiddlewareException mx) {
             throw mx;   // pass through
@@ -202,8 +202,8 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
     }
 
     /**
-     * Return true if the ID corresponds to a {@link ReadableDataSet}
-     * available (via {@link #dataSet(crud.core.ReadableDataSet.Id)}) from
+     * Return true if the ID corresponds to a {@link ReadableResourceSet}
+     * available (via {@link #resources(crud.core.ReadableResourceSet.Id)}) from
      * this {@link DataBus}.
      *
      * @param id    The ID to be inspected: its classes, and its name.
@@ -211,16 +211,16 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      * @return  This implementation always returns false. Subclasses can
      *          override as appropriate.
      *
-     * @see #resolveDataSet(crud.core.ReadableDataSet.Id)
-     * @see #isDataSetAvailable(crud.core.WritableDataSet.Id)
+     * @see #resolveResourceSet(crud.core.ReadableResourceSet.Id)
+     * @see #isResourceSetAvailable(crud.core.WritableResourceSet.Id)
      */
-    protected boolean isDataSetAvailable(final ReadableDataSet.Id<?, ?> id) {
+    protected boolean isResourceSetAvailable(final ReadableResourceSet.Id<?, ?> id) {
         return false;
     }
 
     /**
-     * Return true if the ID corresponds to a {@link WritableDataSet}
-     * available (via {@link #dataSet(crud.core.WritableDataSet.Id)}) from
+     * Return true if the ID corresponds to a {@link WritableResourceSet}
+     * available (via {@link #resources(crud.core.WritableResourceSet.Id)}) from
      * this {@link DataBus}.
      *
      * @param id    The ID to be inspected: its classes, and its name.
@@ -228,75 +228,75 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      * @return  This implementation always returns false. Subclasses can
      *          override as appropriate.
      *
-     * @see #resolveDataSet(crud.core.WritableDataSet.Id)
-     * @see #isDataSetAvailable(crud.core.ReadableDataSet.Id)
+     * @see #resolveResourceSet(crud.core.WritableResourceSet.Id)
+     * @see #isResourceSetAvailable(crud.core.ReadableResourceSet.Id)
      */
-    protected boolean isDataSetAvailable(final WritableDataSet.Id<?, ?, ?> id) {
+    protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
         return false;
     }
 
     /**
-     * Create or otherwise provide a {@link ReadableDataSet} having the given
+     * Create or otherwise provide a {@link ReadableResourceSet} having the given
      * ID. This method will not be called unless
-     * {@link #isDataSetAvailable(crud.core.ReadableDataSet.Id)} returned
+     * {@link #isResourceSetAvailable(crud.core.ReadableResourceSet.Id)} returned
      * true for that ID. It is therefore up to the implementation to ensure
      * that the two methods agree with each other.
      *
      * This method is not generic, although the input and output IDs are
      * required to be equal, because the Java type system does not make it
      * easy to combine static and dynamic typing. An implementation may only
-     * be able to return {@link DataSet}s of certain well-known types; in that
+     * be able to return {@link ResourceSet}s of certain well-known types; in that
      * case, it is difficult to make a method typed with generic type
      * parameters compile without warnings.
      *
      * This base implementation throws {@link AssertionError} always: the base
-     * implementation of {@link #isDataSetAvailable(crud.core.ReadableDataSet.Id)}
+     * implementation of {@link #isResourceSetAvailable(crud.core.ReadableResourceSet.Id)}
      * always returns false, so this method should never be called. Anyone who
      * overrides that method must override this one as well.
      *
      * @param id    The ID to be resolved.
      *
-     * @see #isDataSetAvailable(crud.core.ReadableDataSet.Id)
-     * @see #resolveDataSet(crud.core.WritableDataSet.Id)
+     * @see #isResourceSetAvailable(crud.core.ReadableResourceSet.Id)
+     * @see #resolveResourceSet(crud.core.WritableResourceSet.Id)
      *
      * @throws Exception    Subclasses may throw whatever they wish.
      *                      Exceptions will be passed to
      *                      {@link Observer#onError(Throwable)}.
      */
-    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) throws Exception {
-        throw new AssertionError("isDataSetAvailable() indicated DataSet available, but this method was not overridden");
+    protected ReadableResourceSet<?, ?> resolveResourceSet(final ReadableResourceSet.Id<?, ?> id) throws Exception {
+        throw new AssertionError("isResourceSetAvailable() indicated ResourceSet available, but this method was not overridden");
     }
 
     /**
-     * Create or otherwise provide a {@link WritableDataSet} having the given
+     * Create or otherwise provide a {@link WritableResourceSet} having the given
      * ID. This method will not be called unless
-     * {@link #isDataSetAvailable(crud.core.WritableDataSet.Id)} returned
+     * {@link #isResourceSetAvailable(crud.core.WritableResourceSet.Id)} returned
      * true for that ID. It is therefore up to the implementation to ensure
      * that the two methods agree with each other.
      *
      * This method is not generic, although the input and output IDs are
      * required to be equal, because the Java type system does not make it
      * easy to combine static and dynamic typing. An implementation may only
-     * be able to return {@link DataSet}s of certain well-known types; in that
+     * be able to return {@link ResourceSet}s of certain well-known types; in that
      * case, it is difficult to make a method typed with generic type
      * parameters compile without warnings.
      *
      * This base implementation throws {@link AssertionError} always: the base
-     * implementation of {@link #isDataSetAvailable(crud.core.WritableDataSet.Id)}
+     * implementation of {@link #isResourceSetAvailable(crud.core.WritableResourceSet.Id)}
      * always returns false, so this method should never be called. Anyone who
      * overrides that method must override this one as well.
      *
      * @param id    The ID to be resolved.
      *
-     * @see #isDataSetAvailable(crud.core.WritableDataSet.Id)
-     * @see #resolveDataSet(crud.core.ReadableDataSet.Id)
+     * @see #isResourceSetAvailable(crud.core.WritableResourceSet.Id)
+     * @see #resolveResourceSet(crud.core.ReadableResourceSet.Id)
      *
      * @throws Exception    Subclasses may throw whatever they wish.
      *                      Exceptions will be passed to
      *                      {@link Observer#onError(Throwable)}.
      */
-    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) throws Exception {
-        throw new AssertionError("isDataSetAvailable() indicated DataSet available, but this method was not overridden");
+    protected WritableResourceSet<?, ?, ?> resolveResourceSet(final WritableResourceSet.Id<?, ?, ?> id) throws Exception {
+        throw new AssertionError("isResourceSetAvailable() indicated ResourceSet available, but this method was not overridden");
     }
 
 }

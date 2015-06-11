@@ -18,13 +18,13 @@ import java.io.Writer;
 
 import crud.core.DataSink;
 import crud.core.Session;
-import crud.core.WritableDataSet;
-import crud.implementer.AbstractWritableDataSet;
+import crud.core.WritableResourceSet;
+import crud.implementer.AbstractWritableResourceSet;
 
 
-/*package*/ final class PrintingDataSet extends AbstractWritableDataSet<Writer, String, Integer> {
+/*package*/ final class PrintingResourceSet extends AbstractWritableResourceSet<Writer, String, Integer> {
 
-    public PrintingDataSet(final WritableDataSet.Id<Writer, String, Integer> id) {
+    public PrintingResourceSet(final WritableResourceSet.Id<Writer, String, Integer> id) {
         super(id);
     }
 

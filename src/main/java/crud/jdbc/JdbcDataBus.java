@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
-import crud.core.WritableDataSet;
+import crud.core.WritableResourceSet;
 import crud.implementer.AbstractDataBus;
 
 
@@ -94,47 +94,47 @@ public class JdbcDataBus extends AbstractDataBus {
     }
 
     @Override
-    protected boolean isDataSetAvailable(final ReadableDataSet.Id<?, ?> id) {
+    protected boolean isResourceSetAvailable(final ReadableResourceSet.Id<?, ?> id) {
         if (StatementTemplate.class != id.getKeyType()) {
-            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            log.warn("JDBC ResourceSets have key type StatementTemplate, not {}", id.getKeyType().getName());
             return false;
         }
         if (ResultSetRow.class != id.getElementType()) {
-            log.warn("JDBC readable DataSets have element type ResultSetRow, not {}", id.getElementType().getName());
+            log.warn("JDBC readable ResourceSets have element type ResultSetRow, not {}", id.getElementType().getName());
             return false;
         }
         return true;
     }
 
     @Override
-    protected ReadableDataSet<?, ?> resolveDataSet(final ReadableDataSet.Id<?, ?> id) {
+    protected ReadableResourceSet<?, ?> resolveResourceSet(final ReadableResourceSet.Id<?, ?> id) {
         @SuppressWarnings("unchecked")
-        final ReadableDataSet.Id<StatementTemplate, ResultSetRow> resultSetDataSetId = (ReadableDataSet.Id<StatementTemplate, ResultSetRow>) id;
-        return new ReadableTable(resultSetDataSetId);
+        final ReadableResourceSet.Id<StatementTemplate, ResultSetRow> resultId = (ReadableResourceSet.Id<StatementTemplate, ResultSetRow>) id;
+        return new ReadableTable(resultId);
     }
 
     @Override
-    protected boolean isDataSetAvailable(final WritableDataSet.Id<?, ?, ?> id) {
+    protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
         if (StatementTemplate.class != id.getKeyType()) {
-            log.warn("JDBC DataSets have key type StatementTemplate, not {}", id.getKeyType().getName());
+            log.warn("JDBC ResourceSets have key type StatementTemplate, not {}", id.getKeyType().getName());
             return false;
         }
         if (StatementParameters.class != id.getElementType()) {
-            log.warn("JDBC writable DataSets have element type StatementParameters, not {}", id.getElementType().getName());
+            log.warn("JDBC writable ResourceSets have element type StatementParameters, not {}", id.getElementType().getName());
             return false;
         }
         if (Integer.class != id.getWriteResultType()) {
-            log.warn("JDBC DataSets have write-result type Integer, not {}", id.getWriteResultType().getName());
+            log.warn("JDBC ResourceSets have write-result type Integer, not {}", id.getWriteResultType().getName());
             return false;
         }
         return true;
     }
 
     @Override
-    protected WritableDataSet<?, ?, ?> resolveDataSet(final WritableDataSet.Id<?, ?, ?> id) {
+    protected WritableResourceSet<?, ?, ?> resolveResourceSet(final WritableResourceSet.Id<?, ?, ?> id) {
         @SuppressWarnings("unchecked")
-        final WritableDataSet.Id<StatementTemplate, StatementParameters, Integer> resultSetDataSetId = (WritableDataSet.Id<StatementTemplate, StatementParameters, Integer>) id;
-        return new WritableTable(resultSetDataSetId);
+        final WritableResourceSet.Id<StatementTemplate, StatementParameters, Integer> resultId = (WritableResourceSet.Id<StatementTemplate, StatementParameters, Integer>) id;
+        return new WritableTable(resultId);
     }
 
     private Connection getConnection() throws SQLException {

@@ -14,36 +14,29 @@
  */
 package crud.implementer;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
-import crud.core.DataSet;
+import crud.core.WritableResourceSet;
 
 
 /**
- * An implementation of {@link DataSet} that stores the
- * {@link crud.core.DataSet.Id} on behalf of its subclasses.
+ * An implementation of {@link WritableResourceSet} that stores the
+ * {@link crud.core.WritableResourceSet.Id} on behalf of its subclasses.
  *
  * @author Rick Warren
  */
-public abstract class AbstractDataSet<K, E> implements DataSet<K, E> {
-
-    private @Nonnull final DataSet.Id<K, E> id;
-
-
-    @Override
-    public DataSet.Id<K, E> getId() {
-        return this.id;
-    }
+public abstract class AbstractWritableResourceSet<K, E, R>
+extends AbstractResourceSet<K, E>
+implements WritableResourceSet<K, E, R> {
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + '(' + getId() + ')';
+    @SuppressWarnings("unchecked")
+    public WritableResourceSet.Id<K, E, R> getId() {
+        return (WritableResourceSet.Id<K, E, R>) super.getId();
     }
 
-    protected AbstractDataSet(@Nonnull final DataSet.Id<K, E> id) {
-        this.id = Objects.requireNonNull(id);
+    protected AbstractWritableResourceSet(@Nonnull final WritableResourceSet.Id<K, E, R> id) {
+        super(id);
     }
 
 }

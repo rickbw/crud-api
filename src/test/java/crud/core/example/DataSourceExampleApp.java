@@ -19,10 +19,10 @@ import java.io.InputStreamReader;
 
 import com.google.common.base.Optional;
 
-import crud.core.ReadableDataSet;
+import crud.core.ReadableResourceSet;
 import crud.sync.SyncDataBus;
 import crud.sync.SyncDataSource;
-import crud.sync.SyncReadableDataSet;
+import crud.sync.SyncReadableResourceSet;
 import crud.sync.SyncSession;
 
 
@@ -34,7 +34,7 @@ import crud.sync.SyncSession;
  */
 public class DataSourceExampleApp {
 
-    private static final ReadableDataSet.Id<String, String> dataSetId = new ReadableDataSet.Id<>(
+    private static final ReadableResourceSet.Id<String, String> resourceSetId = new ReadableResourceSet.Id<>(
             "Key Echo Data Set",    // descriptive name
             String.class,           // key type
             String.class);          // data element type
@@ -42,9 +42,9 @@ public class DataSourceExampleApp {
 
     public static void main(final String... args) throws Exception {
         try (SyncDataBus dataBus = new SyncDataBus(new ExampleDataBus())) {
-            final Optional<SyncReadableDataSet<String, String>> optDataSet = dataBus.dataSet(dataSetId);
-            assert optDataSet.isPresent();  // ...since this is an example
-            final SyncReadableDataSet<String, String> echoDataSet = optDataSet.get();
+            final Optional<SyncReadableResourceSet<String, String>> optResources = dataBus.resources(resourceSetId);
+            assert optResources.isPresent();  // ...since this is an example
+            final SyncReadableResourceSet<String, String> echoResourceSet = optResources.get();
 
             try (SyncSession session = dataBus.startSession(true)) {
                 // Don't close standard in!
@@ -57,7 +57,7 @@ public class DataSourceExampleApp {
                         break;
                     }
 
-                    try (SyncDataSource<String> echoDataSource = echoDataSet.dataSource(echoMe, session)) {
+                    try (SyncDataSource<String> echoDataSource = echoResourceSet.dataSource(echoMe, session)) {
                         for (final String value : echoDataSource.read()) {
                             System.out.println("You typed: " + value);
                         }
