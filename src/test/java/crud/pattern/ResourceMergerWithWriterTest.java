@@ -14,7 +14,7 @@
  */
 package crud.pattern;
 
-import static crud.RxAssertions.assertObservablesEqual;
+import static crud.core.RxAssertions.assertObservablesEqual;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.ReadableResource;
-import crud.WritableResource;
+import crud.core.ReadableResource;
+import crud.core.WritableResource;
 import rx.Observable;
 
 

@@ -14,10 +14,10 @@
  */
 package crud.pattern;
 
-import crud.ReadableResource;
-import crud.Resource;
-import crud.UpdatableResource;
-import crud.WritableResource;
+import crud.core.ReadableResource;
+import crud.core.Resource;
+import crud.core.UpdatableResource;
+import crud.core.WritableResource;
 import crud.fluent.FluentReadableResource;
 import crud.fluent.FluentUpdatableResource;
 import crud.fluent.FluentWritableResource;

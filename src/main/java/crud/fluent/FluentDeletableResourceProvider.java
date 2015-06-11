@@ -18,10 +18,11 @@ import java.util.Objects;
 
 import com.google.common.base.Function;
 
-import crud.DeletableResource;
-import crud.DeletableResourceProvider;
-import crud.Resource;
-import crud.ResourceProvider;
+import crud.core.DeletableResource;
+import crud.core.DeletableResourceProvider;
+import crud.core.Resource;
+import crud.core.ResourceProvider;
+
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;

@@ -26,8 +26,8 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.DeletableResource;
-import crud.DeletableResourceTest;
+import crud.core.DeletableResourceTest;
+import crud.core.DeletableResource;
 import rx.Observable;
 import rx.functions.Func0;
 

@@ -12,9 +12,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud;
+package crud.core;
 
-import static crud.RxAssertions.assertObservablesEqual;
+import static crud.core.RxAssertions.assertObservablesEqual;
 
 import org.junit.Test;
 

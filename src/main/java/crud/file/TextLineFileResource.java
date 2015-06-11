@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import crud.ReadableResource;
-import crud.ReadableResourceProvider;
-import crud.UpdatableResource;
-import crud.UpdatableResourceProvider;
+import crud.core.ReadableResource;
+import crud.core.ReadableResourceProvider;
+import crud.core.UpdatableResource;
+import crud.core.UpdatableResourceProvider;
 import crud.util.BooleanSubscription;
 import rx.Observable;
 import rx.Observable.OnSubscribe;

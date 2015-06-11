@@ -12,36 +12,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud;
-
-import static crud.RxAssertions.assertObservablesEqual;
-
-import org.junit.Test;
-
-import rx.Observable;
+package crud.core;
 
 
 /**
  * A base class for all unit test classes that operate on
- * {@link ReadableResource}s. It tests basic contracts that should hold true
+ * {@link UpdatableResource}s. It tests basic contracts that should hold true
  * for all implementations.
  */
-public abstract class ReadableResourceTest<RSRC> extends ResourceTest {
-
-    @Test
-    public void getsAreIdempotent() {
-        // given:
-        final ReadableResource<RSRC> resource = createDefaultResource();
-
-        // when:
-        final Observable<RSRC> result1 = resource.get();
-        final Observable<RSRC> result2 = resource.get();
-
-        // then:
-        assertObservablesEqual(result1, result2);
-    }
+public abstract class UpdatableResourceTest<UPDATE, RESP> extends ResourceTest {
 
     @Override
-    protected abstract ReadableResource<RSRC> createDefaultResource();
+    protected abstract UpdatableResource<UPDATE, RESP> createDefaultResource();
+
+    /**
+     * Create an object suitable for being written to the resources returned
+     * by {@link #createDefaultResource()}.
+     */
+    protected abstract UPDATE createDefaultUpdate();
 
 }

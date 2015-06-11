@@ -16,7 +16,7 @@ package crud.fluent;
 
 import java.util.Objects;
 
-import crud.UpdatableResource;
+import crud.core.UpdatableResource;
 import crud.pattern.ResourceBuilder;
 import rx.Observable;
 import rx.Observer;

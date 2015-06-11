@@ -16,8 +16,9 @@ package crud.fluent;
 
 import java.util.Objects;
 
-import crud.Resource;
-import crud.ResourceProvider;
+import crud.core.Resource;
+import crud.core.ResourceProvider;
+
 import rx.functions.Func0;
 import rx.functions.Func1;
 

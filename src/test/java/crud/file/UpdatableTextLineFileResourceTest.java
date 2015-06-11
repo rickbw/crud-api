@@ -27,8 +27,8 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.UpdatableResource;
-import crud.UpdatableResourceTest;
+import crud.core.UpdatableResourceTest;
+import crud.core.UpdatableResource;
 import rx.Observable;
 
 

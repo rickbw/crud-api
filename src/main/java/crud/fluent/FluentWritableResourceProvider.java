@@ -16,8 +16,9 @@ package crud.fluent;
 
 import java.util.Objects;
 
-import crud.WritableResource;
-import crud.WritableResourceProvider;
+import crud.core.WritableResource;
+import crud.core.WritableResourceProvider;
+
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;

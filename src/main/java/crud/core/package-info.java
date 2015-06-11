@@ -1,6 +1,6 @@
 /**
  * This package supports data-oriented interactions with generic
- * {@link crud.Resource}s, which encapsulate
+ * {@link crud.core.Resource}s, which encapsulate
  * state. The design emphasizes generality, safety and concurrency.
  *
  * <ul>
@@ -17,9 +17,9 @@
  *  resources support all operations, the operations are composable, defined
  *  in separate interfaces designed to work together. For example, a resource
  *  that supports reading and writing, but not deletion, would implement
- *  {@link crud.ReadableResource} and
- *  {@link crud.WritableResource} but not
- *  {@link crud.DeletableResource}.</li>
+ *  {@link crud.core.ReadableResource} and
+ *  {@link crud.core.WritableResource} but not
+ *  {@link crud.core.DeletableResource}.</li>
  *
  *  <li><em>Concurrency</em>: The API encourages asynchronous implementations.
  *  It encapsulates asynchrony using Rx-Java and its {@link rx.Observable}
@@ -31,15 +31,15 @@
  * </ul>
  *
  * There are two primary abstractions in the API:
- * {@link crud.Resource}s and
- * {@link crud.ResourceProvider}s. The former encapsulates the
+ * {@link crud.core.Resource}s and
+ * {@link crud.core.ResourceProvider}s. The former encapsulates the
  * I/O operations on state, and hence uses a reactive style. There are four
  * derived interfaces, one for each CRUD operation:
  * <ul>
- *  <li>{@link crud.ReadableResource}</li>
- *  <li>{@link crud.WritableResource}</li>
- *  <li>{@link crud.UpdatableResource}</li>
- *  <li>{@link crud.DeletableResource}</li>
+ *  <li>{@link crud.core.ReadableResource}</li>
+ *  <li>{@link crud.core.WritableResource}</li>
+ *  <li>{@link crud.core.UpdatableResource}</li>
+ *  <li>{@link crud.core.DeletableResource}</li>
  * </ul>
  *
  * The latter abstraction, the resource providers, provide local (i.e.
@@ -47,12 +47,12 @@
  * lookup idiom, where keys are generic and may be simple -- e.g. a URL -- or
  * arbitrarily complex -- e.g. a database query -- depending on the underlying
  * data-access technology. There are four derived
- * {@link crud.ResourceProvider} interfaces:
+ * {@link crud.core.ResourceProvider} interfaces:
  * <ul>
- *  <li>{@link crud.ReadableResourceProvider}</li>
- *  <li>{@link crud.WritableResourceProvider}</li>
- *  <li>{@link crud.UpdatableResourceProvider}</li>
- *  <li>{@link crud.DeletableResourceProvider}</li>
+ *  <li>{@link crud.core.ReadableResourceProvider}</li>
+ *  <li>{@link crud.core.WritableResourceProvider}</li>
+ *  <li>{@link crud.core.UpdatableResourceProvider}</li>
+ *  <li>{@link crud.core.DeletableResourceProvider}</li>
  * </ul>
  *
  * In addition to these core abstractions, this library provides a number of
@@ -64,4 +64,4 @@
  *      of certain data-access patterns out of the box.</li>
  * </li>
  */
-package crud;
+package crud.core;

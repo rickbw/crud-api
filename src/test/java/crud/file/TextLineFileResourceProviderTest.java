@@ -17,7 +17,7 @@ package crud.file;
 import java.io.File;
 import java.io.IOException;
 
-import crud.ResourceProviderTest;
+import crud.core.ResourceProviderTest;
 
 
 public class TextLineFileResourceProviderTest extends ResourceProviderTest<File> {

@@ -12,9 +12,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud;
+package crud.core;
 
-import static crud.RxAssertions.assertObservablesEqual;
+import static crud.core.RxAssertions.assertObservablesEqual;
 
 import org.junit.Test;
 
@@ -23,31 +23,25 @@ import rx.Observable;
 
 /**
  * A base class for all unit test classes that operate on
- * {@link DeletableResource}s. It tests basic contracts that should hold true
+ * {@link ReadableResource}s. It tests basic contracts that should hold true
  * for all implementations.
  */
-public abstract class DeletableResourceTest<RESP> extends ResourceTest {
+public abstract class ReadableResourceTest<RSRC> extends ResourceTest {
 
-    /**
-     * This base class can't test true idempotence, because it can't observe
-     * the state that was deleted. But it can evaluate whether the responses
-     * are the same, which they should be if the deletes were indeed
-     * idempotent.
-     */
     @Test
-    public void responsesFromRepeatedDeletedAreTheSame() {
+    public void getsAreIdempotent() {
         // given:
-        final DeletableResource<RESP> resource = createDefaultResource();
+        final ReadableResource<RSRC> resource = createDefaultResource();
 
         // when:
-        final Observable<RESP> result1 = resource.delete();
-        final Observable<RESP> result2 = resource.delete();
+        final Observable<RSRC> result1 = resource.get();
+        final Observable<RSRC> result2 = resource.get();
 
         // then:
         assertObservablesEqual(result1, result2);
     }
 
     @Override
-    protected abstract DeletableResource<RESP> createDefaultResource();
+    protected abstract ReadableResource<RSRC> createDefaultResource();
 
 }

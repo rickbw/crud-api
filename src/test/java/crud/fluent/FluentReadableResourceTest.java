@@ -26,8 +26,8 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.ReadableResource;
-import crud.ReadableResourceTest;
+import crud.core.ReadableResourceTest;
+import crud.core.ReadableResource;
 import rx.Observable;
 import rx.functions.Func0;
 

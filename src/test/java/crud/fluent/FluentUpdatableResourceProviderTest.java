@@ -24,9 +24,9 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.ResourceProviderTest;
-import crud.UpdatableResource;
-import crud.UpdatableResourceProvider;
+import crud.core.ResourceProviderTest;
+import crud.core.UpdatableResource;
+import crud.core.UpdatableResourceProvider;
 import rx.Observable;
 import rx.functions.Func1;
 

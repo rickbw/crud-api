@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2013–2014 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,23 +12,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud;
+package crud.core;
 
 
 /**
- * A base class for all unit test classes that operate on
- * {@link UpdatableResource}s. It tests basic contracts that should hold true
- * for all implementations.
+ * Look up a {@link ReadableResource} based on a given key.
+ *
+ * @see DeletableResourceProvider
+ * @see WritableResourceProvider
+ * @see UpdatableResourceProvider
+ * @see ReadableResource
  */
-public abstract class UpdatableResourceTest<UPDATE, RESP> extends ResourceTest {
+public interface ReadableResourceProvider<KEY, RSRC> extends ResourceProvider<KEY> {
 
     @Override
-    protected abstract UpdatableResource<UPDATE, RESP> createDefaultResource();
-
-    /**
-     * Create an object suitable for being written to the resources returned
-     * by {@link #createDefaultResource()}.
-     */
-    protected abstract UPDATE createDefaultUpdate();
+    public abstract ReadableResource<RSRC> get(KEY key);
 
 }

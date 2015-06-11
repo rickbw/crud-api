@@ -17,8 +17,8 @@ package crud.file.example;
 import java.io.File;
 import java.util.StringTokenizer;
 
-import crud.ReadableResource;
-import crud.UpdatableResource;
+import crud.core.ReadableResource;
+import crud.core.UpdatableResource;
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
 import rx.Observable;

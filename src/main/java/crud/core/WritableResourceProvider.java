@@ -12,21 +12,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-package crud;
+package crud.core;
 
 
 /**
- * Look up a {@link UpdatableResource} based on a given key.
+ * Look up a {@link WritableResource} based on a given key.
  *
  * @see ReadableResourceProvider
  * @see DeletableResourceProvider
- * @see WritableResourceProvider
- * @see UpdatableResource
+ * @see UpdatableResourceProvider
+ * @see WritableResource
  */
-public interface UpdatableResourceProvider<KEY, UPDATE, RESPONSE> extends ResourceProvider<KEY> {
+public interface WritableResourceProvider<KEY, RSRC, RESPONSE> extends ResourceProvider<KEY> {
 
     @Override
-    public abstract UpdatableResource<UPDATE, RESPONSE> get(KEY key);
+    public abstract WritableResource<RSRC, RESPONSE> get(KEY key);
 
 }

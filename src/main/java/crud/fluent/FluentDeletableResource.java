@@ -17,7 +17,7 @@ package crud.fluent;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-import crud.DeletableResource;
+import crud.core.DeletableResource;
 import crud.pattern.ResourceBuilder;
 import rx.Observable;
 import rx.Observer;
