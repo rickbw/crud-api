@@ -26,9 +26,10 @@ import crud.core.WritableResourceSet;
  *
  * @author Rick Warren
  */
-public class SyncWritableResourceSet<K, E, R> extends SyncResourceSet<K, E, WritableResourceSet<K, E, R>> {
+public class SyncWritableResourceSet<KEY, RSRC, RESPONSE>
+extends SyncResourceSet<KEY, RSRC, WritableResourceSet<KEY, RSRC, RESPONSE>> {
 
-    public SyncWritableResourceSet(@Nonnull final WritableResourceSet<K, E, R> delegate) {
+    public SyncWritableResourceSet(@Nonnull final WritableResourceSet<KEY, RSRC, RESPONSE> delegate) {
         super(delegate);
     }
 
@@ -36,7 +37,7 @@ public class SyncWritableResourceSet<K, E, R> extends SyncResourceSet<K, E, Writ
      * @see WritableResourceSet#getId()
      */
     @Override
-    public @Nonnull WritableResourceSet.Id<K, E, R> getId() {
+    public @Nonnull WritableResourceSet.Id<KEY, RSRC, RESPONSE> getId() {
         return getDelegate().getId();
     }
 
@@ -44,8 +45,8 @@ public class SyncWritableResourceSet<K, E, R> extends SyncResourceSet<K, E, Writ
      * @see WritableResourceSet#get(Object, Session)
      */
     @Override
-    public @Nonnull SyncWritableResource<E, R> get(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final WritableResource<E, R> delegate = getDelegate().get(key, session.getDelegate());
+    public @Nonnull SyncWritableResource<RSRC, RESPONSE> get(@Nonnull final KEY key, @Nonnull final SyncSession session) {
+        final WritableResource<RSRC, RESPONSE> delegate = getDelegate().get(key, session.getDelegate());
         return new SyncWritableResource<>(delegate);
     }
 

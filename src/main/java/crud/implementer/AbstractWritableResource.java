@@ -22,9 +22,9 @@ import rx.Observer;
 import rx.Subscriber;
 
 
-public abstract class AbstractWritableResource<E, R>
+public abstract class AbstractWritableResource<RSRC, RESPONSE>
 extends AbstractSessionParticipant
-implements WritableResource<E, R> {
+implements WritableResource<RSRC, RESPONSE> {
 
     /**
      * Write the given value in the background thread belonging to the
@@ -36,10 +36,10 @@ implements WritableResource<E, R> {
      * @see #doWrite(Object, Subscriber)
      */
     @Override
-    public Observable<R> write(final E value) {
-        return getWorker().scheduleHot(new SessionWorker.Task<R>() {
+    public Observable<RESPONSE> write(final RSRC value) {
+        return getWorker().scheduleHot(new SessionWorker.Task<RESPONSE>() {
             @Override
-            public void call(final Subscriber<? super R> sub) throws Exception {
+            public void call(final Subscriber<? super RESPONSE> sub) throws Exception {
                 doWrite(value, sub);
             }
         });
@@ -70,7 +70,8 @@ implements WritableResource<E, R> {
      *                      Exceptions will be passed to
      *                      {@link Observer#onError(Throwable)}.
      */
-    protected void doWrite(final E writeMe, final Subscriber<? super R> resultSub) throws Exception {
+    protected void doWrite(final RSRC writeMe, final Subscriber<? super RESPONSE> resultSub)
+    throws Exception {
         throw new AssertionError("Must override this method if not overriding write()");
     }
 

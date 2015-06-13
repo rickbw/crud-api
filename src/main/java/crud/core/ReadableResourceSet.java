@@ -25,10 +25,10 @@ import javax.annotation.concurrent.Immutable;
  *
  * @author Rick Warren
  */
-public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
+public interface ReadableResourceSet<KEY, RSRC> extends ResourceSet<KEY, RSRC> {
 
     @Override
-    public @Nonnull Id<K, E> getId();
+    public abstract @Nonnull Id<KEY, RSRC> getId();
 
     /**
      * Return a readable source of those data elements of type {@code E}
@@ -40,7 +40,7 @@ public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
      *              {@link ReadableResourceSet}.
      */
     @Override
-    public @Nonnull ReadableResource<E> get(@Nonnull K key, @Nonnull Session session);
+    public abstract @Nonnull ReadableResource<RSRC> get(@Nonnull KEY key, @Nonnull Session session);
 
 
     /**
@@ -48,15 +48,15 @@ public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
      * elements in the target middleware. Subsets of these elements are identified
      * by keys.
      *
-     * @param <K>   The type of the keys.
-     * @param <E>   The type of the data elements, identified by those keys.
+     * @param <KEY>     The type of the keys.
+     * @param <RSRC>    The type of the data elements, identified by those keys.
      */
     @Immutable
-    public static final class Id<K, E> extends ResourceSet.Id<K, E> {
+    public static final class Id<KEY, RSRC> extends ResourceSet.Id<KEY, RSRC> {
         public Id(
                 @Nonnull final String name,
-                @Nonnull final Class<K> keyType,
-                @Nonnull final Class<E> type) {
+                @Nonnull final Class<KEY> keyType,
+                @Nonnull final Class<RSRC> type) {
             super(name, keyType, type);
         }
 

@@ -23,19 +23,19 @@ import crud.core.Session;
 /**
  * @see ResourceSet
  */
-public abstract class SyncResourceSet<K, E, D extends ResourceSet<K, E>>
+public abstract class SyncResourceSet<KEY, RSRC, D extends ResourceSet<KEY, RSRC>>
 extends SyncDelegateHolder<D> {
 
     /**
      * @see ResourceSet#getId()
      */
-    public abstract @Nonnull ResourceSet.Id<K, E> getId();
+    public abstract @Nonnull ResourceSet.Id<KEY, RSRC> getId();
 
     /**
      * @see ResourceSet#get(Object, Session)
      */
     public abstract @Nonnull SyncResource<?> get(
-            @Nonnull final K key,
+            @Nonnull final KEY key,
             @Nonnull final SyncSession session);
 
     /*package*/ SyncResourceSet(final D delegate) {

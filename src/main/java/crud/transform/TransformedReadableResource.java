@@ -31,7 +31,7 @@ import rx.functions.Func1;
  *
  * @author Rick Warren
  */
-public abstract class TransformedReadableResource<E> implements ReadableResource<E> {
+public abstract class TransformedReadableResource<RSRC> implements ReadableResource<RSRC> {
 
     public static <FROM, TO> ReadableResource<TO> create(
             @Nonnull final ReadableResource<FROM> delegate,

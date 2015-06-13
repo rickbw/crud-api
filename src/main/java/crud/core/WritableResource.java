@@ -21,15 +21,15 @@ import rx.Observable;
  * A <em>sink</em> for data elements of type {@code E}, written by the
  * application to somewhere else.
  *
- * @param <E>   The static type of the data elements written to this
- *              {@link WritableResource}.
- * @param <R>   The static type of the result of writing a value.
+ * @param <RSRC>        The static type of the data elements written to this
+ *                      {@link WritableResource}.
+ * @param <RESPONSE>    The static type of the result of writing a value.
  *
  * @see ReadableResource
  *
  * @author Rick Warren
  */
-public interface WritableResource<E, R> extends Resource {
+public interface WritableResource<RSRC, RESPONSE> extends Resource {
 
     /**
      * Write a single data element to the target middleware. Return to the
@@ -70,6 +70,6 @@ public interface WritableResource<E, R> extends Resource {
      *      {@link Observable#forEach(rx.functions.Action1) myObservable.forEach(write)}.</li>
      * </ol>
      */
-    public Observable<R> write(E value);
+    public abstract Observable<RESPONSE> write(RSRC newValue);
 
 }

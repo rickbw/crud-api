@@ -25,17 +25,17 @@ import crud.core.WritableResourceSet;
  *
  * @author Rick Warren
  */
-public abstract class AbstractWritableResourceSet<K, E, R>
-extends AbstractResourceSet<K, E>
-implements WritableResourceSet<K, E, R> {
+public abstract class AbstractWritableResourceSet<KEY, RSRC, RESPONSE>
+extends AbstractResourceSet<KEY, RSRC>
+implements WritableResourceSet<KEY, RSRC, RESPONSE> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public WritableResourceSet.Id<K, E, R> getId() {
-        return (WritableResourceSet.Id<K, E, R>) super.getId();
+    public WritableResourceSet.Id<KEY, RSRC, RESPONSE> getId() {
+        return (WritableResourceSet.Id<KEY, RSRC, RESPONSE>) super.getId();
     }
 
-    protected AbstractWritableResourceSet(@Nonnull final WritableResourceSet.Id<K, E, R> id) {
+    protected AbstractWritableResourceSet(@Nonnull final WritableResourceSet.Id<KEY, RSRC, RESPONSE> id) {
         super(id);
     }
 

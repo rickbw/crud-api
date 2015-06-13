@@ -27,10 +27,10 @@ import javax.annotation.concurrent.Immutable;
  *
  * @author Rick Warren
  */
-public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
+public interface WritableResourceSet<KEY, RSRC, RESPONSE> extends ResourceSet<KEY, RSRC> {
 
     @Override
-    public @Nonnull Id<K, E, R> getId();
+    public abstract @Nonnull Id<KEY, RSRC, RESPONSE> getId();
 
     /**
      * Return a writable destination of those data elements of type {@code E}
@@ -42,7 +42,9 @@ public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
      *              {@link WritableResourceSet}.
      */
     @Override
-    public @Nonnull WritableResource<E, R> get(@Nonnull K key, @Nonnull Session session);
+    public abstract @Nonnull WritableResource<RSRC, RESPONSE> get(
+            @Nonnull KEY key,
+            @Nonnull Session session);
 
 
     /**
@@ -50,26 +52,28 @@ public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
      * elements in the target middleware. Subsets of these elements are identified
      * by keys.
      *
-     * @param <K>   The type of the keys.
-     * @param <E>   The type of the data elements, identified by those keys.
-     * @param <R>   The type of the results, when new data elements are written.
+     * @param <KEY>         The type of the keys.
+     * @param <RSRC>        The type of the data elements, identified by those
+     *                      keys.
+     * @param <RESPONSE>    The type of the results, when new data elements
+     *                      are written.
      *
      * @author Rick Warren
      */
     @Immutable
-    public static final class Id<K, E, R> extends ResourceSet.Id<K, E> {
-        private @Nonnull final Class<R> writeResultType;
+    public static final class Id<KEY, RSRC, RESPONSE> extends ResourceSet.Id<KEY, RSRC> {
+        private @Nonnull final Class<RESPONSE> writeResultType;
 
         public Id(
                 @Nonnull final String name,
-                @Nonnull final Class<K> keyType,
-                @Nonnull final Class<E> elementType,
-                @Nonnull final Class<R> writeResultType) {
+                @Nonnull final Class<KEY> keyType,
+                @Nonnull final Class<RSRC> elementType,
+                @Nonnull final Class<RESPONSE> writeResultType) {
             super(name, keyType, elementType);
             this.writeResultType = Objects.requireNonNull(writeResultType);
         }
 
-        public @Nonnull Class<R> getWriteResultType() {
+        public @Nonnull Class<RESPONSE> getWriteResultType() {
             return this.writeResultType;
         }
 

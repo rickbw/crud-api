@@ -25,18 +25,18 @@ import javax.annotation.concurrent.Immutable;
  * table, or a JMS topic (in which every element would be typed by
  * {@javax.jms.Message}).
  *
- * @param <K>   The type of the keys.
- * @param <E>   The type of the data elements, identified by those keys.
+ * @param <KEY>     The type of the keys.
+ * @param <RSRC>    The type of the data elements, identified by those keys.
  *
  * @author Rick Warren
  */
-public interface ResourceSet<K, E> {
+public interface ResourceSet<KEY, RSRC> {
 
     /**
      * @return  An {@link Id} equal to the one provided when this
      *          {@link ResourceSet} was created.
      */
-    public @Nonnull Id<K, E> getId();
+    public abstract @Nonnull Id<KEY, RSRC> getId();
 
     /**
      * Return a {@link Resource} identified by the given key, to be accessed
@@ -46,7 +46,7 @@ public interface ResourceSet<K, E> {
      *              obtained from a {@link DataBus} compatible with this
      *              {@link WritableResourceSet}.
      */
-    public @Nonnull Resource get(@Nonnull K key, @Nonnull Session session);
+    public abstract @Nonnull Resource get(@Nonnull KEY key, @Nonnull Session session);
 
 
     /**
@@ -54,19 +54,19 @@ public interface ResourceSet<K, E> {
      * data elements in the target middleware. Subsets of these elements are
      * identified by keys.
      *
-     * @param <K>   The type of the keys.
-     * @param <E>   The type of the data elements, identified by those keys.
+     * @param <KEY>     The type of the keys.
+     * @param <RSRC>    The type of the data elements, identified by those keys.
      */
     @Immutable
-    public static abstract class Id<K, E> {
+    public static abstract class Id<KEY, RSRC> {
         private @Nonnull final String name;
-        private @Nonnull final Class<K> keyType;
-        private @Nonnull final Class<E> elementType;
+        private @Nonnull final Class<KEY> keyType;
+        private @Nonnull final Class<RSRC> elementType;
 
         protected Id(
                 @Nonnull final String name,
-                @Nonnull final Class<K> keyType,
-                @Nonnull final Class<E> type) {
+                @Nonnull final Class<KEY> keyType,
+                @Nonnull final Class<RSRC> type) {
             this.name = Objects.requireNonNull(name);
             this.keyType = Objects.requireNonNull(keyType);
             this.elementType = Objects.requireNonNull(type);
@@ -76,11 +76,11 @@ public interface ResourceSet<K, E> {
             return this.name;
         }
 
-        public final @Nonnull Class<K> getKeyType() {
+        public final @Nonnull Class<KEY> getKeyType() {
             return this.keyType;
         }
 
-        public final @Nonnull Class<E> getElementType() {
+        public final @Nonnull Class<RSRC> getElementType() {
             return this.elementType;
         }
 

@@ -24,16 +24,16 @@ import crud.core.ReadableResource;
  *
  * @author Rick Warren
  */
-public class SyncReadableResource<E> extends SyncResource<ReadableResource<E>> {
+public class SyncReadableResource<RSRC> extends SyncResource<ReadableResource<RSRC>> {
 
-    public SyncReadableResource(@Nonnull final ReadableResource<E> delegate) {
+    public SyncReadableResource(@Nonnull final ReadableResource<RSRC> delegate) {
         super(delegate);
     }
 
     /**
      * @see ReadableResource#read()
      */
-    public Iterable<E> read() {
+    public Iterable<RSRC> read() {
         return getDelegate().read().toBlocking().toIterable();
     }
 

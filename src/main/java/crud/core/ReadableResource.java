@@ -22,14 +22,14 @@ import rx.Observer;
  * A <em>source</em> of data elements of type {@code E}, read by the
  * application from somewhere else.
  *
- * @param <E>   The static type of the data elements observable from this
- *              {@link ReadableResource}.
+ * @param <RSRC>    The static type of the data elements observable from this
+ *                  {@link ReadableResource}.
  *
  * @see WritableResource
  *
  * @author Rick Warren
  */
-public interface ReadableResource<E> extends Resource {
+public interface ReadableResource<RSRC> extends Resource {
 
     /**
      * Begin observation of the data elements. The {@link Observable} may be
@@ -45,6 +45,6 @@ public interface ReadableResource<E> extends Resource {
      * associated with the {@link Session} used to create this
      * {@code ReadableResource}.
      */
-    public Observable<E> read();
+    public abstract Observable<RSRC> read();
 
 }

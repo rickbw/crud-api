@@ -27,13 +27,13 @@ import crud.core.ResourceSet;
  *
  * @author Rick Warren
  */
-public abstract class AbstractResourceSet<K, E> implements ResourceSet<K, E> {
+public abstract class AbstractResourceSet<KEY, RSRC> implements ResourceSet<KEY, RSRC> {
 
-    private @Nonnull final ResourceSet.Id<K, E> id;
+    private @Nonnull final ResourceSet.Id<KEY, RSRC> id;
 
 
     @Override
-    public ResourceSet.Id<K, E> getId() {
+    public ResourceSet.Id<KEY, RSRC> getId() {
         return this.id;
     }
 
@@ -42,7 +42,7 @@ public abstract class AbstractResourceSet<K, E> implements ResourceSet<K, E> {
         return getClass().getSimpleName() + '(' + getId() + ')';
     }
 
-    protected AbstractResourceSet(@Nonnull final ResourceSet.Id<K, E> id) {
+    protected AbstractResourceSet(@Nonnull final ResourceSet.Id<KEY, RSRC> id) {
         this.id = Objects.requireNonNull(id);
     }
 

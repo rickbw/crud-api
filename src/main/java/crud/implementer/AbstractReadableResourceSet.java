@@ -25,16 +25,16 @@ import crud.core.ReadableResourceSet;
  *
  * @author Rick Warren
  */
-public abstract class AbstractReadableResourceSet<K, E>
-extends AbstractResourceSet<K, E>
-implements ReadableResourceSet<K, E> {
+public abstract class AbstractReadableResourceSet<KEY, RSRC>
+extends AbstractResourceSet<KEY, RSRC>
+implements ReadableResourceSet<KEY, RSRC> {
 
     @Override
-    public ReadableResourceSet.Id<K, E> getId() {
-        return (ReadableResourceSet.Id<K, E>) super.getId();
+    public ReadableResourceSet.Id<KEY, RSRC> getId() {
+        return (ReadableResourceSet.Id<KEY, RSRC>) super.getId();
     }
 
-    protected AbstractReadableResourceSet(@Nonnull final ReadableResourceSet.Id<K, E> id) {
+    protected AbstractReadableResourceSet(@Nonnull final ReadableResourceSet.Id<KEY, RSRC> id) {
         super(id);
     }
 

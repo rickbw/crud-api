@@ -24,16 +24,17 @@ import crud.core.WritableResource;
  *
  * @author Rick Warren
  */
-public class SyncWritableResource<E, R> extends SyncResource<WritableResource<E, R>> {
+public class SyncWritableResource<RSRC, RESPONSE>
+extends SyncResource<WritableResource<RSRC, RESPONSE>> {
 
-    public SyncWritableResource(@Nonnull final WritableResource<E, R> delegate) {
+    public SyncWritableResource(@Nonnull final WritableResource<RSRC, RESPONSE> delegate) {
         super(delegate);
     }
 
     /**
      * @see WritableResource#write(Object)
      */
-    public Iterable<R> write(final E value) {
+    public Iterable<RESPONSE> write(final RSRC value) {
         return getDelegate().write(value).toBlocking().toIterable();
     }
 

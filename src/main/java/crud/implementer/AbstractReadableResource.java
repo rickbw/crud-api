@@ -22,13 +22,15 @@ import rx.Observer;
 import rx.Subscriber;
 
 
-public abstract class AbstractReadableResource<E> extends AbstractSessionParticipant implements ReadableResource<E> {
+public abstract class AbstractReadableResource<RSRC>
+extends AbstractSessionParticipant
+implements ReadableResource<RSRC> {
 
     @Override
-    public Observable<E> read() {
-        return getWorker().scheduleCold(new SessionWorker.Task<E>() {
+    public Observable<RSRC> read() {
+        return getWorker().scheduleCold(new SessionWorker.Task<RSRC>() {
             @Override
-            public void call(final Subscriber<? super E> sub) throws Exception {
+            public void call(final Subscriber<? super RSRC> sub) throws Exception {
                 onReadSubscribe(sub);
             }
         });
@@ -55,7 +57,7 @@ public abstract class AbstractReadableResource<E> extends AbstractSessionPartici
      *                      Exceptions will be passed to
      *                      {@link Observer#onError(Throwable)}.
      */
-    protected void onReadSubscribe(final Subscriber<? super E> sub) throws Exception {
+    protected void onReadSubscribe(final Subscriber<? super RSRC> sub) throws Exception {
         throw new AssertionError("Must override this method if not overriding read()");
     }
 

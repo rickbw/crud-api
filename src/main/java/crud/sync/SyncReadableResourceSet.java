@@ -26,9 +26,10 @@ import crud.core.Session;
  *
  * @author Rick Warren
  */
-public class SyncReadableResourceSet<K, E> extends SyncResourceSet<K, E, ReadableResourceSet<K, E>> {
+public class SyncReadableResourceSet<KEY, RSRC>
+extends SyncResourceSet<KEY, RSRC, ReadableResourceSet<KEY, RSRC>> {
 
-    public SyncReadableResourceSet(@Nonnull final ReadableResourceSet<K, E> delegate) {
+    public SyncReadableResourceSet(@Nonnull final ReadableResourceSet<KEY, RSRC> delegate) {
         super(delegate);
     }
 
@@ -36,7 +37,7 @@ public class SyncReadableResourceSet<K, E> extends SyncResourceSet<K, E, Readabl
      * @see ReadableResourceSet#getId()
      */
     @Override
-    public @Nonnull ReadableResourceSet.Id<K, E> getId() {
+    public @Nonnull ReadableResourceSet.Id<KEY, RSRC> getId() {
         return getDelegate().getId();
     }
 
@@ -44,8 +45,10 @@ public class SyncReadableResourceSet<K, E> extends SyncResourceSet<K, E, Readabl
      * @see ReadableResourceSet#get(Object, Session)
      */
     @Override
-    public @Nonnull SyncReadableResource<E> get(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final ReadableResource<E> delegateSource = getDelegate().get(key, session.getDelegate());
+    public @Nonnull SyncReadableResource<RSRC> get(
+            @Nonnull final KEY key,
+            @Nonnull final SyncSession session) {
+        final ReadableResource<RSRC> delegateSource = getDelegate().get(key, session.getDelegate());
         return new SyncReadableResource<>(delegateSource);
     }
 

@@ -31,7 +31,8 @@ import rx.functions.Func1;
  *
  * @author Rick Warren
  */
-public abstract class TransformedWritableResource<E, R> implements WritableResource<E, R> {
+public abstract class TransformedWritableResource<RSRC, RESPONSE>
+implements WritableResource<RSRC, RESPONSE> {
 
     public static <EFROM, ETO, RFROM, RTO> WritableResource<ETO, RTO> create(
             @Nonnull final WritableResource<EFROM, RFROM> delegate,
