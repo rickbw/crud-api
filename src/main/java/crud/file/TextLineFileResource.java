@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,8 +26,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 import crud.core.ReadableResource;
 import crud.core.ReadableResourceProvider;
-import crud.core.UpdatableResource;
-import crud.core.UpdatableResourceProvider;
+import crud.core.WritableResource;
+import crud.core.WritableResourceProvider;
 import crud.util.BooleanSubscription;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -38,7 +38,7 @@ import rx.Subscriber;
  * Provides all the lines of a text file, one at a time.
  */
 public class TextLineFileResource
-implements ReadableResource<String>, UpdatableResource<String, Void> {
+implements ReadableResource<String>, WritableResource<String, Void> {
 
     private final File file;
 
@@ -53,8 +53,8 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
     }
 
     @Override
-    public Observable<Void> update(final String update) {
-        return Observable.create(new WriteLineOnSubscribe(update));
+    public Observable<Void> write(final String newLine) {
+        return Observable.create(new WriteLineOnSubscribe(newLine));
     }
 
     @Override
@@ -96,7 +96,7 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
 
 
     public static class Provider
-    implements ReadableResourceProvider<File, String>, UpdatableResourceProvider<File, String, Void> {
+    implements ReadableResourceProvider<File, String>, WritableResourceProvider<File, String, Void> {
         @Override
         public TextLineFileResource get(final File file) {
             return new TextLineFileResource(file);
@@ -127,10 +127,10 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
 
 
     private final class WriteLineOnSubscribe implements OnSubscribe<Void> {
-        private final String update;
+        private final String newLine;
 
-        private WriteLineOnSubscribe(final String update) {
-            this.update = Objects.requireNonNull(update);
+        private WriteLineOnSubscribe(final String newLine) {
+            this.newLine = Objects.requireNonNull(newLine);
         }
 
         @Override
@@ -141,7 +141,7 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
              */
             final boolean appendToFile = true;
             try (Writer writer = new FileWriter(TextLineFileResource.this.file, appendToFile)) {
-                final String line = (this.update.endsWith("\n")) ? this.update : this.update + "\n";
+                final String line = (this.newLine.endsWith("\n")) ? this.newLine : this.newLine + "\n";
                 writer.write(line);
                 subscriber.onCompleted();
             } catch (final Throwable ex) {

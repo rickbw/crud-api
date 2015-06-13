@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,6 @@ import rx.Observable;
  * @param <RSRC>    The type of the resource's value(s).
  *
  * @see WritableResource
- * @see UpdatableResource
- * @see DeletableResource
  * @see ReadableResourceProvider
  */
 public interface ReadableResource<RSRC> extends Resource {

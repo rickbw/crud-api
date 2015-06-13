@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,8 @@ package crud.pattern;
 
 import crud.core.ReadableResource;
 import crud.core.Resource;
-import crud.core.UpdatableResource;
 import crud.core.WritableResource;
 import crud.fluent.FluentReadableResource;
-import crud.fluent.FluentUpdatableResource;
 import crud.fluent.FluentWritableResource;
 import rx.Observable;
 import rx.functions.Func0;
@@ -45,7 +43,6 @@ import rx.functions.Function;
  * in the caller-provided function.
  *
  * @see #withWriter(ReadableResource, WritableResource)
- * @see #withUpdater(ReadableResource, UpdatableResource)
  */
 public abstract class ResourceMerger<RESPONSE> {
 
@@ -59,18 +56,6 @@ public abstract class ResourceMerger<RESPONSE> {
             final ReadableResource<RSRC> reader,
             final WritableResource<RSRC, RESPONSE> writer) {
         return new MergerImpl<>(reader, FluentWritableResource.from(writer).toFunction());
-    }
-
-    /**
-     * Create a merger that will read from the given {@link ReadableResource}
-     * and write the results with {@link UpdatableResource#update(Object)}.
-     *
-     * @see #mapToUpdater(ReadableResource, Func1, UpdatableResource)
-     */
-    public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withUpdater(
-            final ReadableResource<RSRC> reader,
-            final UpdatableResource<RSRC, RESPONSE> updater) {
-        return new MergerImpl<>(reader, FluentUpdatableResource.from(updater).toFunction());
     }
 
     /**
@@ -88,22 +73,8 @@ public abstract class ResourceMerger<RESPONSE> {
     }
 
     /**
-     * Create a merger that will read from the given {@link ReadableResource},
-     * apply the given transformation to the results, and then write them with
-     * {@link UpdatableResource#update(Object)}.
-     */
-    public static <RSRC, UPDATE, RESPONSE> ResourceMerger<RESPONSE> mapToUpdater(
-            final ReadableResource<? extends RSRC> reader,
-            final Func1<? super RSRC, ? extends UPDATE> mapper,
-            final UpdatableResource<UPDATE, RESPONSE> updater) {
-        return new MergerImpl<>(
-                FluentReadableResource.from(reader).mapValue(mapper),
-                FluentUpdatableResource.from(updater).toFunction());
-    }
-
-    /**
-     * Perform the {@code read}, optionally transform, and {@code write} (or
-     * {@code update}) operations.
+     * Perform the {@code read}, optionally transform, and {@code write}
+     * operations.
      */
     public abstract Observable<RESPONSE> merge();
 
@@ -153,7 +124,7 @@ public abstract class ResourceMerger<RESPONSE> {
             this.merger = FluentReadableResource.from(reader).flatMapValue(writer);
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
-            this.asFunction = new MergerFunction<RESPONSE>(this);
+            this.asFunction = new MergerFunction<>(this);
         }
 
         @Override

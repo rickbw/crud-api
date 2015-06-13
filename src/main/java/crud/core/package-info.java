@@ -5,21 +5,15 @@
  *
  * <ul>
  *  <li><em>Generality</em>: The available interactions consist of the
- *  conventional "CRUD": Create, Read, Update, and Delete. These have an HTTP-
- *  like flare -- set, get, update, delete -- though the types in this package
- *  do <em>not</em> depend on HTTP as an implementation technology. (For an
- *  HTTP implementation, see the Crud HTTP project. These operations
- *  should also be familiar to anyone who has worked with other data-oriented
- *  APIs, such as JDBC.)</li>
+ *  simple {@link crud.core.ReadableResource#read() read} and
+ *  {@link crud.core.WritableResource#write(Object) write} operations. Writes
+ *  may have slightly different semantics, depending on the underlying
+ *  middleware implementation, e.g. update an existing record, replace an
+ *  existing record, insert a new record, or send a message. This abstraction
+ *  layer does not attempt to capture all possible semantics in the API.</li>
  *
  *  <li><em>Safety</em>: The types of resources are statically type-safe,
- *  configured by means of generic type parameters. And because not all
- *  resources support all operations, the operations are composable, defined
- *  in separate interfaces designed to work together. For example, a resource
- *  that supports reading and writing, but not deletion, would implement
- *  {@link crud.core.ReadableResource} and
- *  {@link crud.core.WritableResource} but not
- *  {@link crud.core.DeletableResource}.</li>
+ *  configured by means of generic type parameters.</li>
  *
  *  <li><em>Concurrency</em>: The API encourages asynchronous implementations.
  *  It encapsulates asynchrony using Rx-Java and its {@link rx.Observable}
@@ -33,26 +27,22 @@
  * There are two primary abstractions in the API:
  * {@link crud.core.Resource}s and
  * {@link crud.core.ResourceProvider}s. The former encapsulates the
- * I/O operations on state, and hence uses a reactive style. There are four
- * derived interfaces, one for each CRUD operation:
+ * I/O operations on state, and hence uses a reactive style. There are two
+ * derived interfaces:
  * <ul>
  *  <li>{@link crud.core.ReadableResource}</li>
  *  <li>{@link crud.core.WritableResource}</li>
- *  <li>{@link crud.core.UpdatableResource}</li>
- *  <li>{@link crud.core.DeletableResource}</li>
  * </ul>
  *
  * The latter abstraction, the resource providers, provide local (i.e.
  * assumed-cheap) navigation among Resources. This navigation uses a key-value
  * lookup idiom, where keys are generic and may be simple -- e.g. a URL -- or
  * arbitrarily complex -- e.g. a database query -- depending on the underlying
- * data-access technology. There are four derived
+ * data-access technology. There are two derived
  * {@link crud.core.ResourceProvider} interfaces:
  * <ul>
  *  <li>{@link crud.core.ReadableResourceProvider}</li>
  *  <li>{@link crud.core.WritableResourceProvider}</li>
- *  <li>{@link crud.core.UpdatableResourceProvider}</li>
- *  <li>{@link crud.core.DeletableResourceProvider}</li>
  * </ul>
  *
  * In addition to these core abstractions, this library provides a number of

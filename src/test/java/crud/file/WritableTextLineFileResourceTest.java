@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,15 +27,15 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.core.UpdatableResourceTest;
-import crud.core.UpdatableResource;
+import crud.core.WritableResource;
+import crud.core.WritableResourceTest;
 import rx.Observable;
 
 
 /**
- * Test of the {@link UpdatableResource} aspect of {@link TextLineFileResource}.
+ * Test of the {@link WritableResource} aspect of {@link TextLineFileResource}.
  */
-public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<String, Void> {
+public class WritableTextLineFileResourceTest extends WritableResourceTest<String, Void> {
 
     private File file;
 
@@ -48,13 +48,13 @@ public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<Str
     @Test
     public void linesWritten() throws IOException {
         // given:
-        final UpdatableResource<String, Void> resource = createDefaultResource();
-        final String expectedLine = createDefaultUpdate();
+        final WritableResource<String, Void> resource = createDefaultResource();
+        final String expectedLine = createDefaultResourceState();
         final int numLines = 3;
 
         // when:
         for (int i = 0; i < numLines; ++i) {
-            final Observable<Void> response = resource.update(expectedLine);
+            final Observable<Void> response = resource.write(expectedLine);
             final Iterator<?> it = response.toBlocking().getIterator();
             assertFalse(it.hasNext());
         }
@@ -75,7 +75,7 @@ public class UpdatableTextLineFileResourceTest extends UpdatableResourceTest<Str
     }
 
     @Override
-    protected String createDefaultUpdate() {
+    protected String createDefaultResourceState() {
         return "hello, world";
     }
 

@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,9 +18,7 @@ package crud.core;
 /**
  * Look up a {@link ReadableResource} based on a given key.
  *
- * @see DeletableResourceProvider
  * @see WritableResourceProvider
- * @see UpdatableResourceProvider
  * @see ReadableResource
  */
 public interface ReadableResourceProvider<KEY, RSRC> extends ResourceProvider<KEY> {

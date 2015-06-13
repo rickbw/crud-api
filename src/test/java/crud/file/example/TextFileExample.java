@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,7 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 import crud.core.ReadableResource;
-import crud.core.UpdatableResource;
+import crud.core.WritableResource;
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
 import rx.Observable;
@@ -51,8 +51,8 @@ public final class TextFileExample {
 
         final TextLineFileResource.Provider files = TextLineFileResource.provider();
         final ReadableResource<String> inputLines = files.get(inputFile);
-        final UpdatableResource<String, Void> outputLines = files.get(outputFile);
-        final ResourceMerger<Void> merger = ResourceMerger.mapToUpdater(
+        final WritableResource<String, Void> outputLines = files.get(outputFile);
+        final ResourceMerger<Void> merger = ResourceMerger.mapToWriter(
                 inputLines,
                 lineToJson,
                 outputLines);
