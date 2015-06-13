@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,8 +24,8 @@ import org.junit.Test;
 import rx.Observable;
 
 
-public class FluentReadableResourceProviderRetryTest
-extends FluentReadableResourceProviderTest {
+public class FluentReadableResourceSetRetryTest
+extends FluentReadableResourceSetTest {
 
     private static final int NUM_RETRIES = 2;
 //    private static final String SUCCESS_RESPONSE = "Hello, World";
@@ -34,10 +34,10 @@ extends FluentReadableResourceProviderTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> expected = super.createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> expected = super.createDefaultResourceSet();
 
         // when:
-        final FluentReadableResourceProvider<Object, Object> actual = expected.retry(0);
+        final FluentReadableResourceSet<Object, Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -46,17 +46,17 @@ extends FluentReadableResourceProviderTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = super.createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = super.createDefaultResourceSet();
 
         // when:
-        provider.retry(-1);
+        rsrcSet.retry(-1);
     }
 
     /* TODO: Rewrite this test. It relies on a bug in a previous version of RxJava.
     @Test
     public void retryUntilSuccess() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
@@ -67,7 +67,7 @@ extends FluentReadableResourceProviderTest {
 
         // when:
         when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
-        final FluentReadableResource<Object> resource = provider.get(key);
+        final FluentReadableResource<Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.get();
         final Object value = response.toBlocking().single();
 
@@ -79,7 +79,7 @@ extends FluentReadableResourceProviderTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
@@ -87,14 +87,14 @@ extends FluentReadableResourceProviderTest {
 
         // when:
         when(super.mockResource.read()).thenReturn(firstAttemptAndAllRetries);
-        final FluentReadableResource<Object> resource = provider.get(key);
+        final FluentReadableResource<Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.read();
         response.toBlocking().single();
     }
 
     @Override
-    protected FluentReadableResourceProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().retry(NUM_RETRIES);
+    protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().retry(NUM_RETRIES);
     }
 
 }

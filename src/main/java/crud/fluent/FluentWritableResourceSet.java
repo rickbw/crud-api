@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,37 +17,36 @@ package crud.fluent;
 import java.util.Objects;
 
 import crud.core.WritableResource;
-import crud.core.WritableResourceProvider;
-
+import crud.core.WritableResourceSet;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
-public abstract class FluentWritableResourceProvider<KEY, RSRC, RESPONSE>
-implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
+public abstract class FluentWritableResourceSet<KEY, RSRC, RESPONSE>
+implements WritableResourceSet<KEY, RSRC, RESPONSE> {
 
-    public static <KEY, RSRC, RESPONSE> FluentWritableResourceProvider<KEY, RSRC, RESPONSE> from(
-            final WritableResourceProvider<KEY, RSRC, RESPONSE> provider) {
-        if (provider instanceof FluentWritableResourceProvider<?, ?, ?>) {
-            return (FluentWritableResourceProvider<KEY, RSRC, RESPONSE>) provider;
+    public static <KEY, RSRC, RESPONSE> FluentWritableResourceSet<KEY, RSRC, RESPONSE> from(
+            final WritableResourceSet<KEY, RSRC, RESPONSE> rsrcSet) {
+        if (rsrcSet instanceof FluentWritableResourceSet<?, ?, ?>) {
+            return (FluentWritableResourceSet<KEY, RSRC, RESPONSE>) rsrcSet;
         } else {
-            return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
+            return new FluentWritableResourceSet<KEY, RSRC, RESPONSE>() {
                 @Override
                 public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    return FluentWritableResource.from(provider.get(key));
+                    return FluentWritableResource.from(rsrcSet.get(key));
                 }
             };
         }
     }
 
-    public <RESP> FluentWritableResourceProvider<KEY, RSRC, RESP> mapResponse(
+    public <RESP> FluentWritableResourceSet<KEY, RSRC, RESP> mapResponse(
             final Func1<? super RESPONSE, ? extends RESP> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentWritableResourceProvider<KEY, RSRC, RESP> result = new FluentWritableResourceProvider<KEY, RSRC, RESP>() {
+        final FluentWritableResourceSet<KEY, RSRC, RESP> result = new FluentWritableResourceSet<KEY, RSRC, RESP>() {
             @Override
             public FluentWritableResource<RSRC, RESP> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .mapResponse(mapper);
             }
@@ -55,13 +54,13 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public <R> FluentWritableResourceProvider<KEY, RSRC, R> flatMapResponse(
+    public <R> FluentWritableResourceSet<KEY, RSRC, R> flatMapResponse(
             final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentWritableResourceProvider<KEY, RSRC, R> result = new FluentWritableResourceProvider<KEY, RSRC, R>() {
+        final FluentWritableResourceSet<KEY, RSRC, R> result = new FluentWritableResourceSet<KEY, RSRC, R>() {
             @Override
             public FluentWritableResource<RSRC, R> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .flatMapResponse(mapper);
             }
@@ -74,18 +73,18 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
      * {@link Observer#onCompleted()}. Emit any error to
      * {@link Observer#onError(Throwable)} as usual.
      */
-    public <TO> FluentWritableResourceProvider<KEY, RSRC, TO> flattenResponseToCompletion() {
+    public <TO> FluentWritableResourceSet<KEY, RSRC, TO> flattenResponseToCompletion() {
         final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
         return flatMapResponse(func);
     }
 
-    public <RC> FluentWritableResourceProvider<KEY, RC, RESPONSE> adaptNewValue(
+    public <RC> FluentWritableResourceSet<KEY, RC, RESPONSE> adaptNewValue(
             final Func1<? super RC, ? extends RSRC> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentWritableResourceProvider<KEY, RC, RESPONSE> result = new FluentWritableResourceProvider<KEY, RC, RESPONSE>() {
+        final FluentWritableResourceSet<KEY, RC, RESPONSE> result = new FluentWritableResourceSet<KEY, RC, RESPONSE>() {
             @Override
             public FluentWritableResource<RC, RESPONSE> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .<RC>adaptNewValue(adapter);
             }
@@ -93,22 +92,22 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public <K> FluentWritableResourceProvider<K, RSRC, RESPONSE> adaptKey(
+    public <K> FluentWritableResourceSet<K, RSRC, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentWritableResourceProvider<K, RSRC, RESPONSE> result = new FluentWritableResourceProvider<K, RSRC, RESPONSE>() {
+        final FluentWritableResourceSet<K, RSRC, RESPONSE> result = new FluentWritableResourceSet<K, RSRC, RESPONSE>() {
             @Override
             public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerResourceSet().get(transformedKey);
             }
         };
         return result;
     }
 
     /**
-     * Return a resource provider, the resource from which will transparently
+     * Return a resource set, the resource from which will transparently
      * retry calls to {@link WritableResource#write(Object)} that throw, as
      * with {@link Observable#retry(long)}. Specifically, any
      * {@link Observable} returned by {@link WritableResource#write(Object)}
@@ -125,16 +124,16 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public FluentWritableResourceProvider<KEY, RSRC, RESPONSE> retry(final int maxRetries) {
+    public FluentWritableResourceSet<KEY, RSRC, RESPONSE> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;    // no-op
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new FluentWritableResourceProvider<KEY, RSRC, RESPONSE>() {
+            return new FluentWritableResourceSet<KEY, RSRC, RESPONSE>() {
                 @Override
                 public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    return outerProvider()
+                    return outerResourceSet()
                             .get(key)
                             .retry(maxRetries);
                 }
@@ -142,12 +141,12 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
         }
     }
 
-    public <TO> FluentWritableResourceProvider<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
+    public <TO> FluentWritableResourceSet<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
         Objects.requireNonNull(bind, "null operator");
-        return new FluentWritableResourceProvider<KEY, RSRC, TO>() {
+        return new FluentWritableResourceSet<KEY, RSRC, TO>() {
             @Override
             public FluentWritableResource<RSRC, TO> get(final KEY key) {
-                final FluentWritableResource<RSRC, TO> resource = outerProvider()
+                final FluentWritableResource<RSRC, TO> resource = outerResourceSet()
                         .get(key)
                         .lift(bind);
                 return resource;
@@ -167,7 +166,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
     @Override
     public abstract FluentWritableResource<RSRC, RESPONSE> get(KEY key);
 
-    private FluentWritableResourceProvider<KEY, RSRC, RESPONSE> outerProvider() {
+    private FluentWritableResourceSet<KEY, RSRC, RESPONSE> outerResourceSet() {
         return this;
     }
 

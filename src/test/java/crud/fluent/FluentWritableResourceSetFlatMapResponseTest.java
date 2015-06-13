@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,8 @@ import rx.functions.Func1;
  * Tests the nested subclass of {@link FluentWritableResource} that handles
  * transforming responses.
  */
-public class FluentWritableResourceProviderFlatMapResponseTest
-extends FluentWritableResourceProviderTest {
+public class FluentWritableResourceSetFlatMapResponseTest
+extends FluentWritableResourceSetTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
@@ -44,7 +44,7 @@ extends FluentWritableResourceProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final Object newValue = "Hello";
         final String origResponse = "world";
@@ -52,7 +52,7 @@ extends FluentWritableResourceProviderTest {
 
         // when:
         when(super.mockResource.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
-        final FluentWritableResource<Object, Object> resource = provider.get(key);
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.write(newValue);
 
         // then:
@@ -61,8 +61,8 @@ extends FluentWritableResourceProviderTest {
     }
 
     @Override
-    protected FluentWritableResourceProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>flatMapResponse(mapper);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().<Object>flatMapResponse(mapper);
     }
 
 }

@@ -26,7 +26,7 @@
  *
  * There are two primary abstractions in the API:
  * {@link crud.core.Resource}s and
- * {@link crud.core.ResourceProvider}s. The former encapsulates the
+ * {@link crud.core.ResourceSet}s. The former encapsulates the
  * I/O operations on state, and hence uses a reactive style. There are two
  * derived interfaces:
  * <ul>
@@ -34,15 +34,15 @@
  *  <li>{@link crud.core.WritableResource}</li>
  * </ul>
  *
- * The latter abstraction, the resource providers, provide local (i.e.
+ * The latter abstraction, the resource sets, provide local (i.e.
  * assumed-cheap) navigation among Resources. This navigation uses a key-value
  * lookup idiom, where keys are generic and may be simple -- e.g. a URL -- or
  * arbitrarily complex -- e.g. a database query -- depending on the underlying
  * data-access technology. There are two derived
- * {@link crud.core.ResourceProvider} interfaces:
+ * {@link crud.core.ResourceSet} interfaces:
  * <ul>
- *  <li>{@link crud.core.ReadableResourceProvider}</li>
- *  <li>{@link crud.core.WritableResourceProvider}</li>
+ *  <li>{@link crud.core.ReadableResourceSet}</li>
+ *  <li>{@link crud.core.WritableResourceSet}</li>
  * </ul>
  *
  * In addition to these core abstractions, this library provides a number of

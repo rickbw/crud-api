@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,16 +27,16 @@ import rx.Subscriber;
 
 
 /**
- * Tests the nested subclass of {@link FluentReadableResourceProvider} that
+ * Tests the nested subclass of {@link FluentWritableResourceSet} that
  * handles lifting subscriptions.
  */
-public class FluentReadableResourceProviderLiftTest extends FluentReadableResourceProviderTest {
+public class FluentWritableResourceSetLiftTest extends FluentWritableResourceSetTest {
 
     private final AtomicBoolean lifterCalled = new AtomicBoolean(false);
     private final Observable.Operator<Object, Object> lifter = new Observable.Operator<Object, Object>() {
         @Override
         public Subscriber<? super Object> call(final Subscriber<? super Object> subscriber) {
-            lifterCalled.set(true);
+            FluentWritableResourceSetLiftTest.this.lifterCalled.set(true);
             return subscriber;
         }
     };
@@ -45,14 +45,14 @@ public class FluentReadableResourceProviderLiftTest extends FluentReadableResour
     @Test
     public void lifterCalled() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final String expectedResponseValue = "Response!";
 
         // when:
-        when(super.mockResource.read()).thenReturn(Observable.<Object>just(expectedResponseValue));
-        final FluentReadableResource<Object> resource = provider.get(key);
-        final Observable<Object> response = resource.read();
+        when(super.mockResource.write(expectedResponseValue)).thenReturn(Observable.<Object>just(expectedResponseValue));
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
+        final Observable<Object> response = resource.write(expectedResponseValue);
 
         // then:
         final Object actualResponseValue = response.toBlocking().first();
@@ -62,8 +62,8 @@ public class FluentReadableResourceProviderLiftTest extends FluentReadableResour
     }
 
     @Override
-    protected FluentReadableResourceProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().lift(this.lifter);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().lift(this.lifter);
     }
 
 }

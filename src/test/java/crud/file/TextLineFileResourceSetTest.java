@@ -17,14 +17,14 @@ package crud.file;
 import java.io.File;
 import java.io.IOException;
 
-import crud.core.ResourceProviderTest;
+import crud.core.ResourceSetTest;
 
 
-public class TextLineFileResourceProviderTest extends ResourceProviderTest<File> {
+public class TextLineFileResourceSetTest extends ResourceSetTest<File> {
 
     @Override
-    protected TextLineFileResource.Provider createDefaultProvider() {
-        return TextLineFileResource.provider();
+    protected TextLineFileResource.Set createDefaultResourceSet() {
+        return TextLineFileResource.set();
     }
 
     @Override

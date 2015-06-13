@@ -12,13 +12,13 @@ The Crud API supports data-oriented interactions based on generic _Resources_, w
 
 API Overview
 ------------
-There are two primary abstractions in the API: `Resources` and `ResourceProviders`. The former encapsulate the I/O operations on state, and hence uses a reactive style. There are two interfaces derived from [Resource](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/Resource.java):
+There are two primary abstractions in the API: `Resources` and `ResourceSets`. The former encapsulate the I/O operations on state, and hence uses a reactive style. There are two interfaces derived from [Resource](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/Resource.java):
 * [ReadableResource](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/ReadableResource.java)
 * [WritableResource](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/WritableResource.java)
 
-The latter abstraction, `ResourceProvider`, provides local (i.e. assumed-cheap) navigation among `Resources`. This navigation uses a key-value lookup idiom, where keys are generic and may be simple—e.g. a URL—or arbitrarily complex—e.g. a database query—depending on the underlying data-access technology. There are two derived [ResourceProvider](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/ResourceProvider.java) interfaces:
-* [ReadableResourceProvider](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/ReadableResourceProvider.java)
-* [WritableResourceProvider](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/WritableResourceProvider.java)
+The latter abstraction, `ResourceSet`, provides local (i.e. assumed-cheap) navigation among `Resources`. This navigation uses a key-value lookup idiom, where keys are generic and may be simple—e.g. a URL—or arbitrarily complex—e.g. a database query—depending on the underlying data-access technology. There are two derived [ResourceSet](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/ResourceSet.java) interfaces:
+* [ReadableResourceSet](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/ReadableResourceSet.java)
+* [WritableResourceSet](https://github.com/rickbw/crud-api/blob/master/src/main/java/rickbw/crud/core/WritableResourceSet.java)
 
 
 See Also

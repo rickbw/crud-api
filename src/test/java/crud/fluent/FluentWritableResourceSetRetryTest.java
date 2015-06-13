@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,8 +24,8 @@ import org.junit.Test;
 import rx.Observable;
 
 
-public class FluentWritableResourceProviderRetryTest
-extends FluentWritableResourceProviderTest {
+public class FluentWritableResourceSetRetryTest
+extends FluentWritableResourceSetTest {
 
     private static final int NUM_RETRIES = 2;
 //    private static final String SUCCESS_RESPONSE = "Hello, World";
@@ -34,10 +34,10 @@ extends FluentWritableResourceProviderTest {
     @Test
     public void retryZeroTimesReturnsSameObject() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> expected = super.createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> expected = super.createDefaultResourceSet();
 
         // when:
-        final FluentWritableResourceProvider<Object, Object, Object> actual = expected.retry(0);
+        final FluentWritableResourceSet<Object, Object, Object> actual = expected.retry(0);
 
         // then:
         assertSame(expected, actual);
@@ -46,17 +46,17 @@ extends FluentWritableResourceProviderTest {
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = super.createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = super.createDefaultResourceSet();
 
         // when:
-        provider.retry(-1);
+        rsrcSet.retry(-1);
     }
 
     /* TODO: Rewrite this test. It relies on a bug in a previous version of RxJava.
     @Test
     public void retryUntilSuccess() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.just(ImmutableList.of(
                 Notification.createOnError(new RuntimeException("1st attempt")),
@@ -68,7 +68,7 @@ extends FluentWritableResourceProviderTest {
 
         // when:
         when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final FluentWritableResource<Object, Object> resource = provider.get(key);
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.write(inputValue);
 
         // then:
@@ -80,7 +80,7 @@ extends FluentWritableResourceProviderTest {
     @Test(expected=ConcurrentModificationException.class)
     public void propagateExceptionWhenRetriesExceeded() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final Observable<Object> firstAttemptAndAllRetries = Observable.error(
                 // Use unusual exception type to make sure we catch our own:
@@ -89,14 +89,14 @@ extends FluentWritableResourceProviderTest {
 
         // when:
         when(super.mockResource.write(inputValue)).thenReturn(firstAttemptAndAllRetries);
-        final FluentWritableResource<Object, Object> resource = provider.get(key);
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.write(inputValue);
         response.toBlocking().single();
     }
 
     @Override
-    protected FluentWritableResourceProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().retry(NUM_RETRIES);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().retry(NUM_RETRIES);
     }
 
 }

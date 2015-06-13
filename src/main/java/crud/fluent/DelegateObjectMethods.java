@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,15 +17,14 @@ package crud.fluent;
 import java.util.Objects;
 
 import crud.core.Resource;
-import crud.core.ResourceProvider;
-
+import crud.core.ResourceSet;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
 
 /**
  * A base class for {@link rx.functions.Function} facades around
- * {@link Resource}s and {@link ResourceProvider}s. It delegates the common
+ * {@link Resource}s and {@link ResourceSet}s. It delegates the common
  * {@link Object} methods {@link #toString()}, {@link #equals(Object)}, and
  * {@link #hashCode()} to its delegate. Its concrete subclasses
  * {@link Function} and {@link Callable} pull in {@code call} methods.

@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,12 @@
 package crud.fluent;
 
 import static org.mockito.Mockito.verify;
+
 import rx.functions.Func1;
 
 
-public class FluentReadableResourceProviderAdaptKeyTest
-extends FluentReadableResourceProviderTest {
+public class FluentWritableResourceSetAdaptKeyTest
+extends FluentWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -32,37 +33,37 @@ extends FluentReadableResourceProviderTest {
 
 
     @Override
-    public void fluentProviderCallsDelegate() {
+    public void fluentResourceSetCallsDelegate() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object origKey = createDefaultKey();
-        final String transformedKey = adapter.call(origKey);
+        final String transformedKey = this.adapter.call(origKey);
 
         // when:
-        provider.get(origKey);
+        rsrcSet.get(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockResourceSet).get(transformedKey);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, FluentReadableResource<Object>> function = provider.toFunction();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final Func1<Object, FluentWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object origKey = createDefaultKey();
-        final String transformedKey = adapter.call(origKey);
+        final String transformedKey = this.adapter.call(origKey);
 
         // when:
         function.call(origKey);
 
         // then:
-        verify(this.mockProvider).get(transformedKey);
+        verify(this.mockResourceSet).get(transformedKey);
     }
 
     @Override
-    protected FluentReadableResourceProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>adaptKey(adapter);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().<Object>adaptKey(this.adapter);
     }
 
 }

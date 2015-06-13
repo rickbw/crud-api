@@ -21,18 +21,18 @@ import org.junit.Test;
 
 
 /**
- * A base class for all unit tests for {@link ResourceProvider}s.
+ * A base class for all unit tests for {@link ResourceSet}s.
  */
-public abstract class ResourceProviderTest<KEY> {
+public abstract class ResourceSetTest<KEY> {
 
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
         final KEY key = createDefaultKey();
 
         // when:
-        final Resource resource = provider.get(key);
+        final Resource resource = rsrcSet.get(key);
 
         // then:
         assertNotNull(resource);
@@ -41,12 +41,12 @@ public abstract class ResourceProviderTest<KEY> {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
         final KEY key = createDefaultKey();
 
         // when:
-        final Resource resource1 = provider.get(key);
-        final Resource resource2 = provider.get(key);
+        final Resource resource1 = rsrcSet.get(key);
+        final Resource resource2 = rsrcSet.get(key);
 
         // then:
         assertEquals(resource1, resource2);
@@ -55,21 +55,21 @@ public abstract class ResourceProviderTest<KEY> {
     @Test(expected=NullPointerException.class)
     public void getNullKeyThrows() {
         // given:
-        final ResourceProvider<KEY> provider = createDefaultProvider();
+        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
 
         // when:
-        provider.get(null);
+        rsrcSet.get(null);
     }
 
     /**
-     * Create and return a new instance of the {@link ResourceProvider} class
+     * Create and return a new instance of the {@link ResourceSet} class
      * under test.
      */
-    protected abstract ResourceProvider<KEY> createDefaultProvider();
+    protected abstract ResourceSet<KEY> createDefaultResourceSet();
 
     /**
-     * Create and return a key that can be passed to the providers returned by
-     * {@link #createDefaultProvider()}.
+     * Create and return a key that can be passed to the resource sets
+     * returned by {@link #createDefaultResourceSet()}.
      */
     protected abstract KEY createDefaultKey();
 

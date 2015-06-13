@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,8 @@ import rx.functions.Func1;
  * Tests the nested subclass of {@link FluentReadableResource} that handles
  * transforming responses.
  */
-public class FluentReadableResourceProviderFlatMapValueTest
-extends FluentReadableResourceProviderTest {
+public class FluentReadableResourceSetFlatMapValueTest
+extends FluentReadableResourceSetTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
@@ -44,14 +44,14 @@ extends FluentReadableResourceProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final String origResponse = "Hello, World";
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
         when(super.mockResource.read()).thenReturn(Observable.<Object>just(origResponse));
-        final FluentReadableResource<Object> resource = provider.get(key);
+        final FluentReadableResource<Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.read();
 
         // then:
@@ -60,8 +60,8 @@ extends FluentReadableResourceProviderTest {
     }
 
     @Override
-    protected FluentReadableResourceProvider<Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>flatMapValue(mapper);
+    protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().<Object>flatMapValue(mapper);
     }
 
 }

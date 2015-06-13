@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,89 +24,86 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.core.ResourceProviderTest;
 import crud.core.ReadableResource;
-import crud.core.ReadableResourceProvider;
+import crud.core.ReadableResourceSet;
+import crud.core.ResourceSetTest;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link FluentReadableResourceProvider} that don't
+ * Tests those methods of {@link FluentReadableResourceSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class FluentReadableResourceProviderTest extends ResourceProviderTest<Object> {
+public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
 
-    @SuppressWarnings("unchecked")
     protected final ReadableResource<Object> mockResource = mock(ReadableResource.class);
-
-    @SuppressWarnings("unchecked")
-    protected final ReadableResourceProvider<Object, Object> mockProvider = mock(ReadableResourceProvider.class);
+    protected final ReadableResourceSet<Object, Object> mockResourceSet = mock(ReadableResourceSet.class);
 
 
     @Before
     public void setup() {
         when(this.mockResource.read()).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockResourceSet.get(any())).thenReturn(this.mockResource);
+        when(this.mockResourceSet.get(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
-    public void fluentProviderNotEqualDelegate() {
+    public void fluentResourceSetNotEqualDelegate() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
-        assertNotEquals(this.mockProvider, provider);
-        assertNotEquals(provider, this.mockProvider);
+        assertNotEquals(this.mockResourceSet, rsrcSet);
+        assertNotEquals(rsrcSet, this.mockResourceSet);
     }
 
     @Test
-    public void fromFluentProviderReturnsSameObject() {
+    public void fromFluentResourceSetReturnsSameObject() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> origProvider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> origRsrcSet = createDefaultResourceSet();
 
         // when:
-        final FluentReadableResourceProvider<Object, Object> wrappedProvider = FluentReadableResourceProvider.from(
-                origProvider);
+        final FluentReadableResourceSet<Object, Object> wrappedRsrcSet = FluentReadableResourceSet.from(
+                origRsrcSet);
 
         // then:
-        assertSame(origProvider, wrappedProvider);
+        assertSame(origRsrcSet, wrappedRsrcSet);
     }
 
     @Test
-    public void fluentProviderCallsDelegate() {
+    public void fluentResourceSetCallsDelegate() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        rsrcSet.get(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockResourceSet).get(key);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
-        final FluentReadableResourceProvider<Object, Object> provider = createDefaultProvider();
-        final Func1<Object, FluentReadableResource<Object>> function = provider.toFunction();
+        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
+        final Func1<Object, FluentReadableResource<Object>> function = rsrcSet.toFunction();
         final Object key = createDefaultKey();
 
         // when:
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockResourceSet).get(key);
     }
 
     @Override
-    protected FluentReadableResourceProvider<Object, Object> createDefaultProvider() {
-        return FluentReadableResourceProvider.from(this.mockProvider);
+    protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
+        return FluentReadableResourceSet.from(this.mockResourceSet);
     }
 
     @Override

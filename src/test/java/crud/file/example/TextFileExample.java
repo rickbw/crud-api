@@ -49,7 +49,7 @@ public final class TextFileExample {
             outputFile.delete();    // create from scratch
         }
 
-        final TextLineFileResource.Provider files = TextLineFileResource.provider();
+        final TextLineFileResource.Set files = TextLineFileResource.set();
         final ReadableResource<String> inputLines = files.get(inputFile);
         final WritableResource<String, Void> outputLines = files.get(outputFile);
         final ResourceMerger<Void> merger = ResourceMerger.mapToWriter(

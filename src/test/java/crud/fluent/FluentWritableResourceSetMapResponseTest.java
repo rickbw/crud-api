@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,8 +23,8 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public class FluentWritableResourceProviderMapResponseTest
-extends FluentWritableResourceProviderTest {
+public class FluentWritableResourceSetMapResponseTest
+extends FluentWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -39,15 +39,15 @@ extends FluentWritableResourceProviderTest {
     @Test
     public void transformationApplied() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final String value = "Hello";
         final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse);
+        final String mappedResponse = this.mapper.call(origResponse);
 
         // when:
         when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
-        final FluentWritableResource<Object, Object> resource = provider.get(key);
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.write(value);
 
         // then:
@@ -56,8 +56,8 @@ extends FluentWritableResourceProviderTest {
     }
 
     @Override
-    protected FluentWritableResourceProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>mapResponse(mapper);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().<Object>mapResponse(this.mapper);
     }
 
 }

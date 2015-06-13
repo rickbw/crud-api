@@ -49,10 +49,10 @@ public class FluentWritableResourceRetryTest extends FluentWritableResourceTest 
     @Test(expected=IllegalArgumentException.class)
     public void retryNegativeTimesThrows() {
         // given:
-        final FluentWritableResource<Object, Object> provider = super.createDefaultResource();
+        final FluentWritableResource<Object, Object> rsrcSet = super.createDefaultResource();
 
         // when:
-        provider.retry(-1);
+        rsrcSet.retry(-1);
     }
 
     /* TODO: Rewrite this test. It relies on a bug in a previous version of RxJava.

@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,37 +17,36 @@ package crud.fluent;
 import java.util.Objects;
 
 import crud.core.ReadableResource;
-import crud.core.ReadableResourceProvider;
-
+import crud.core.ReadableResourceSet;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
 
 
-public abstract class FluentReadableResourceProvider<KEY, RSRC>
-implements ReadableResourceProvider<KEY, RSRC> {
+public abstract class FluentReadableResourceSet<KEY, RSRC>
+implements ReadableResourceSet<KEY, RSRC> {
 
-    public static <KEY, RSRC> FluentReadableResourceProvider<KEY, RSRC> from(
-            final ReadableResourceProvider<KEY, RSRC> provider) {
-        if (provider instanceof FluentReadableResourceProvider<?, ?>) {
-            return (FluentReadableResourceProvider<KEY, RSRC>) provider;
+    public static <KEY, RSRC> FluentReadableResourceSet<KEY, RSRC> from(
+            final ReadableResourceSet<KEY, RSRC> rsrcSet) {
+        if (rsrcSet instanceof FluentReadableResourceSet<?, ?>) {
+            return (FluentReadableResourceSet<KEY, RSRC>) rsrcSet;
         } else {
-            return new FluentReadableResourceProvider<KEY, RSRC>() {
+            return new FluentReadableResourceSet<KEY, RSRC>() {
                 @Override
                 public FluentReadableResource<RSRC> get(final KEY key) {
-                    return FluentReadableResource.from(provider.get(key));
+                    return FluentReadableResource.from(rsrcSet.get(key));
                 }
             };
         }
     }
 
-    public <R> FluentReadableResourceProvider<KEY, R> mapValue(
+    public <R> FluentReadableResourceSet<KEY, R> mapValue(
             final Func1<? super RSRC, ? extends R> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
+        final FluentReadableResourceSet<KEY, R> result = new FluentReadableResourceSet<KEY, R>() {
             @Override
             public FluentReadableResource<R> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .mapValue(mapper);
             }
@@ -55,13 +54,13 @@ implements ReadableResourceProvider<KEY, RSRC> {
         return result;
     }
 
-    public <R> FluentReadableResourceProvider<KEY, R> flatMapValue(
+    public <R> FluentReadableResourceSet<KEY, R> flatMapValue(
             final Func1<? super RSRC, ? extends Observable<? extends R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentReadableResourceProvider<KEY, R> result = new FluentReadableResourceProvider<KEY, R>() {
+        final FluentReadableResourceSet<KEY, R> result = new FluentReadableResourceSet<KEY, R>() {
             @Override
             public FluentReadableResource<R> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .flatMapValue(mapper);
             }
@@ -69,22 +68,22 @@ implements ReadableResourceProvider<KEY, RSRC> {
         return result;
     }
 
-    public <K> FluentReadableResourceProvider<K, RSRC> adaptKey(
+    public <K> FluentReadableResourceSet<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentReadableResourceProvider<K, RSRC> result = new FluentReadableResourceProvider<K, RSRC>() {
+        final FluentReadableResourceSet<K, RSRC> result = new FluentReadableResourceSet<K, RSRC>() {
             @Override
             public FluentReadableResource<RSRC> get(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerProvider().get(transformedKey);
+                return outerResourceSet().get(transformedKey);
             }
         };
         return result;
     }
 
     /**
-     * Return a resource provider, the resource from which will transparently
+     * Return a resource set, the resource from which will transparently
      * retry calls to {@link ReadableResource#read()} that throw, as with
      * {@link Observable#retry(long)}. Specifically, any {@link Observable}
      * returned by {@link ReadableResource#read()} will re-subscribe up to
@@ -100,16 +99,16 @@ implements ReadableResourceProvider<KEY, RSRC> {
      *
      * @param maxRetries    number of retry attempts before failing
      */
-    public FluentReadableResourceProvider<KEY, RSRC> retry(final int maxRetries) {
+    public FluentReadableResourceSet<KEY, RSRC> retry(final int maxRetries) {
         if (maxRetries == 0) {
             return this;    // no-op
         } else if (maxRetries < 0) {
             throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
         } else {
-            return new FluentReadableResourceProvider<KEY, RSRC>() {
+            return new FluentReadableResourceSet<KEY, RSRC>() {
                 @Override
                 public FluentReadableResource<RSRC> get(final KEY key) {
-                    return outerProvider()
+                    return outerResourceSet()
                             .get(key)
                             .retry(maxRetries);
                 }
@@ -117,12 +116,12 @@ implements ReadableResourceProvider<KEY, RSRC> {
         }
     }
 
-    public <TO> FluentReadableResourceProvider<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
+    public <TO> FluentReadableResourceSet<KEY, TO> lift(final Observable.Operator<TO, RSRC> bind) {
         Objects.requireNonNull(bind, "null operator");
-        return new FluentReadableResourceProvider<KEY, TO>() {
+        return new FluentReadableResourceSet<KEY, TO>() {
             @Override
             public FluentReadableResource<TO> get(final KEY key) {
-                return outerProvider()
+                return outerResourceSet()
                         .get(key)
                         .lift(bind);
             }
@@ -141,7 +140,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
     @Override
     public abstract FluentReadableResource<RSRC> get(KEY key);
 
-    private FluentReadableResourceProvider<KEY, RSRC> outerProvider() {
+    private FluentReadableResourceSet<KEY, RSRC> outerResourceSet() {
         return this;
     }
 

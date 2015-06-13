@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,8 +21,8 @@ import org.junit.Test;
 import rx.functions.Func1;
 
 
-public class FluentWritableResourceProviderAdaptNewValueTest
-extends FluentWritableResourceProviderTest {
+public class FluentWritableResourceSetAdaptNewValueTest
+extends FluentWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -37,13 +37,13 @@ extends FluentWritableResourceProviderTest {
     @Test
     public void passAdaptedValueToResource() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final String origValue = "World!";
-        final String adaptedValue = adapter.call(origValue);
+        final String adaptedValue = this.adapter.call(origValue);
 
         // when:
-        final FluentWritableResource<Object, Object> resource = provider.get(key);
+        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
         resource.write(origValue);
 
         // then:
@@ -51,8 +51,8 @@ extends FluentWritableResourceProviderTest {
     }
 
     @Override
-    protected FluentWritableResourceProvider<Object, Object, Object> createDefaultProvider() {
-        return super.createDefaultProvider().<Object>adaptNewValue(adapter);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().<Object>adaptNewValue(this.adapter);
     }
 
 }

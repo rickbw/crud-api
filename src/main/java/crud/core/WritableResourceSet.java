@@ -18,10 +18,10 @@ package crud.core;
 /**
  * Look up a {@link WritableResource} based on a given key.
  *
- * @see ReadableResourceProvider
+ * @see ReadableResourceSet
  * @see WritableResource
  */
-public interface WritableResourceProvider<KEY, RSRC, RESPONSE> extends ResourceProvider<KEY> {
+public interface WritableResourceSet<KEY, RSRC, RESPONSE> extends ResourceSet<KEY> {
 
     @Override
     public abstract WritableResource<RSRC, RESPONSE> get(KEY key);

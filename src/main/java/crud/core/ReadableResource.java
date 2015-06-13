@@ -27,7 +27,7 @@ import rx.Observable;
  * @param <RSRC>    The type of the resource's value(s).
  *
  * @see WritableResource
- * @see ReadableResourceProvider
+ * @see ReadableResourceSet
  */
 public interface ReadableResource<RSRC> extends Resource {
 

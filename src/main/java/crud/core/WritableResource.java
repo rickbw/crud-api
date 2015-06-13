@@ -25,7 +25,7 @@ import rx.Observable;
  *        a result of the change in the value.
  *
  * @see ReadableResource
- * @see WritableResourceProvider
+ * @see WritableResourceSet
  */
 public interface WritableResource<RSRC, RESPONSE> extends Resource {
 

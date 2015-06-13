@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,10 +21,10 @@ package crud.core;
  * return resources that implement multiple interfaces (e.g. that are both a
  * {@link ReadableResource} and a {@link WritableResource}) can extend
  * multiple sub-interfaces of this interface (e.g. both
- * {@link ReadableResourceProvider} and {@link WritableResourceProvider}) by
+ * {@link ReadableResourceSet} and {@link WritableResourceSet}) by
  * overriding the return type of {@link #get(Object)}.
  */
-public interface ResourceProvider<KEY> {
+public interface ResourceSet<KEY> {
 
     /**
      * Get the {@link Resource} associated with the given key. Resources
@@ -36,7 +36,7 @@ public interface ResourceProvider<KEY> {
      * Specifically, when dealing with remote and/or persistent Resources,
      * implementers should locate expensive operations -- such as transferring
      * data across a network -- within the Resource implementations
-     * themselves, and leave the ResourceProviders to simply prepare the
+     * themselves, and leave the ResourceSets to simply prepare the
      * necessary objects.
      *
      * @throws NullPointerException if the given key is null.

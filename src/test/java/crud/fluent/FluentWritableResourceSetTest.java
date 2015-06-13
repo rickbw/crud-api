@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,89 +24,86 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.core.ResourceProviderTest;
+import crud.core.ResourceSetTest;
 import crud.core.WritableResource;
-import crud.core.WritableResourceProvider;
+import crud.core.WritableResourceSet;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link FluentWritableResourceProvider} that don't
+ * Tests those methods of {@link FluentWritableResourceSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class FluentWritableResourceProviderTest extends ResourceProviderTest<Object> {
+public class FluentWritableResourceSetTest extends ResourceSetTest<Object> {
 
-    @SuppressWarnings("unchecked")
     protected final WritableResource<Object, Object> mockResource = mock(WritableResource.class);
-
-    @SuppressWarnings("unchecked")
-    protected final WritableResourceProvider<Object, Object, Object> mockProvider = mock(WritableResourceProvider.class);
+    protected final WritableResourceSet<Object, Object, Object> mockResourceSet = mock(WritableResourceSet.class);
 
 
     @Before
     public void setup() {
         when(this.mockResource.write(any())).thenReturn(Observable.empty());
-        when(this.mockProvider.get(any())).thenReturn(this.mockResource);
-        when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockResourceSet.get(any())).thenReturn(this.mockResource);
+        when(this.mockResourceSet.get(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
-    public void fluentProviderNotEqualDelegate() {
+    public void fluentResourceSetNotEqualDelegate() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
-        assertNotEquals(this.mockProvider, provider);
-        assertNotEquals(provider, this.mockProvider);
+        assertNotEquals(this.mockResourceSet, rsrcSet);
+        assertNotEquals(rsrcSet, this.mockResourceSet);
     }
 
     @Test
-    public void fromFluentProviderReturnsSameObject() {
+    public void fromFluentResourceSetReturnsSameObject() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> origProvider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> origRsrcSet = createDefaultResourceSet();
 
         // when:
-        final FluentWritableResourceProvider<Object, Object, Object> wrappedProvider = FluentWritableResourceProvider.from(
-                origProvider);
+        final FluentWritableResourceSet<Object, Object, Object> wrappedRsrcSet = FluentWritableResourceSet.from(
+                origRsrcSet);
 
         // then:
-        assertSame(origProvider, wrappedProvider);
+        assertSame(origRsrcSet, wrappedRsrcSet);
     }
 
     @Test
-    public void fluentProviderCallsDelegate() {
+    public void fluentResourceSetCallsDelegate() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
 
         // when:
-        provider.get(key);
+        rsrcSet.get(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockResourceSet).get(key);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
-        final FluentWritableResourceProvider<Object, Object, Object> provider = createDefaultProvider();
-        final Func1<Object, FluentWritableResource<Object, Object>> function = provider.toFunction();
+        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final Func1<Object, FluentWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object key = createDefaultKey();
 
         // when:
         function.call(key);
 
         // then:
-        verify(this.mockProvider).get(key);
+        verify(this.mockResourceSet).get(key);
     }
 
     @Override
-    protected FluentWritableResourceProvider<Object, Object, Object> createDefaultProvider() {
-        return FluentWritableResourceProvider.from(this.mockProvider);
+    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return FluentWritableResourceSet.from(this.mockResourceSet);
     }
 
     @Override

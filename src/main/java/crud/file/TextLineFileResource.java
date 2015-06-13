@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.annotations.VisibleForTesting;
 
 import crud.core.ReadableResource;
-import crud.core.ReadableResourceProvider;
+import crud.core.ReadableResourceSet;
 import crud.core.WritableResource;
-import crud.core.WritableResourceProvider;
+import crud.core.WritableResourceSet;
 import crud.util.BooleanSubscription;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -43,8 +43,8 @@ implements ReadableResource<String>, WritableResource<String, Void> {
     private final File file;
 
 
-    public static Provider provider() {
-        return new Provider();
+    public static Set set() {
+        return new Set();
     }
 
     @Override
@@ -95,14 +95,14 @@ implements ReadableResource<String>, WritableResource<String, Void> {
     }
 
 
-    public static class Provider
-    implements ReadableResourceProvider<File, String>, WritableResourceProvider<File, String, Void> {
+    public static class Set
+    implements ReadableResourceSet<File, String>, WritableResourceSet<File, String, Void> {
         @Override
         public TextLineFileResource get(final File file) {
             return new TextLineFileResource(file);
         }
 
-        private Provider() {
+        private Set() {
             // instantiation via factory method only
         }
     }
