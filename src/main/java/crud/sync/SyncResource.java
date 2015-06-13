@@ -14,27 +14,24 @@
  */
 package crud.sync;
 
-import javax.annotation.Nonnull;
+import crud.core.Resource;
+import crud.implementer.AsyncResults;
 
-import crud.core.ReadableResource;
 
-
-/**
- * @see ReadableResource
- *
- * @author Rick Warren
- */
-public class SyncReadableResource<E> extends SyncResource<ReadableResource<E>> {
-
-    public SyncReadableResource(@Nonnull final ReadableResource<E> delegate) {
-        super(delegate);
-    }
+public abstract class SyncResource<D extends Resource>
+extends SyncDelegateHolder<D>
+implements AutoCloseable {
 
     /**
-     * @see ReadableResource#read()
+     * @see Resource#shutdown()
      */
-    public Iterable<E> read() {
-        return getDelegate().read().toBlocking().toIterable();
+    @Override
+    public final void close() throws Exception {
+        AsyncResults.awaitShutdown(getDelegate());
+    }
+
+    /*package*/ SyncResource(final D delegate) {
+        super(delegate);
     }
 
 }

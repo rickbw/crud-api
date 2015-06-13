@@ -12,29 +12,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.sync;
-
-import javax.annotation.Nonnull;
-
-import crud.core.ReadableResource;
+package crud.core;
 
 
 /**
- * @see ReadableResource
+ * An abstract stateful entity, whose value may be retrieved via the
+ * sub-interface {@link ReadableResource}, or modified via the sub-interface
+ * {@link WritableResource}.
  *
  * @author Rick Warren
  */
-public class SyncReadableResource<E> extends SyncResource<ReadableResource<E>> {
-
-    public SyncReadableResource(@Nonnull final ReadableResource<E> delegate) {
-        super(delegate);
-    }
-
-    /**
-     * @see ReadableResource#read()
-     */
-    public Iterable<E> read() {
-        return getDelegate().read().toBlocking().toIterable();
-    }
-
+public interface Resource extends AsyncCloseable {
+    // empty
 }

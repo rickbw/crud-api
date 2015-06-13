@@ -18,7 +18,6 @@ import javax.annotation.Nonnull;
 
 import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
-import crud.core.ReadableResourceSet.Id;
 import crud.core.Session;
 
 
@@ -27,7 +26,7 @@ import crud.core.Session;
  *
  * @author Rick Warren
  */
-public class SyncReadableResourceSet<K, E> extends SyncDelegateHolder<ReadableResourceSet<K, E>> {
+public class SyncReadableResourceSet<K, E> extends SyncResourceSet<K, E, ReadableResourceSet<K, E>> {
 
     public SyncReadableResourceSet(@Nonnull final ReadableResourceSet<K, E> delegate) {
         super(delegate);
@@ -36,13 +35,15 @@ public class SyncReadableResourceSet<K, E> extends SyncDelegateHolder<ReadableRe
     /**
      * @see ReadableResourceSet#getId()
      */
-    public @Nonnull Id<K, E> getId() {
+    @Override
+    public @Nonnull ReadableResourceSet.Id<K, E> getId() {
         return getDelegate().getId();
     }
 
     /**
      * @see ReadableResourceSet#resource(Object, Session)
      */
+    @Override
     public @Nonnull SyncReadableResource<E> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
         final ReadableResource<E> delegateSource = getDelegate().resource(key, session.getDelegate());
         return new SyncReadableResource<>(delegateSource);

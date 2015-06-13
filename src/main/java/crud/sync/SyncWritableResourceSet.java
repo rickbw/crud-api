@@ -16,10 +16,9 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.WritableResource;
 import crud.core.Session;
+import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
-import crud.core.WritableResourceSet.Id;
 
 
 /**
@@ -27,7 +26,7 @@ import crud.core.WritableResourceSet.Id;
  *
  * @author Rick Warren
  */
-public class SyncWritableResourceSet<K, E, R> extends SyncDelegateHolder<WritableResourceSet<K, E, R>> {
+public class SyncWritableResourceSet<K, E, R> extends SyncResourceSet<K, E, WritableResourceSet<K, E, R>> {
 
     public SyncWritableResourceSet(@Nonnull final WritableResourceSet<K, E, R> delegate) {
         super(delegate);
@@ -36,13 +35,15 @@ public class SyncWritableResourceSet<K, E, R> extends SyncDelegateHolder<Writabl
     /**
      * @see WritableResourceSet#getId()
      */
-    public @Nonnull Id<K, E, R> getId() {
+    @Override
+    public @Nonnull WritableResourceSet.Id<K, E, R> getId() {
         return getDelegate().getId();
     }
 
     /**
      * @see WritableResourceSet#resource(Object, Session)
      */
+    @Override
     public @Nonnull SyncWritableResource<E, R> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
         final WritableResource<E, R> delegate = getDelegate().resource(key, session.getDelegate());
         return new SyncWritableResource<>(delegate);

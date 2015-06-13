@@ -17,7 +17,6 @@ package crud.sync;
 import javax.annotation.Nonnull;
 
 import crud.core.WritableResource;
-import crud.implementer.AsyncResults;
 
 
 /**
@@ -25,7 +24,7 @@ import crud.implementer.AsyncResults;
  *
  * @author Rick Warren
  */
-public class SyncWritableResource<E, R> extends SyncDelegateHolder<WritableResource<E, R>> implements AutoCloseable {
+public class SyncWritableResource<E, R> extends SyncResource<WritableResource<E, R>> {
 
     public SyncWritableResource(@Nonnull final WritableResource<E, R> delegate) {
         super(delegate);
@@ -36,14 +35,6 @@ public class SyncWritableResource<E, R> extends SyncDelegateHolder<WritableResou
      */
     public Iterable<R> write(final E value) {
         return getDelegate().write(value).toBlocking().toIterable();
-    }
-
-    /**
-     * @see WritableResource#shutdown()
-     */
-    @Override
-    public void close() throws Exception {
-        AsyncResults.awaitShutdown(getDelegate());
     }
 
 }

@@ -16,25 +16,30 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.ReadableResource;
+import crud.core.ResourceSet;
+import crud.core.Session;
 
 
 /**
- * @see ReadableResource
- *
- * @author Rick Warren
+ * @see ResourceSet
  */
-public class SyncReadableResource<E> extends SyncResource<ReadableResource<E>> {
-
-    public SyncReadableResource(@Nonnull final ReadableResource<E> delegate) {
-        super(delegate);
-    }
+public abstract class SyncResourceSet<K, E, D extends ResourceSet<K, E>>
+extends SyncDelegateHolder<D> {
 
     /**
-     * @see ReadableResource#read()
+     * @see ResourceSet#getId()
      */
-    public Iterable<E> read() {
-        return getDelegate().read().toBlocking().toIterable();
+    public abstract @Nonnull ResourceSet.Id<K, E> getId();
+
+    /**
+     * @see ResourceSet#resource(Object, Session)
+     */
+    public abstract @Nonnull SyncResource<?> resource(
+            @Nonnull final K key,
+            @Nonnull final SyncSession session);
+
+    /*package*/ SyncResourceSet(final D delegate) {
+        super(delegate);
     }
 
 }

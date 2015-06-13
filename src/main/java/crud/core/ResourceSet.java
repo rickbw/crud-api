@@ -38,6 +38,16 @@ public interface ResourceSet<K, E> {
      */
     public @Nonnull Id<K, E> getId();
 
+    /**
+     * Return a {@link Resource} identified by the given key, to be accessed
+     * in the context of the given {@link Session}.
+     *
+     * @throws ClassCastException               If the {@link Session} was not
+     *              obtained from a {@link DataBus} compatible with this
+     *              {@link WritableResourceSet}.
+     */
+    public @Nonnull Resource resource(@Nonnull K key, @Nonnull Session session);
+
 
     /**
      * Identifies a {@link ResourceSet}: a named collection of homogeneously-typed

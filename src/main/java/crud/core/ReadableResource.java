@@ -29,7 +29,7 @@ import rx.Observer;
  *
  * @author Rick Warren
  */
-public interface ReadableResource<E> extends AsyncCloseable {
+public interface ReadableResource<E> extends Resource {
 
     /**
      * Begin observation of the data elements. The {@link Observable} may be

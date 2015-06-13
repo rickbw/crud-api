@@ -29,7 +29,7 @@ import rx.Observable;
  *
  * @author Rick Warren
  */
-public interface WritableResource<E, R> extends AsyncCloseable {
+public interface WritableResource<E, R> extends Resource {
 
     /**
      * Write a single data element to the target middleware. Return to the

@@ -40,9 +40,8 @@ public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
      * @throws ClassCastException               If the {@link Session} was not
      *              obtained from a {@link DataBus} compatible with this
      *              {@link WritableResourceSet}.
-     * @throws UnsupportedOperationException    If this {@link WritableResourceSet} cannot
-     *              be written.
      */
+    @Override
     public @Nonnull WritableResource<E, R> resource(@Nonnull K key, @Nonnull Session session);
 
 

@@ -39,6 +39,7 @@ public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
      *              obtained from a {@link DataBus} compatible with this
      *              {@link ReadableResourceSet}.
      */
+    @Override
     public @Nonnull ReadableResource<E> resource(@Nonnull K key, @Nonnull Session session);
 
 
