@@ -44,13 +44,13 @@ public interface DataBus extends AsyncCloseable {
      * consumption of data.
      * <p/>
      * The expected pattern is that the application will create a
-     * {@link DataBus}, initialize all of its data sources and sinks, and
+     * {@link DataBus}, initialize all of its readable and writable resources, and
      * then finally start the bus.
      * <p/>
      * <b>Design Rationale</b>: Why does this method return {@link Void}
      * instead of {@link Observable Observable&lt;Void&gt;}? It is part of the
      * object-initialization phase of the application, and all object creation
-     * methods are synchronous. Furthermore, once all data sources and sinks
+     * methods are synchronous. Furthermore, once all readable and writable resources
      * have been created, there is nothing more that can be done with this bus
      * until starting has completed, so there seems to be little point in
      * allowing it to run asynchronously; most likely, every single caller

@@ -43,7 +43,7 @@ public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
      * @throws UnsupportedOperationException    If this {@link WritableResourceSet} cannot
      *              be written.
      */
-    public @Nonnull DataSink<E, R> dataSink(@Nonnull K key, @Nonnull Session session);
+    public @Nonnull WritableResource<E, R> resource(@Nonnull K key, @Nonnull Session session);
 
 
     /**

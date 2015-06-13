@@ -16,30 +16,30 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.implementer.AsyncResults;
 
 
 /**
- * @see DataSink
+ * @see WritableResource
  *
  * @author Rick Warren
  */
-public class SyncDataSink<E, R> extends SyncDelegateHolder<DataSink<E, R>> implements AutoCloseable {
+public class SyncWritableResource<E, R> extends SyncDelegateHolder<WritableResource<E, R>> implements AutoCloseable {
 
-    public SyncDataSink(@Nonnull final DataSink<E, R> delegate) {
+    public SyncWritableResource(@Nonnull final WritableResource<E, R> delegate) {
         super(delegate);
     }
 
     /**
-     * @see DataSink#write(Object)
+     * @see WritableResource#write(Object)
      */
     public Iterable<R> write(final E value) {
         return getDelegate().write(value).toBlocking().toIterable();
     }
 
     /**
-     * @see DataSink#shutdown()
+     * @see WritableResource#shutdown()
      */
     @Override
     public void close() throws Exception {

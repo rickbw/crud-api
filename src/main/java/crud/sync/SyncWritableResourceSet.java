@@ -16,7 +16,7 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.core.Session;
 import crud.core.WritableResourceSet;
 import crud.core.WritableResourceSet.Id;
@@ -41,11 +41,11 @@ public class SyncWritableResourceSet<K, E, R> extends SyncDelegateHolder<Writabl
     }
 
     /**
-     * @see WritableResourceSet#dataSink(Object, Session)
+     * @see WritableResourceSet#resource(Object, Session)
      */
-    public @Nonnull SyncDataSink<E, R> dataSink(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final DataSink<E, R> delegateSink = getDelegate().dataSink(key, session.getDelegate());
-        return new SyncDataSink<>(delegateSink);
+    public @Nonnull SyncWritableResource<E, R> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
+        final WritableResource<E, R> delegate = getDelegate().resource(key, session.getDelegate());
+        return new SyncWritableResource<>(delegate);
     }
 
 }

@@ -22,19 +22,19 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ final class MessageProducerDataSink<M extends Message> implements DataSink<M, Void> {
+/*package*/ final class MessageProducerResource<M extends Message> implements WritableResource<M, Void> {
 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final MessageProducer producer;
 
 
-    public MessageProducerDataSink(
+    public MessageProducerResource(
             @Nonnull final SessionWorker worker,
             @Nonnull final MessageProducer producer) {
         this.worker = Objects.requireNonNull(worker);
@@ -46,7 +46,7 @@ import rx.Subscriber;
         return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
-                MessageProducerDataSink.this.producer.send(message, new CompletionListener() {
+                MessageProducerResource.this.producer.send(message, new CompletionListener() {
                     @Override
                     public void onCompletion(final Message ignored) {
                         sub.onCompleted();
@@ -66,7 +66,7 @@ import rx.Subscriber;
         return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
-                MessageProducerDataSink.this.producer.close();
+                MessageProducerResource.this.producer.close();
             }
         });
     }

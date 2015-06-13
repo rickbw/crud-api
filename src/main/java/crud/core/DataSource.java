@@ -25,7 +25,7 @@ import rx.Observer;
  * @param <E>   The static type of the data elements observable from this
  *              {@link DataSource}.
  *
- * @see DataSink
+ * @see WritableResource
  *
  * @author Rick Warren
  */

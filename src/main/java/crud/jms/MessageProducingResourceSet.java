@@ -25,7 +25,7 @@ import javax.jms.MessageProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.core.MiddlewareException;
 import crud.core.Session;
 import crud.core.WritableResourceSet;
@@ -53,7 +53,7 @@ import crud.core.WritableResourceSet;
 
     @SuppressWarnings("resource")
     @Override
-    public DataSink<M, Void> dataSink(final String key, final Session session) {
+    public WritableResource<M, Void> resource(final String key, final Session session) {
         if (!key.isEmpty()) {
             log.warn("Ignoring key {}", key);
         }
@@ -62,7 +62,7 @@ import crud.core.WritableResourceSet;
         final javax.jms.Session realSession = sessionImpl.getDelegate();
         try {
             final MessageProducer messageProducer = realSession.createProducer(this.destination);
-            return new MessageProducerDataSink<>(sessionImpl.worker(), messageProducer);
+            return new MessageProducerResource<>(sessionImpl.worker(), messageProducer);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

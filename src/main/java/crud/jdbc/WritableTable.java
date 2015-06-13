@@ -14,8 +14,8 @@
  */
 package crud.jdbc;
 
-import crud.core.DataSink;
 import crud.core.Session;
+import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
 import crud.implementer.AbstractWritableResourceSet;
 
@@ -28,9 +28,9 @@ extends AbstractWritableResourceSet<StatementTemplate, StatementParameters, Inte
     }
 
     @Override
-    public DataSink<StatementParameters, Integer> dataSink(final StatementTemplate query, final Session session) {
+    public WritableResource<StatementParameters, Integer> resource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
-        return jdbcSession.dataSink(query);
+        return jdbcSession.resource(query);
     }
 
 }

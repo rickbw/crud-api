@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import com.google.common.base.Charsets;
 
 import crud.core.MiddlewareException;
-import crud.implementer.AbstractDataSink;
+import crud.implementer.AbstractWritableResource;
 import crud.implementer.SessionWorker;
 import rx.Subscriber;
 
@@ -35,14 +35,14 @@ import rx.Subscriber;
  *
  * @author Rick Warren
  */
-/*package*/ final class PrintingDataSink extends AbstractDataSink<String, Integer> {
+/*package*/ final class PrintingWritableResource extends AbstractWritableResource<String, Integer> {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
     private final Writer writer;
 
 
-    public PrintingDataSink(@Nonnull final Writer writer, @Nonnull final SessionWorker worker) {
+    public PrintingWritableResource(@Nonnull final Writer writer, @Nonnull final SessionWorker worker) {
         super(worker);
         this.writer = Objects.requireNonNull(writer);
     }

@@ -16,15 +16,15 @@ package crud.implementer;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 
 
-public abstract class AbstractDataSink<E, R>
+public abstract class AbstractWritableResource<E, R>
 extends AbstractSessionParticipant
-implements DataSink<E, R> {
+implements WritableResource<E, R> {
 
     /**
      * Write the given value in the background thread belonging to the
@@ -45,7 +45,7 @@ implements DataSink<E, R> {
         });
     }
 
-    protected AbstractDataSink(@Nonnull final SessionWorker worker) {
+    protected AbstractWritableResource(@Nonnull final SessionWorker worker) {
         super(worker);
     }
 

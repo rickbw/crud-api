@@ -20,9 +20,9 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
 import crud.core.DataSource;
 import crud.core.Session;
+import crud.core.WritableResource;
 import crud.implementer.AbstractSession;
 
 
@@ -49,8 +49,8 @@ import crud.implementer.AbstractSession;
         return new QueryDataSource(this.connection, query, getWorker());
     }
 
-    /*package*/ final @Nonnull DataSink<StatementParameters, Integer> dataSink(final StatementTemplate update) {
-        return new UpdateDataSink(this.connection, update, getWorker());
+    /*package*/ final @Nonnull WritableResource<StatementParameters, Integer> resource(final StatementTemplate update) {
+        return new UpdateResource(this.connection, update, getWorker());
     }
 
 }

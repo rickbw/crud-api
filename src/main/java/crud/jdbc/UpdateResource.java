@@ -20,17 +20,17 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ final class UpdateDataSink
+/*package*/ final class UpdateResource
 extends StatementProvider
-implements DataSink<StatementParameters, Integer> {
+implements WritableResource<StatementParameters, Integer> {
 
-    public UpdateDataSink(
+    public UpdateResource(
             @Nonnull final Connection connection,
             @Nonnull final StatementTemplate statementTemplate,
             @Nonnull final SessionWorker worker) {

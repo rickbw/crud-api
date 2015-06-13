@@ -16,7 +16,7 @@ package crud.core.example;
 
 import java.io.Writer;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import crud.core.Session;
 import crud.core.WritableResourceSet;
 import crud.implementer.AbstractWritableResourceSet;
@@ -29,8 +29,8 @@ import crud.implementer.AbstractWritableResourceSet;
     }
 
     @Override
-    public DataSink<String, Integer> dataSink(final Writer writer, final Session session) {
-        return new PrintingDataSink(writer, ((ExampleSession) session).worker());
+    public WritableResource<String, Integer> resource(final Writer writer, final Session session) {
+        return new PrintingWritableResource(writer, ((ExampleSession) session).worker());
     }
 
 }

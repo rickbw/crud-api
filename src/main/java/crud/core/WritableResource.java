@@ -22,21 +22,21 @@ import rx.Observable;
  * application to somewhere else.
  *
  * @param <E>   The static type of the data elements written to this
- *              {@link DataSink}.
+ *              {@link WritableResource}.
  * @param <R>   The static type of the result of writing a value.
  *
  * @see DataSource
  *
  * @author Rick Warren
  */
-public interface DataSink<E, R> extends AsyncCloseable {
+public interface WritableResource<E, R> extends AsyncCloseable {
 
     /**
      * Write a single data element to the target middleware. Return to the
      * application a stream of zero or more values indicating the result of
      * the write operation. That result may indicate success/failure, number
      * of records modified, or any other relevant meta-data specific to the
-     * {@link DataSink} implementation. The preferred return type for
+     * {@link WritableResource} implementation. The preferred return type for
      * implementations that need only return a success/failure result is
      * {@code Observable<Void>}.
      * <p/>
@@ -46,7 +46,7 @@ public interface DataSink<E, R> extends AsyncCloseable {
      * don't care what it is.
      * <p/>
      * <b>Note to implementers</b>: Except in special cases, writing to this
-     * {@link DataSink} will involve I/O. In the interest of segregating those
+     * {@link WritableResource} will involve I/O. In the interest of segregating those
      * threads that perform blocking I/O and those that perform computation,
      * implementations should not block on this call, nor should the result(s)
      * be delivered in the thread {@link Observable#subscribe() subscribing}

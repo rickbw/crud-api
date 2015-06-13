@@ -18,40 +18,40 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSink;
+import crud.core.WritableResource;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * A {@link DataSink} that wraps another, transforming the inputs and outputs
+ * A {@link WritableResource} that wraps another, transforming the inputs and outputs
  * of its {@link #write(Object)} method on the fly.
  *
- * @see #create(DataSink, Func1, Func1)
+ * @see #create(WritableResource, Func1, Func1)
  *
  * @author Rick Warren
  */
-public abstract class TransformedDataSink<E, R> implements DataSink<E, R> {
+public abstract class TransformedWritableResource<E, R> implements WritableResource<E, R> {
 
-    public static <EFROM, ETO, RFROM, RTO> DataSink<ETO, RTO> create(
-            @Nonnull final DataSink<EFROM, RFROM> delegate,
+    public static <EFROM, ETO, RFROM, RTO> WritableResource<ETO, RTO> create(
+            @Nonnull final WritableResource<EFROM, RFROM> delegate,
             @Nonnull final Func1<? super ETO, ? extends EFROM> writeMapper,
             @Nonnull final Func1<? super Observable<? super RFROM>, ? extends Observable<RTO>> resultMapper) {
         return new Impl<>(delegate, writeMapper, resultMapper);
     }
 
-    private TransformedDataSink() {
+    private TransformedWritableResource() {
         // disallow extensions other than the nested one
     }
 
 
-    private static final class Impl<EFROM, ETO, RFROM, RTO> extends TransformedDataSink<ETO, RTO> {
-        private @Nonnull final DataSink<EFROM, RFROM> delegate;
+    private static final class Impl<EFROM, ETO, RFROM, RTO> extends TransformedWritableResource<ETO, RTO> {
+        private @Nonnull final WritableResource<EFROM, RFROM> delegate;
         private @Nonnull final Func1<? super ETO, ? extends EFROM> writeMapper;
         private @Nonnull final Func1<? super Observable<? super RFROM>, ? extends Observable<RTO>> resultMapper;
 
         public Impl(
-                @Nonnull final DataSink<EFROM, RFROM> delegate,
+                @Nonnull final WritableResource<EFROM, RFROM> delegate,
                 @Nonnull final Func1<? super ETO, ? extends EFROM> writeMapper,
                 @Nonnull final Func1<? super Observable<? super RFROM>, ? extends Observable<RTO>> resultMapper) {
             this.delegate = Objects.requireNonNull(delegate);

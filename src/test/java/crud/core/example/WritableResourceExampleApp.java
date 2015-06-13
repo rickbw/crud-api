@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 
 import crud.core.WritableResourceSet;
 import crud.sync.SyncDataBus;
-import crud.sync.SyncDataSink;
+import crud.sync.SyncWritableResource;
 import crud.sync.SyncSession;
 import crud.sync.SyncWritableResourceSet;
 
@@ -34,7 +34,7 @@ import crud.sync.SyncWritableResourceSet;
  *
  * @author Rick Warren
  */
-public class DataSinkExampleApp {
+public class WritableResourceExampleApp {
 
     private static final WritableResourceSet.Id<Writer, String, Integer> resourceSetId = new WritableResourceSet.Id<>(
             "Printing Data Set",    // descriptive name
@@ -62,7 +62,7 @@ public class DataSinkExampleApp {
                         break;
                     }
 
-                    try (SyncDataSink<String, Integer> echoDataSource = echoResourcesSet.dataSink(writer, session)) {
+                    try (SyncWritableResource<String, Integer> echoDataSource = echoResourcesSet.resource(writer, session)) {
                         for (final Integer nBytes : echoDataSource.write(echoMe)) {
                             // Expect just one
                             System.out.println("Printed " + nBytes + " bytes.");
