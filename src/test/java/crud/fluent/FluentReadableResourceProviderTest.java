@@ -48,7 +48,7 @@ public class FluentReadableResourceProviderTest extends ResourceProviderTest<Obj
 
     @Before
     public void setup() {
-        when(this.mockResource.get()).thenReturn(Observable.empty());
+        when(this.mockResource.read()).thenReturn(Observable.empty());
         when(this.mockProvider.get(any())).thenReturn(this.mockResource);
         when(this.mockProvider.get(null)).thenThrow(new NullPointerException("mock"));
     }

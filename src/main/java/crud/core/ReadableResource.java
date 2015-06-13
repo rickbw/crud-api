@@ -41,6 +41,6 @@ public interface ReadableResource<RSRC> extends Resource {
      *
      * @see Observable#subscribe(rx.Observer)
      */
-    public abstract Observable<RSRC> get();
+    public abstract Observable<RSRC> read();
 
 }

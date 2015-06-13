@@ -43,9 +43,9 @@ extends FluentReadableResourceProviderTest {
         final Object key = createDefaultKey();
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>just("world"));
+        when(super.mockResource.read()).thenReturn(Observable.<Object>just("world"));
         final FluentReadableResource<Object> resource = provider.get(key);
-        final Observable<Object> response = resource.get();
+        final Observable<Object> response = resource.read();
 
         // then:
         final String responseString = (String) response.toBlocking().single();

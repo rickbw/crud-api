@@ -34,8 +34,8 @@ public abstract class ReadableResourceTest<RSRC> extends ResourceTest {
         final ReadableResource<RSRC> resource = createDefaultResource();
 
         // when:
-        final Observable<RSRC> result1 = resource.get();
-        final Observable<RSRC> result2 = resource.get();
+        final Observable<RSRC> result1 = resource.read();
+        final Observable<RSRC> result2 = resource.read();
 
         // then:
         assertObservablesEqual(result1, result2);

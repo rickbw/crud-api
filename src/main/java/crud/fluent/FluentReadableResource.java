@@ -59,7 +59,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
     /**
      * Create and return a new resource that will transform and flatten the
      * responses from this resource. Take care that the given function does
-     * not violate the requirements of {@link ReadableResource#get()} calls:
+     * not violate the requirements of {@link ReadableResource#read()} calls:
      * it must maintain idempotency, and it must not create observable side
      * effects.
      *
@@ -76,8 +76,8 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #get()} that throw, as with {@link Observable#retry(int)}.
-     * Specifically, any {@link Observable} returned by {@link #get()}
+     * {@link #read()} that throw, as with {@link Observable#retry(int)}.
+     * Specifically, any {@link Observable} returned by {@link #read()}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
      * that {@code onError} call.
@@ -116,7 +116,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
     // TODO: Expose other Observable methods
 
     /**
-     * Return a function that, when called, will call {@link #get()}.
+     * Return a function that, when called, will call {@link #read()}.
      * The function object implements {@link Object#equals(Object)},
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
@@ -126,7 +126,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
     }
 
     /**
-     * Return a {@link Callable} that delegates to {@link #get()}.
+     * Return a {@link Callable} that delegates to {@link #read()}.
      * The {@code Callable} overrides {@link Object#equals(Object)},
      * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
      * this resource.
@@ -148,7 +148,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
             @Override
             public Observable<RSRC> call() {
-                return FluentReadableResource.this.get();
+                return FluentReadableResource.this.read();
             }
         };
     }
@@ -203,9 +203,9 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
 
         @Override
-        public Observable<RSRC> get() {
+        public Observable<RSRC> read() {
             final Observable<RSRC> rsrc = super.state.getDelegate()
-                    .get();
+                    .read();
             return rsrc;
         }
     }
@@ -221,9 +221,9 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
 
         @Override
-        public Observable<TO> get() {
+        public Observable<TO> read() {
             final Observable<TO> rsrc = super.state.getDelegate()
-                    .get()
+                    .read()
                     .map(super.state.getAuxiliaryState());
             return rsrc;
         }
@@ -240,9 +240,9 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
 
         @Override
-        public Observable<TO> get() {
+        public Observable<TO> read() {
             final Observable<TO> response = super.state.getDelegate()
-                    .get()
+                    .read()
                     .flatMap(super.state.getAuxiliaryState());
             return response;
         }
@@ -261,9 +261,9 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
 
         @Override
-        public Observable<RSRC> get() {
+        public Observable<RSRC> read() {
             final Observable<RSRC> rsrc = super.state.getDelegate()
-                    .get()
+                    .read()
                     .retry(super.state.getAuxiliaryState());
             return rsrc;
         }
@@ -280,9 +280,9 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         }
 
         @Override
-        public Observable<TO> get() {
+        public Observable<TO> read() {
             final Observable<TO> rsrc = super.state.getDelegate()
-                    .get()
+                    .read()
                     .lift(super.state.getAuxiliaryState());
             return rsrc;
         }

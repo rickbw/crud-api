@@ -37,7 +37,7 @@ public abstract class ResourceMergerTest {
 
     @Before
     public void setup() {
-        when(this.mockReader.get()).thenReturn(mockReaderState);
+        when(this.mockReader.read()).thenReturn(mockReaderState);
     }
 
     @Test
@@ -112,9 +112,9 @@ public abstract class ResourceMergerTest {
 
         // when:
         final Observable<Object> mergeResults = merger.merge();
-        verify(this.mockReader).get();
+        verify(this.mockReader).read();
         final Observable<Object> functionResults = function.call();
-        verify(this.mockReader, times(2)).get();
+        verify(this.mockReader, times(2)).read();
 
         // then:
         assertObservablesEqual(mergeResults, functionResults);

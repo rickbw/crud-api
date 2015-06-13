@@ -86,8 +86,8 @@ public class FluentReadableResourceRetryTest extends FluentReadableResourceTest 
                 new ConcurrentModificationException("throw over and over"));
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(firstAttemptAndAllRetries);
-        final Observable<Object> response = resource.get();
+        when(super.mockDelegate.read()).thenReturn(firstAttemptAndAllRetries);
+        final Observable<Object> response = resource.read();
         response.toBlocking().single();
     }
 

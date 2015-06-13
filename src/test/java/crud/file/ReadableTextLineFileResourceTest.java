@@ -61,7 +61,7 @@ public class ReadableTextLineFileResourceTest extends ReadableResourceTest<Strin
         final TextLineFileResource resource = createDefaultResource();
 
         // when:
-        final Observable<String> result = resource.get();
+        final Observable<String> result = resource.read();
 
         // then:
         final Iterator<String> actualLines = result.toBlocking().getIterator();

@@ -48,7 +48,7 @@ implements ReadableResource<String>, UpdatableResource<String, Void> {
     }
 
     @Override
-    public Observable<String> get() {
+    public Observable<String> read() {
         return Observable.create(new ReadFileOnSubscribe());
     }
 

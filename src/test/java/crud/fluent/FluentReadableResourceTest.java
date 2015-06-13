@@ -45,7 +45,7 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
 
     @Before
     public void setup() {
-        when(this.mockDelegate.get()).thenReturn(Observable.empty());
+        when(this.mockDelegate.read()).thenReturn(Observable.empty());
     }
 
     @Test
@@ -65,10 +65,10 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
         final FluentReadableResource<Object> resource = createDefaultResource();
 
         // when:
-        resource.get();
+        resource.read();
 
         // then:
-        verify(this.mockDelegate).get();
+        verify(this.mockDelegate).read();
     }
 
     @Test

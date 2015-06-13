@@ -158,7 +158,7 @@ public abstract class ResourceMerger<RESPONSE> {
 
         @Override
         public Observable<RESPONSE> merge() {
-            return this.merger.get();
+            return this.merger.read();
         }
 
         @Override

@@ -86,9 +86,9 @@ extends FluentReadableResourceProviderTest {
                 new ConcurrentModificationException("throw over and over"));
 
         // when:
-        when(super.mockResource.get()).thenReturn(firstAttemptAndAllRetries);
+        when(super.mockResource.read()).thenReturn(firstAttemptAndAllRetries);
         final FluentReadableResource<Object> resource = provider.get(key);
-        final Observable<Object> response = resource.get();
+        final Observable<Object> response = resource.read();
         response.toBlocking().single();
     }
 

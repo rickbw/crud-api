@@ -49,8 +49,8 @@ public class FluentReadableResourceLiftTest extends FluentReadableResourceTest {
         final String expectedResourceValue = "Response!";
 
         // when:
-        when(super.mockDelegate.get()).thenReturn(Observable.<Object>just(expectedResourceValue));
-        final Observable<Object> response = resource.get();
+        when(super.mockDelegate.read()).thenReturn(Observable.<Object>just(expectedResourceValue));
+        final Observable<Object> response = resource.read();
 
         // then:
         final Object actualResourceValue = response.toBlocking().first();

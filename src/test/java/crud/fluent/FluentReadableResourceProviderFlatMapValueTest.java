@@ -50,9 +50,9 @@ extends FluentReadableResourceProviderTest {
         final String mappedResponse = mapper.call(origResponse).toBlocking().first();
 
         // when:
-        when(super.mockResource.get()).thenReturn(Observable.<Object>just(origResponse));
+        when(super.mockResource.read()).thenReturn(Observable.<Object>just(origResponse));
         final FluentReadableResource<Object> resource = provider.get(key);
-        final Observable<Object> response = resource.get();
+        final Observable<Object> response = resource.read();
 
         // then:
         final Object responseValue = response.toBlocking().first();
