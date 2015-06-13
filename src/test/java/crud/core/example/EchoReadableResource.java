@@ -18,7 +18,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.implementer.AbstractDataSource;
+import crud.implementer.AbstractReadableResource;
 import crud.implementer.SessionWorker;
 import rx.Subscriber;
 
@@ -28,12 +28,12 @@ import rx.Subscriber;
  *
  * @author Rick Warren
  */
-/*package*/ final class EchoDataSource<E> extends AbstractDataSource<E> {
+/*package*/ final class EchoReadableResource<E> extends AbstractReadableResource<E> {
 
     private @Nonnull final E message;
 
 
-    public EchoDataSource(@Nonnull final SessionWorker worker, @Nonnull final E message) {
+    public EchoReadableResource(@Nonnull final SessionWorker worker, @Nonnull final E message) {
         super(worker);
         this.message = Objects.requireNonNull(message);
     }

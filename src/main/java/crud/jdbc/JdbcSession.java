@@ -20,7 +20,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.Session;
 import crud.core.WritableResource;
 import crud.implementer.AbstractSession;
@@ -45,11 +45,11 @@ import crud.implementer.AbstractSession;
         this.connection.close();
     }
 
-    /*package*/ final @Nonnull DataSource<ResultSetRow> dataSource(final StatementTemplate query) {
-        return new QueryDataSource(this.connection, query, getWorker());
+    /*package*/ final @Nonnull ReadableResource<ResultSetRow> readableResource(final StatementTemplate query) {
+        return new QueryResource(this.connection, query, getWorker());
     }
 
-    /*package*/ final @Nonnull WritableResource<StatementParameters, Integer> resource(final StatementTemplate update) {
+    /*package*/ final @Nonnull WritableResource<StatementParameters, Integer> writableResource(final StatementTemplate update) {
         return new UpdateResource(this.connection, update, getWorker());
     }
 

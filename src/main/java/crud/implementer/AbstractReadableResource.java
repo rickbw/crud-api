@@ -16,13 +16,13 @@ package crud.implementer;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 
 
-public abstract class AbstractDataSource<E> extends AbstractSessionParticipant implements DataSource<E> {
+public abstract class AbstractReadableResource<E> extends AbstractSessionParticipant implements ReadableResource<E> {
 
     @Override
     public Observable<E> read() {
@@ -34,7 +34,7 @@ public abstract class AbstractDataSource<E> extends AbstractSessionParticipant i
         });
     }
 
-    protected AbstractDataSource(@Nonnull final SessionWorker worker) {
+    protected AbstractReadableResource(@Nonnull final SessionWorker worker) {
         super(worker);
     }
 

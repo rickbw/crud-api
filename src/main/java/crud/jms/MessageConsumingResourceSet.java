@@ -22,7 +22,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.MiddlewareException;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
@@ -48,14 +48,14 @@ import crud.core.Session;
 
     @Override
     @SuppressWarnings("resource")
-    public DataSource<M> dataSource(final String key, final Session session) {
+    public ReadableResource<M> resource(final String key, final Session session) {
         final SessionWrapper sessionImpl = (SessionWrapper) session;
         final javax.jms.Session realSession = sessionImpl.getDelegate();
         try {
             final MessageConsumer messageConsumer = key.isEmpty()
                     ? realSession.createConsumer(this.destination)
                     : realSession.createConsumer(this.destination, key);
-            return new MessageConsumerDataSource<>(sessionImpl.worker(), messageConsumer, this.id.getElementType());
+            return new MessageConsumerResource<>(sessionImpl.worker(), messageConsumer, this.id.getElementType());
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

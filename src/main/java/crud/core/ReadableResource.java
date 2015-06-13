@@ -23,27 +23,27 @@ import rx.Observer;
  * application from somewhere else.
  *
  * @param <E>   The static type of the data elements observable from this
- *              {@link DataSource}.
+ *              {@link ReadableResource}.
  *
  * @see WritableResource
  *
  * @author Rick Warren
  */
-public interface DataSource<E> extends AsyncCloseable {
+public interface ReadableResource<E> extends AsyncCloseable {
 
     /**
      * Begin observation of the data elements. The {@link Observable} may be
-     * either "hot" or "cold", depending on the nature of the data source.
+     * either "hot" or "cold", depending on the nature of the resource.
      * <p/>
      * <b>Note to implementers</b>: Except in special cases, consuming from
-     * this {@link DataSource} will involve I/O. In the interest of
+     * this {@link ReadableResource} will involve I/O. In the interest of
      * segregating those threads that perform blocking I/O and those that
      * perform computation, implementations should not block on this call, nor
      * should elements be delivered in the thread
      * {@link Observable#subscribe() subscribing} to the Observable. Instead,
      * data elements should be delivered to {@link Observer}s in a thread
      * associated with the {@link Session} used to create this
-     * {@code DataSource}.
+     * {@code ReadableResource}.
      */
     public Observable<E> read();
 

@@ -16,7 +16,7 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
 import crud.core.ReadableResourceSet.Id;
 import crud.core.Session;
@@ -41,11 +41,11 @@ public class SyncReadableResourceSet<K, E> extends SyncDelegateHolder<ReadableRe
     }
 
     /**
-     * @see ReadableResourceSet#dataSource(Object, Session)
+     * @see ReadableResourceSet#resource(Object, Session)
      */
-    public @Nonnull SyncDataSource<E> dataSource(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final DataSource<E> delegateSource = getDelegate().dataSource(key, session.getDelegate());
-        return new SyncDataSource<>(delegateSource);
+    public @Nonnull SyncReadableResource<E> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
+        final ReadableResource<E> delegateSource = getDelegate().resource(key, session.getDelegate());
+        return new SyncReadableResource<>(delegateSource);
     }
 
 }

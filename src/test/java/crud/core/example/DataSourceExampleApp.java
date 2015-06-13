@@ -21,7 +21,7 @@ import com.google.common.base.Optional;
 
 import crud.core.ReadableResourceSet;
 import crud.sync.SyncDataBus;
-import crud.sync.SyncDataSource;
+import crud.sync.SyncReadableResource;
 import crud.sync.SyncReadableResourceSet;
 import crud.sync.SyncSession;
 
@@ -57,7 +57,7 @@ public class DataSourceExampleApp {
                         break;
                     }
 
-                    try (SyncDataSource<String> echoDataSource = echoResourceSet.dataSource(echoMe, session)) {
+                    try (SyncReadableResource<String> echoDataSource = echoResourceSet.resource(echoMe, session)) {
                         for (final String value : echoDataSource.read()) {
                             System.out.println("You typed: " + value);
                         }

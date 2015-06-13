@@ -25,7 +25,7 @@ import rx.Observable;
  *              {@link WritableResource}.
  * @param <R>   The static type of the result of writing a value.
  *
- * @see DataSource
+ * @see ReadableResource
  *
  * @author Rick Warren
  */
@@ -51,7 +51,7 @@ public interface WritableResource<E, R> extends AsyncCloseable {
      * implementations should not block on this call, nor should the result(s)
      * be delivered in the thread {@link Observable#subscribe() subscribing}
      * to the Observable. Instead, writes should occur in a thread associated
-     * with the {@link Session} used to create this {@code DataSource}.
+     * with the {@link Session} used to create this {@code ReadableResource}.
      * <p/>
      * <b>Design Rationale</b>: Why does this method take a single value,
      * rather than an {@link Observable} of (perhaps multiple) value(s)?

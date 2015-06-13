@@ -14,7 +14,7 @@
  */
 package crud.core.example;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.implementer.AbstractReadableResourceSet;
@@ -27,8 +27,8 @@ import crud.implementer.AbstractReadableResourceSet;
     }
 
     @Override
-    public DataSource<T> dataSource(final T key, final Session session) {
-        return new EchoDataSource<>(((ExampleSession) session).worker(), key);
+    public ReadableResource<T> resource(final T key, final Session session) {
+        return new EchoReadableResource<>(((ExampleSession) session).worker(), key);
     }
 
 }

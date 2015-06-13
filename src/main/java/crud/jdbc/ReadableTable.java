@@ -14,7 +14,7 @@
  */
 package crud.jdbc;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.implementer.AbstractReadableResourceSet;
@@ -27,9 +27,9 @@ import crud.implementer.AbstractReadableResourceSet;
     }
 
     @Override
-    public DataSource<ResultSetRow> dataSource(final StatementTemplate query, final Session session) {
+    public ReadableResource<ResultSetRow> resource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
-        return jdbcSession.dataSource(query);
+        return jdbcSession.readableResource(query);
     }
 
 }

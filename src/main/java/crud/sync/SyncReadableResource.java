@@ -16,30 +16,30 @@ package crud.sync;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.implementer.AsyncResults;
 
 
 /**
- * @see DataSource
+ * @see ReadableResource
  *
  * @author Rick Warren
  */
-public class SyncDataSource<E> extends SyncDelegateHolder<DataSource<E>> implements AutoCloseable {
+public class SyncReadableResource<E> extends SyncDelegateHolder<ReadableResource<E>> implements AutoCloseable {
 
-    public SyncDataSource(@Nonnull final DataSource<E> delegate) {
+    public SyncReadableResource(@Nonnull final ReadableResource<E> delegate) {
         super(delegate);
     }
 
     /**
-     * @see DataSource#read()
+     * @see ReadableResource#read()
      */
     public Iterable<E> read() {
         return getDelegate().read().toBlocking().toIterable();
     }
 
     /**
-     * @see DataSource#shutdown()
+     * @see ReadableResource#shutdown()
      */
     @Override
     public void close() throws Exception {

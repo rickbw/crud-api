@@ -20,14 +20,14 @@ import javax.annotation.Nonnull;
 
 import crud.core.AsyncCloseable;
 import crud.core.WritableResource;
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 
 
 /**
- * An abstract base class for a {@link DataSource} or {@link WritableResource}.
+ * An abstract base class for a {@link ReadableResource} or {@link WritableResource}.
  *
  * @author Rick Warren
  */

@@ -18,38 +18,38 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * A {@link DataSource} that wraps another, transforming its {@link #read()}
+ * A {@link ReadableResource} that wraps another, transforming its {@link #read()}
  * results on the fly.
  *
- * @see #create(DataSource, Func1)
+ * @see #create(ReadableResource, Func1)
  *
  * @author Rick Warren
  */
-public abstract class TransformedDataSource<E> implements DataSource<E> {
+public abstract class TransformedReadableResource<E> implements ReadableResource<E> {
 
-    public static <FROM, TO> DataSource<TO> create(
-            @Nonnull final DataSource<FROM> delegate,
+    public static <FROM, TO> ReadableResource<TO> create(
+            @Nonnull final ReadableResource<FROM> delegate,
             @Nonnull final Func1<? super Observable<? super FROM>, ? extends Observable<TO>> readMapper) {
         return new Impl<>(delegate, readMapper);
     }
 
-    private TransformedDataSource() {
+    private TransformedReadableResource() {
         // disallow extensions other than the nested one
     }
 
 
-    private static final class Impl<FROM, TO> extends TransformedDataSource<TO> {
-        private @Nonnull final DataSource<FROM> delegate;
+    private static final class Impl<FROM, TO> extends TransformedReadableResource<TO> {
+        private @Nonnull final ReadableResource<FROM> delegate;
         private @Nonnull final Func1<? super Observable<? super FROM>, ? extends Observable<TO>> readMapper;
 
         public Impl(
-                @Nonnull final DataSource<FROM> delegate,
+                @Nonnull final ReadableResource<FROM> delegate,
                 @Nonnull final Func1<? super Observable<? super FROM>, ? extends Observable<TO>> readMapper) {
             this.delegate = Objects.requireNonNull(delegate);
             this.readMapper = Objects.requireNonNull(readMapper);

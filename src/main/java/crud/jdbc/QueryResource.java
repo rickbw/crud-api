@@ -21,15 +21,15 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ final class QueryDataSource extends StatementProvider implements DataSource<ResultSetRow> {
+/*package*/ final class QueryResource extends StatementProvider implements ReadableResource<ResultSetRow> {
 
-    public QueryDataSource(
+    public QueryResource(
             @Nonnull final Connection connection,
             @Nonnull final StatementTemplate statementTemplate,
             @Nonnull final SessionWorker worker) {

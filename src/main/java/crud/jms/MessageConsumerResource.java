@@ -22,7 +22,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 
-import crud.core.DataSource;
+import crud.core.ReadableResource;
 import crud.core.MiddlewareException;
 import crud.implementer.SessionWorker;
 import rx.Observable;
@@ -30,7 +30,7 @@ import rx.Subscriber;
 import rx.Subscription;
 
 
-/*package*/ final class MessageConsumerDataSource<M extends Message> implements DataSource<M> {
+/*package*/ final class MessageConsumerResource<M extends Message> implements ReadableResource<M> {
 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final MessageConsumer consumer;
@@ -39,7 +39,7 @@ import rx.Subscription;
     private final MessageListenerRemover messageListenerRemover = new MessageListenerRemover();
 
 
-    public MessageConsumerDataSource(
+    public MessageConsumerResource(
             @Nonnull final SessionWorker worker,
             @Nonnull final MessageConsumer consumer,
             @Nonnull final Class<M> messageType) {
@@ -64,7 +64,7 @@ import rx.Subscription;
                  * hotObservable? Or perhaps an onError() with a specific
                  * source-termination "exception"?
                  */
-                MessageConsumerDataSource.this.consumer.close();
+                MessageConsumerResource.this.consumer.close();
             }
         });
     }
@@ -80,8 +80,8 @@ import rx.Subscription;
         @Override
         public void call(final Subscriber<? super M> sub) {
             try {
-                sub.add(MessageConsumerDataSource.this.messageListenerRemover);
-                MessageConsumerDataSource.this.consumer.setMessageListener(new MessageListener() {
+                sub.add(MessageConsumerResource.this.messageListenerRemover);
+                MessageConsumerResource.this.consumer.setMessageListener(new MessageListener() {
                     @Override
                     public void onMessage(final Message message) {
                         sub.onNext(MessageListenerToSubscriberHandoff.this.messageType.cast(message));
@@ -99,7 +99,7 @@ import rx.Subscription;
         @Override
         public void unsubscribe() {
             try {
-                MessageConsumerDataSource.this.consumer.setMessageListener(null);
+                MessageConsumerResource.this.consumer.setMessageListener(null);
             } catch (final JMSException jx) {
                 throw new MiddlewareException(jx.getMessage(), jx);
             }
@@ -108,7 +108,7 @@ import rx.Subscription;
         @Override
         public boolean isUnsubscribed() {
             try {
-                return MessageConsumerDataSource.this.consumer.getMessageListener() == null;
+                return MessageConsumerResource.this.consumer.getMessageListener() == null;
             } catch (final JMSException jx) {
                 throw new MiddlewareException(jx.getMessage(), jx);
             }

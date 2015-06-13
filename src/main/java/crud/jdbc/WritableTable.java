@@ -30,7 +30,7 @@ extends AbstractWritableResourceSet<StatementTemplate, StatementParameters, Inte
     @Override
     public WritableResource<StatementParameters, Integer> resource(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
-        return jdbcSession.resource(query);
+        return jdbcSession.writableResource(query);
     }
 
 }
