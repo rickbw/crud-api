@@ -14,11 +14,11 @@
  */
 package crud.pattern;
 
+import crud.transform.FluentReadableResource;
+import crud.transform.FluentWritableResource;
 import crud.core.ReadableResource;
 import crud.core.Resource;
 import crud.core.WritableResource;
-import crud.fluent.FluentReadableResource;
-import crud.fluent.FluentWritableResource;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
