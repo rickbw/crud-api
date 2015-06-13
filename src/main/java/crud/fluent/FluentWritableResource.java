@@ -17,7 +17,6 @@ package crud.fluent;
 import java.util.Objects;
 
 import crud.core.WritableResource;
-import crud.pattern.ResourceBuilder;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -151,15 +150,6 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
                 return FluentWritableResource.this.write(newValue);
             }
         };
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends WritableResource<RSRC, RESPONSE>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromWriter(rsrcClass, this);
     }
 
 

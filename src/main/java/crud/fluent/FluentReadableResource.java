@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import crud.core.ReadableResource;
-import crud.pattern.ResourceBuilder;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func0;
@@ -133,15 +132,6 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      */
     public Callable<Observable<RSRC>> toCallable() {
         return toResourceCallable();
-    }
-
-    /**
-     * @throws NullPointerException     If the given class is null.
-     * @throws IllegalArgumentException If the given class is not an interface.
-     */
-    public <R extends ReadableResource<RSRC>> ResourceBuilder<R> toBuilder(
-            final Class<R> rsrcClass) {
-        return ResourceBuilder.fromReader(rsrcClass, this);
     }
 
     private DelegateObjectMethods.Callable<Observable<RSRC>> toResourceCallable() {
