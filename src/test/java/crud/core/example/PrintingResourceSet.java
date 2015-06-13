@@ -29,7 +29,7 @@ import crud.implementer.AbstractWritableResourceSet;
     }
 
     @Override
-    public WritableResource<String, Integer> resource(final Writer writer, final Session session) {
+    public WritableResource<String, Integer> get(final Writer writer, final Session session) {
         return new PrintingWritableResource(writer, ((ExampleSession) session).worker());
     }
 

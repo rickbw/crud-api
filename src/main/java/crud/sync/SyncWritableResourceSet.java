@@ -41,11 +41,11 @@ public class SyncWritableResourceSet<K, E, R> extends SyncResourceSet<K, E, Writ
     }
 
     /**
-     * @see WritableResourceSet#resource(Object, Session)
+     * @see WritableResourceSet#get(Object, Session)
      */
     @Override
-    public @Nonnull SyncWritableResource<E, R> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final WritableResource<E, R> delegate = getDelegate().resource(key, session.getDelegate());
+    public @Nonnull SyncWritableResource<E, R> get(@Nonnull final K key, @Nonnull final SyncSession session) {
+        final WritableResource<E, R> delegate = getDelegate().get(key, session.getDelegate());
         return new SyncWritableResource<>(delegate);
     }
 

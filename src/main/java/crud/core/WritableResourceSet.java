@@ -42,7 +42,7 @@ public interface WritableResourceSet<K, E, R> extends ResourceSet<K, E> {
      *              {@link WritableResourceSet}.
      */
     @Override
-    public @Nonnull WritableResource<E, R> resource(@Nonnull K key, @Nonnull Session session);
+    public @Nonnull WritableResource<E, R> get(@Nonnull K key, @Nonnull Session session);
 
 
     /**

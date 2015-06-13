@@ -27,7 +27,7 @@ import crud.implementer.AbstractReadableResourceSet;
     }
 
     @Override
-    public ReadableResource<T> resource(final T key, final Session session) {
+    public ReadableResource<T> get(final T key, final Session session) {
         return new EchoReadableResource<>(((ExampleSession) session).worker(), key);
     }
 

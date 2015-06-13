@@ -46,7 +46,7 @@ public interface ResourceSet<K, E> {
      *              obtained from a {@link DataBus} compatible with this
      *              {@link WritableResourceSet}.
      */
-    public @Nonnull Resource resource(@Nonnull K key, @Nonnull Session session);
+    public @Nonnull Resource get(@Nonnull K key, @Nonnull Session session);
 
 
     /**

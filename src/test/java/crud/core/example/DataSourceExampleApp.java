@@ -57,7 +57,7 @@ public class DataSourceExampleApp {
                         break;
                     }
 
-                    try (SyncReadableResource<String> echoDataSource = echoResourceSet.resource(echoMe, session)) {
+                    try (SyncReadableResource<String> echoDataSource = echoResourceSet.get(echoMe, session)) {
                         for (final String value : echoDataSource.read()) {
                             System.out.println("You typed: " + value);
                         }

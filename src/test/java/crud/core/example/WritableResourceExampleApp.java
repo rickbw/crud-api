@@ -62,7 +62,7 @@ public class WritableResourceExampleApp {
                         break;
                     }
 
-                    try (SyncWritableResource<String, Integer> echoDataSource = echoResourcesSet.resource(writer, session)) {
+                    try (SyncWritableResource<String, Integer> echoDataSource = echoResourcesSet.get(writer, session)) {
                         for (final Integer nBytes : echoDataSource.write(echoMe)) {
                             // Expect just one
                             System.out.println("Printed " + nBytes + " bytes.");

@@ -41,11 +41,11 @@ public class SyncReadableResourceSet<K, E> extends SyncResourceSet<K, E, Readabl
     }
 
     /**
-     * @see ReadableResourceSet#resource(Object, Session)
+     * @see ReadableResourceSet#get(Object, Session)
      */
     @Override
-    public @Nonnull SyncReadableResource<E> resource(@Nonnull final K key, @Nonnull final SyncSession session) {
-        final ReadableResource<E> delegateSource = getDelegate().resource(key, session.getDelegate());
+    public @Nonnull SyncReadableResource<E> get(@Nonnull final K key, @Nonnull final SyncSession session) {
+        final ReadableResource<E> delegateSource = getDelegate().get(key, session.getDelegate());
         return new SyncReadableResource<>(delegateSource);
     }
 

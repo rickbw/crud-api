@@ -27,7 +27,7 @@ import crud.implementer.AbstractReadableResourceSet;
     }
 
     @Override
-    public ReadableResource<ResultSetRow> resource(final StatementTemplate query, final Session session) {
+    public ReadableResource<ResultSetRow> get(final StatementTemplate query, final Session session) {
         final JdbcSession jdbcSession = (JdbcSession) session;
         return jdbcSession.readableResource(query);
     }

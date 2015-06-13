@@ -40,7 +40,7 @@ public interface ReadableResourceSet<K, E> extends ResourceSet<K, E> {
      *              {@link ReadableResourceSet}.
      */
     @Override
-    public @Nonnull ReadableResource<E> resource(@Nonnull K key, @Nonnull Session session);
+    public @Nonnull ReadableResource<E> get(@Nonnull K key, @Nonnull Session session);
 
 
     /**

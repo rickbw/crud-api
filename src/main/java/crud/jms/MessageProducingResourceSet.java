@@ -53,7 +53,7 @@ import crud.core.WritableResourceSet;
 
     @SuppressWarnings("resource")
     @Override
-    public WritableResource<M, Void> resource(final String key, final Session session) {
+    public WritableResource<M, Void> get(final String key, final Session session) {
         if (!key.isEmpty()) {
             log.warn("Ignoring key {}", key);
         }

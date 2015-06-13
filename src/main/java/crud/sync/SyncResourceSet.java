@@ -32,9 +32,9 @@ extends SyncDelegateHolder<D> {
     public abstract @Nonnull ResourceSet.Id<K, E> getId();
 
     /**
-     * @see ResourceSet#resource(Object, Session)
+     * @see ResourceSet#get(Object, Session)
      */
-    public abstract @Nonnull SyncResource<?> resource(
+    public abstract @Nonnull SyncResource<?> get(
             @Nonnull final K key,
             @Nonnull final SyncSession session);
 
