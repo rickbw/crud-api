@@ -86,7 +86,7 @@ implements ReadableResourceProvider<KEY, RSRC> {
     /**
      * Return a resource provider, the resource from which will transparently
      * retry calls to {@link ReadableResource#read()} that throw, as with
-     * {@link Observable#retry(int)}. Specifically, any {@link Observable}
+     * {@link Observable#retry(long)}. Specifically, any {@link Observable}
      * returned by {@link ReadableResource#read()} will re-subscribe up to
      * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
      * called, rather than propagating that {@code onError} call.

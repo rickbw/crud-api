@@ -22,7 +22,6 @@ import crud.core.DeletableResource;
 import crud.core.DeletableResourceProvider;
 import crud.core.Resource;
 import crud.core.ResourceProvider;
-
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Func1;
@@ -115,7 +114,7 @@ implements DeletableResourceProvider<KEY, RESPONSE> {
     /**
      * Return a resource provider, the resource from which will transparently
      * retry calls to {@link DeletableResource#delete()} that throw, as with
-     * {@link Observable#retry(int)}. Specifically, any {@link Observable}
+     * {@link Observable#retry(long)}. Specifically, any {@link Observable}
      * returned by {@link DeletableResource#delete()} will re-subscribe up to
      * {@code maxRetries} times if {@link Observer#onError(Throwable)} is
      * called, rather than propagating that {@code onError} call.

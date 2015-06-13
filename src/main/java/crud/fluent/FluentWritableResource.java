@@ -99,7 +99,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #write(Object)} that throw, as with {@link Observable#retry(int)}.
+     * {@link #write(Object)} that throw, as with {@link Observable#retry(long)}.
      * Specifically, any {@link Observable} returned by {@link #write(Object)}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating

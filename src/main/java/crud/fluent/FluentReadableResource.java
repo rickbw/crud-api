@@ -76,7 +76,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
     /**
      * Return a resource that will transparently retry calls to
-     * {@link #read()} that throw, as with {@link Observable#retry(int)}.
+     * {@link #read()} that throw, as with {@link Observable#retry(long)}.
      * Specifically, any {@link Observable} returned by {@link #read()}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating

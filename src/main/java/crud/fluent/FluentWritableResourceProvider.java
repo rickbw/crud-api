@@ -110,7 +110,7 @@ implements WritableResourceProvider<KEY, RSRC, RESPONSE> {
     /**
      * Return a resource provider, the resource from which will transparently
      * retry calls to {@link WritableResource#write(Object)} that throw, as
-     * with {@link Observable#retry(int)}. Specifically, any
+     * with {@link Observable#retry(long)}. Specifically, any
      * {@link Observable} returned by {@link WritableResource#write(Object)}
      * will re-subscribe up to {@code maxRetries} times if
      * {@link Observer#onError(Throwable)} is called, rather than propagating
