@@ -31,10 +31,16 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Object, Object> singleMapper = new Func1<Object, Object>() {
         @Override
         public String call(final Object input) {
             return RESPONSE_PREFIX + input;
+        }
+    };
+    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
+        @Override
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(singleMapper);
         }
     };
 
@@ -45,7 +51,7 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
         final FluentWritableResource<Object, Object> resource = createDefaultResource();
         final Object newValue = createDefaultResourceState();
         final String origResponse = "world";
-        final String mappedResponse = mapper.call(origResponse);
+        final String mappedResponse = singleMapper.call(origResponse).toString();
 
         // when:
         when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
@@ -58,7 +64,7 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
 
     @Override
     protected FluentWritableResource<Object, Object> createDefaultResource() {
-        return super.createDefaultResource().<Object>mapResponse(mapper);
+        return super.createDefaultResource().mapResponse(mapper);
     }
 
 }

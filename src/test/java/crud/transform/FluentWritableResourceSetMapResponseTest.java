@@ -28,10 +28,16 @@ extends FluentWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Object, Object> singleMapper = new Func1<Object, Object>() {
         @Override
-        public String call(final Object response) {
+        public Object call(final Object response) {
             return PREFIX + response;
+        }
+    };
+    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
+        @Override
+        public Observable<Object> call(final Observable<Object> input) {
+            return input.map(singleMapper);
         }
     };
 
@@ -43,7 +49,7 @@ extends FluentWritableResourceSetTest {
         final Object key = createDefaultKey();
         final String value = "Hello";
         final String origResponse = "world";
-        final String mappedResponse = this.mapper.call(origResponse);
+        final String mappedResponse = singleMapper.call(origResponse).toString();
 
         // when:
         when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
@@ -57,7 +63,7 @@ extends FluentWritableResourceSetTest {
 
     @Override
     protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
-        return super.createDefaultResourceSet().<Object>mapResponse(this.mapper);
+        return super.createDefaultResourceSet().mapResponse(mapper);
     }
 
 }

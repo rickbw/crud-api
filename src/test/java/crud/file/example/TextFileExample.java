@@ -64,22 +64,27 @@ public final class TextFileExample {
     }
 
 
-    private static final class LineToJson implements Func1<String, String> {
+    private static final class LineToJson implements Func1<Observable<String>, Observable<String>> {
         @Override
-        public String call(final String line) {
-            final StringBuilder buf = new StringBuilder("{ ");
-            final StringTokenizer tok = new StringTokenizer(line);
-            while (tok.hasMoreTokens()) {
-                final String keyValue = tok.nextToken();
-                final String[] keyValueElems = keyValue.split("=");
-                if (keyValueElems.length == 2) {
-                    final String key = keyValueElems[0];
-                    final String value = keyValueElems[1];
-                    buf.append(key).append(": \"").append(value).append("\",\n  ");
+        public Observable<String> call(final Observable<String> lines) {
+            return lines.map(new Func1<String, String>() {
+                @Override
+                public String call(final String line) {
+                    final StringBuilder buf = new StringBuilder("{ ");
+                    final StringTokenizer tok = new StringTokenizer(line);
+                    while (tok.hasMoreTokens()) {
+                        final String keyValue = tok.nextToken();
+                        final String[] keyValueElems = keyValue.split("=");
+                        if (keyValueElems.length == 2) {
+                            final String key = keyValueElems[0];
+                            final String value = keyValueElems[1];
+                            buf.append(key).append(": \"").append(value).append("\",\n  ");
+                        }
+                    }
+                    buf.append('}');
+                    return buf.toString();
                 }
-            }
-            buf.append('}');
-            return buf.toString();
+            });
         }
     }
 

@@ -14,11 +14,11 @@
  */
 package crud.pattern;
 
-import crud.transform.FluentReadableResource;
-import crud.transform.FluentWritableResource;
 import crud.core.ReadableResource;
 import crud.core.Resource;
 import crud.core.WritableResource;
+import crud.transform.FluentReadableResource;
+import crud.transform.FluentWritableResource;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -64,8 +64,8 @@ public abstract class ResourceMerger<RESPONSE> {
      * {@link WritableResource#write(Object)}.
      */
     public static <RRSRC, WRSRC, RESPONSE> ResourceMerger<RESPONSE> mapToWriter(
-            final ReadableResource<? extends RRSRC> reader,
-            final Func1<? super RRSRC, ? extends WRSRC> mapper,
+            final ReadableResource<RRSRC> reader,
+            final Func1<? super Observable<RRSRC>, ? extends Observable<WRSRC>> mapper,
             final WritableResource<WRSRC, RESPONSE> writer) {
         return new MergerImpl<>(
                 FluentReadableResource.from(reader).mapValue(mapper),
@@ -121,7 +121,12 @@ public abstract class ResourceMerger<RESPONSE> {
         public MergerImpl(
                 final ReadableResource<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
-            this.merger = FluentReadableResource.from(reader).flatMapValue(writer);
+            this.merger = FluentReadableResource.from(reader).mapValue(new Func1<Observable<RSRC>, Observable<RESPONSE>>() {
+                @Override
+                public Observable<RESPONSE> call(final Observable<RSRC> resource) {
+                    return resource.flatMap(writer);
+                }
+            });
             this.readerForObjectMethods = reader;
             this.writerForObjectMethods = writer;
             this.asFunction = new MergerFunction<>(this);

@@ -16,10 +16,8 @@ package crud.transform;
 
 import java.util.Objects;
 
-import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -41,7 +39,7 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
     }
 
     public <RESP> FluentWritableResourceSet<KEY, RSRC, RESP> mapResponse(
-            final Func1<? super RESPONSE, ? extends RESP> mapper) {
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<RESP>> mapper) {
         Objects.requireNonNull(mapper, "null function");
         final FluentWritableResourceSet<KEY, RSRC, RESP> result = new FluentWritableResourceSet<KEY, RSRC, RESP>() {
             @Override
@@ -52,30 +50,6 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
             }
         };
         return result;
-    }
-
-    public <R> FluentWritableResourceSet<KEY, RSRC, R> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends R>> mapper) {
-        Objects.requireNonNull(mapper, "null function");
-        final FluentWritableResourceSet<KEY, RSRC, R> result = new FluentWritableResourceSet<KEY, RSRC, R>() {
-            @Override
-            public FluentWritableResource<RSRC, R> get(final KEY key) {
-                return outerResourceSet()
-                        .get(key)
-                        .flatMapResponse(mapper);
-            }
-        };
-        return result;
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> FluentWritableResourceSet<KEY, RSRC, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
     }
 
     public <RC> FluentWritableResourceSet<KEY, RC, RESPONSE> adaptNewValue(
@@ -104,54 +78,6 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
             }
         };
         return result;
-    }
-
-    /**
-     * Return a resource set, the resource from which will transparently
-     * retry calls to {@link WritableResource#write(Object)} that throw, as
-     * with {@link Observable#retry(long)}. Specifically, any
-     * {@link Observable} returned by {@link WritableResource#write(Object)}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public FluentWritableResourceSet<KEY, RSRC, RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;    // no-op
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new FluentWritableResourceSet<KEY, RSRC, RESPONSE>() {
-                @Override
-                public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    return outerResourceSet()
-                            .get(key)
-                            .retry(maxRetries);
-                }
-            };
-        }
-    }
-
-    public <TO> FluentWritableResourceSet<KEY, RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        Objects.requireNonNull(bind, "null operator");
-        return new FluentWritableResourceSet<KEY, RSRC, TO>() {
-            @Override
-            public FluentWritableResource<RSRC, TO> get(final KEY key) {
-                final FluentWritableResource<RSRC, TO> resource = outerResourceSet()
-                        .get(key)
-                        .lift(bind);
-                return resource;
-            }
-        };
     }
 
     public Func1<KEY, FluentWritableResource<RSRC, RESPONSE>> toFunction() {

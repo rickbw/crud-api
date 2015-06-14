@@ -31,10 +31,15 @@ public class FluentReadableResourceMapValueTest extends FluentReadableResourceTe
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Observable<Object> call(final Observable<Object> allInput) {
+            return allInput.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object oneInput) {
+                    return RESPONSE_PREFIX + oneInput;
+                }
+            });
         }
     };
 
@@ -55,7 +60,7 @@ public class FluentReadableResourceMapValueTest extends FluentReadableResourceTe
 
     @Override
     protected FluentReadableResource<Object> createDefaultResource() {
-        return super.createDefaultResource().<Object>mapValue(mapper);
+        return super.createDefaultResource().mapValue(mapper);
     }
 
 }

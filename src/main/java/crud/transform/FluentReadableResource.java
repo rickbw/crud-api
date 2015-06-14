@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 
 import crud.core.ReadableResource;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
@@ -51,68 +50,10 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> FluentReadableResource<TO> mapValue(final Func1<? super RSRC, ? extends TO> mapper) {
+    public <TO> FluentReadableResource<TO> mapValue(
+            final Func1<? super Observable<RSRC>, ? extends Observable<TO>> mapper) {
         return new MappingReadableResource<>(this, mapper);
     }
-
-    /**
-     * Create and return a new resource that will transform and flatten the
-     * responses from this resource. Take care that the given function does
-     * not violate the requirements of {@link ReadableResource#read()} calls:
-     * it must maintain idempotency, and it must not create observable side
-     * effects.
-     *
-     * If this method is called on two equal {@code FluentReadableResource}s,
-     * the results will be equal if the functions are equal. If equality
-     * behavior it important to you (for example, if you intend to keep
-     * resources in a {@code HashSet}), consider it in your function
-     * implementation.
-     */
-    public <TO> FluentReadableResource<TO> flatMapValue(
-            final Func1<? super RSRC, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingReadableResource<>(this, mapper);
-    }
-
-    /**
-     * Return a resource that will transparently retry calls to
-     * {@link #read()} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #read()}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * If this method is called on two equal {@code FluentReadableResource}s,
-     * the results will be equal if the max retry counts are equal.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public FluentReadableResource<RSRC> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new RetryingReadableResource<>(this, maxRetries);
-        }
-    }
-
-    /**
-     * Wrap this {@code FluentReadableResource} in another one that will
-     * pass all observations through a given adapter {@link Observer}, as with
-     * {@link Observable#lift(rx.Observable.Operator)}.
-     */
-    public <TO> FluentReadableResource<TO> lift(final Observable.Operator<TO, RSRC> bind) {
-        return new LiftingReadableResource<>(this, bind);
-    }
-
-    // TODO: Expose other Observable methods
 
     /**
      * Return a function that, when called, will call {@link #read()}.
@@ -202,79 +143,19 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
 
     private static final class MappingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends TO>> {
+    extends AbstractFluentReadableResource<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingReadableResource(
                 final ReadableResource<FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
+                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> read() {
-            final Observable<TO> rsrc = super.state.getDelegate()
-                    .read()
-                    .map(super.state.getAuxiliaryState());
-            return rsrc;
-        }
-    }
-
-
-    private static final class FlatMappingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingReadableResource(
-                final ReadableResource<FROM> delegate,
-                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> read() {
-            final Observable<TO> response = super.state.getDelegate()
-                    .read()
-                    .flatMap(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class RetryingReadableResource<RSRC>
-    extends AbstractFluentReadableResource<RSRC, RSRC, Integer>{
-        public RetryingReadableResource(
-                final ReadableResource<RSRC> delegate,
-                final int maxRetries) {
-            super(delegate, maxRetries);
-            if (maxRetries <= 0) {
-                throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
-            }
-        }
-
-        @Override
-        public Observable<RSRC> read() {
-            final Observable<RSRC> rsrc = super.state.getDelegate()
-                    .read()
-                    .retry(super.state.getAuxiliaryState());
-            return rsrc;
-        }
-    }
-
-
-    private static final class LiftingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingReadableResource(
-                final ReadableResource<FROM> delegate,
-                final Observable.Operator<TO, FROM> bind) {
-            super(delegate, bind);
-            Objects.requireNonNull(bind, "null operator");
-        }
-
-        @Override
-        public Observable<TO> read() {
-            final Observable<TO> rsrc = super.state.getDelegate()
-                    .read()
-                    .lift(super.state.getAuxiliaryState());
-            return rsrc;
+            final Observable<FROM> data = super.state.getDelegate().read();
+            final Observable<TO> mapped = super.state.getAuxiliaryState().call(data);
+            return mapped;
         }
     }
 

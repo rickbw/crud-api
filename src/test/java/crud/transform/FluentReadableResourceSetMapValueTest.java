@@ -28,10 +28,15 @@ extends FluentReadableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
-    private final Func1<Object, String> mapper = new Func1<Object, String>() {
+    private final Func1<Observable<?>, Observable<Object>> mapper = new Func1<Observable<?>, Observable<Object>>() {
         @Override
-        public String call(final Object response) {
-            return PREFIX + response;
+        public Observable<Object> call(final Observable<?> allInput) {
+            return allInput.map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object oneInput) {
+                    return PREFIX + oneInput;
+                }
+            });
         }
     };
 
@@ -54,7 +59,7 @@ extends FluentReadableResourceSetTest {
 
     @Override
     protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
-        return super.createDefaultResourceSet().<Object>mapValue(this.mapper);
+        return super.createDefaultResourceSet().mapValue(this.mapper);
     }
 
 }

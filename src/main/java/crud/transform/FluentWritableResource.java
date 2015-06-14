@@ -18,7 +18,6 @@ import java.util.Objects;
 
 import crud.core.WritableResource;
 import rx.Observable;
-import rx.Observer;
 import rx.functions.Func1;
 
 
@@ -50,35 +49,9 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> FluentWritableResource<RSRC, TO> mapResponse(final Func1<? super RESPONSE, ? extends TO> mapper) {
+    public <TO> FluentWritableResource<RSRC, TO> mapResponse(
+            final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
         return new MappingWritableResource<>(this, mapper);
-    }
-
-    /**
-     * Create and return a new resource that will transform and flatten the
-     * responses from this resource. Take care that the given function does
-     * not violate the idempotency requirement of
-     * {@link WritableResource#write(Object)}.
-     *
-     * If this method is called on two equal {@code FluentWritableResource}s,
-     * the results will be equal if the functions are equal. If equality
-     * behavior it important to you (for example, if you intend to keep
-     * resources in a {@code HashSet}), consider it in your function
-     * implementation.
-     */
-    public <TO> FluentWritableResource<RSRC, TO> flatMapResponse(
-            final Func1<? super RESPONSE, ? extends Observable<? extends TO>> mapper) {
-        return new FlatMappingWritableResource<>(this, mapper);
-    }
-
-    /**
-     * Swallow the response(s) on success, emitting only
-     * {@link Observer#onCompleted()}. Emit any error to
-     * {@link Observer#onError(Throwable)} as usual.
-     */
-    public <TO> FluentWritableResource<RSRC, TO> flattenResponseToCompletion() {
-        final MapToEmptyFunction<RESPONSE, TO> func = MapToEmptyFunction.create();
-        return flatMapResponse(func);
     }
 
     /**
@@ -95,47 +68,6 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             final Func1<? super TO, ? extends RSRC> adapter) {
         return new AdaptingWritableResource<>(this, adapter);
     }
-
-    /**
-     * Return a resource that will transparently retry calls to
-     * {@link #write(Object)} that throw, as with {@link Observable#retry(long)}.
-     * Specifically, any {@link Observable} returned by {@link #write(Object)}
-     * will re-subscribe up to {@code maxRetries} times if
-     * {@link Observer#onError(Throwable)} is called, rather than propagating
-     * that {@code onError} call.
-     *
-     * If a subscription fails after emitting some number of elements via
-     * {@link Observer#onNext(Object)}, those elements will be emitted again
-     * on the retry. For example, if an {@code Observable} fails at first
-     * after emitting {@code [1, 2]}, then succeeds the second time after
-     * emitting {@code [1, 2, 3, 4, 5]}, then the complete sequence of
-     * emissions would be {@code [1, 2, 1, 2, 3, 4, 5, onCompleted]}.
-     *
-     * If this method is called on two equal {@code FluentWritableResource}s,
-     * the results will be equal if the max retry counts are equal.
-     *
-     * @param maxRetries    number of retry attempts before failing
-     */
-    public FluentWritableResource<RSRC, RESPONSE> retry(final int maxRetries) {
-        if (maxRetries == 0) {
-            return this;
-        } else if (maxRetries < 0) {
-            throw new IllegalArgumentException("maxRetries " + maxRetries + " < 0");
-        } else {
-            return new RetryingWritableResource<>(this, maxRetries);
-        }
-    }
-
-    /**
-     * Wrap this {@code FluentWritableResource} in another one that will
-     * pass all observations through a given adapter {@link Observer}, as with
-     * {@link Observable#lift(rx.Observable.Operator)}.
-     */
-    public <TO> FluentWritableResource<RSRC, TO> lift(final Observable.Operator<TO, RESPONSE> bind) {
-        return new LiftingWritableResource<>(this, bind);
-    }
-
-    // TODO: Expose other Observable methods
 
     /**
      * Return a function that, when called, will call {@link #write(Object)}.
@@ -206,39 +138,19 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
 
     private static final class MappingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends TO>> {
+    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingWritableResource(
                 final WritableResource<RSRC, FROM> delegate,
-                final Func1<? super FROM, ? extends TO> mapper) {
+                final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
             super(delegate, mapper);
             Objects.requireNonNull(mapper, "null function");
         }
 
         @Override
         public Observable<TO> write(final RSRC value) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .write(value)
-                    .map(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class FlatMappingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super FROM, ? extends Observable<? extends TO>>> {
-        private FlatMappingWritableResource(
-                final WritableResource<RSRC, FROM> delegate,
-                final Func1<? super FROM, ? extends Observable<? extends TO>> mapper) {
-            super(delegate, mapper);
-            Objects.requireNonNull(mapper, "null function");
-        }
-
-        @Override
-        public Observable<TO> write(final RSRC update) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .write(update)
-                    .flatMap(super.state.getAuxiliaryState());
-            return response;
+            final Observable<FROM> response = super.state.getDelegate().write(value);
+            final Observable<TO> transformed = super.state.getAuxiliaryState().call(response);
+            return transformed;
         }
     }
 
@@ -257,46 +169,6 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             final FROM transformed = super.state.getAuxiliaryState().call(value);
             final Observable<RESPONSE> response = super.state.getDelegate()
                     .write(transformed);
-            return response;
-        }
-    }
-
-
-    private static final class RetryingWritableResource<RSRC, RESPONSE>
-    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Integer> {
-        public RetryingWritableResource(
-                final WritableResource<RSRC, RESPONSE> delegate,
-                final int maxRetries) {
-            super(delegate, maxRetries);
-            if (maxRetries <= 0) {
-                throw new IllegalArgumentException("maxRetries " + maxRetries + " <= 0");
-            }
-        }
-
-        @Override
-        public Observable<RESPONSE> write(final RSRC newResourceState) {
-            final Observable<RESPONSE> response = super.state.getDelegate()
-                    .write(newResourceState)
-                    .retry(super.state.getAuxiliaryState());
-            return response;
-        }
-    }
-
-
-    private static final class LiftingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Observable.Operator<TO, FROM>> {
-        public LiftingWritableResource(
-                final WritableResource<RSRC, FROM> delegate,
-                final Observable.Operator<TO, FROM> bind) {
-            super(delegate, bind);
-            Objects.requireNonNull(bind, "null operator");
-        }
-
-        @Override
-        public Observable<TO> write(final RSRC newResourceState) {
-            final Observable<TO> response = super.state.getDelegate()
-                    .write(newResourceState)
-                    .lift(super.state.getAuxiliaryState());
             return response;
         }
     }
