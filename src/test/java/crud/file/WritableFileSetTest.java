@@ -1,4 +1,4 @@
-/* Copyright 2015 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,25 +12,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.core.example;
+package crud.file;
 
-import java.io.Writer;
+import java.io.File;
+import java.io.IOException;
 
-import crud.core.WritableResource;
-import crud.core.Session;
+import crud.core.ResourceSetTest;
 import crud.core.WritableResourceSet;
-import crud.implementer.AbstractWritableResourceSet;
 
 
-/*package*/ final class PrintingResourceSet extends AbstractWritableResourceSet<Writer, String, Integer> {
+public class WritableFileSetTest extends ResourceSetTest<File> {
 
-    public PrintingResourceSet(final WritableResourceSet.Id<Writer, String, Integer> id) {
-        super(id);
+    @Override
+    protected WritableFileSet createDefaultResourceSet() {
+        return new WritableFileSet(new WritableResourceSet.Id<>("Test", File.class, String.class, Void.class));
     }
 
     @Override
-    public WritableResource<String, Integer> get(final Writer writer, final Session session) {
-        return new PrintingWritableResource(writer, ((ExampleSession) session).getWorker());
+    protected File createDefaultKey() {
+        try {
+            return File.createTempFile(getClass().getSimpleName(), null);
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
 }

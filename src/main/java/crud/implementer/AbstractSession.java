@@ -38,6 +38,17 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
     };
 
 
+    /**
+     * Provided for use by subclasses and their clients.
+     * <p/>
+     * <em>ATTN</em>: This method is not declared {@code final} in order to
+     * support mocking in unit tests. Nevertheless, it is not intended for
+     * overriding, and the behavior in that case is unspecified.
+     */
+    public @Nonnull SessionWorker getWorker() {
+        return this.worker;
+    }
+
     @Override
     public Session.Ordering getOrdering() {
         return this.ordering;
@@ -78,10 +89,6 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
      */
     protected void doShutdown() throws Exception {
         // do nothing
-    }
-
-    protected final SessionWorker getWorker() {
-        return this.worker;
     }
 
 }

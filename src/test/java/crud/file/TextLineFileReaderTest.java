@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,20 +28,19 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import crud.core.ReadableResourceTest;
 import crud.core.ReadableResource;
+import crud.core.ReadableResourceTest;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 
 
-/**
- * Test of the {@link ReadableResource} aspect of {@link TextLineFileResource}.
- */
-public class ReadableTextLineFileResourceTest extends ReadableResourceTest<String> {
+public class TextLineFileReaderTest extends ReadableResourceTest<String> {
 
     private static final ImmutableList<String> lines = ImmutableList.of(
             "foo=bar bax=quux",
             "hello, world");
 
+    private final SessionWorker worker = new SessionWorker();
     private File file;
 
 
@@ -58,7 +57,7 @@ public class ReadableTextLineFileResourceTest extends ReadableResourceTest<Strin
     @Test
     public void fileContentsExpected() {
         // given:
-        final TextLineFileResource resource = createDefaultResource();
+        final ReadableResource<String> resource = createDefaultResource();
 
         // when:
         final Observable<String> result = resource.read();
@@ -72,8 +71,8 @@ public class ReadableTextLineFileResourceTest extends ReadableResourceTest<Strin
     }
 
     @Override
-    protected TextLineFileResource createDefaultResource() {
-        return new TextLineFileResource(this.file);
+    protected ReadableResource<String> createDefaultResource() {
+        return new TextLineFileReader(this.file, this.worker);
     }
 
 }

@@ -21,7 +21,6 @@ import javax.jms.JMSException;
 
 import crud.core.Session;
 import crud.implementer.AbstractSession;
-import crud.implementer.SessionWorker;
 
 
 /*package*/ abstract class SessionWrapper extends AbstractSession {
@@ -32,10 +31,6 @@ import crud.implementer.SessionWorker;
     protected SessionWrapper(@Nonnull final Session.Ordering ordering, @Nonnull final javax.jms.Session delegate) {
         super(ordering);
         this.delegate = Objects.requireNonNull(delegate);
-    }
-
-    protected final @Nonnull SessionWorker worker() {
-        return getWorker();
     }
 
     protected final @Nonnull javax.jms.Session getDelegate() {

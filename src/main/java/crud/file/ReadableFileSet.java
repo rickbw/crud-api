@@ -1,4 +1,4 @@
-/* Copyright 2015 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,23 +12,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.core.example;
+package crud.file;
+
+import java.io.File;
 
 import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.implementer.AbstractReadableResourceSet;
+import crud.implementer.AbstractSession;
+import crud.implementer.SessionWorker;
 
 
-/*package*/ final class EchoReadableResourceSet<T> extends AbstractReadableResourceSet<T, T> {
+/*package*/ final class ReadableFileSet extends AbstractReadableResourceSet<File, String> {
 
-    public EchoReadableResourceSet(final ReadableResourceSet.Id<T, T> id) {
+    public ReadableFileSet(final ReadableResourceSet.Id<File, String> id) {
         super(id);
     }
 
     @Override
-    public ReadableResource<T> get(final T key, final Session session) {
-        return new EchoReadableResource<>(((ExampleSession) session).getWorker(), key);
+    public ReadableResource<String> get(final File key, final Session session) {
+        final SessionWorker worker = ((AbstractSession) session).getWorker();
+        return new TextLineFileReader(key, worker);
     }
 
 }

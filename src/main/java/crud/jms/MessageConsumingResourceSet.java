@@ -50,7 +50,7 @@ import crud.core.Session;
             final MessageConsumer messageConsumer = key.isEmpty()
                     ? realSession.createConsumer(this.destination)
                     : realSession.createConsumer(this.destination, key);
-            return new MessageConsumerResource<>(sessionImpl.worker(), messageConsumer, this.id.getElementType());
+            return new MessageConsumerResource<>(sessionImpl.getWorker(), messageConsumer, this.id.getElementType());
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

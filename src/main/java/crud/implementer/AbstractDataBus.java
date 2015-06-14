@@ -52,7 +52,9 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
     }
 
     /**
-     * @return  {@link Optional#absent()}. Subclasses can override this behavior.
+     * Delegates to {@link #isResourceSetAvailable(crud.core.ReadableResourceSet.Id)},
+     * followed by {@link #resolveResourceSet(crud.core.ReadableResourceSet.Id)}.
+     * Subclasses can override those, or override this method directly.
      */
     @Override
     public <K, E> Optional<ReadableResourceSet<K, E>> resources(final ReadableResourceSet.Id<K, E> id) {
@@ -78,7 +80,9 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
     }
 
     /**
-     * @return  {@link Optional#absent()}. Subclasses can override this behavior.
+     * Delegates to {@link #isResourceSetAvailable(crud.core.WritableResourceSet.Id)},
+     * followed by {@link #resolveResourceSet(crud.core.WritableResourceSet.Id)}.
+     * Subclasses can override those, or override this method directly.
      */
     @Override
     public <K, E, R> Optional<WritableResourceSet<K, E, R>> resources(final WritableResourceSet.Id<K, E, R> id) {

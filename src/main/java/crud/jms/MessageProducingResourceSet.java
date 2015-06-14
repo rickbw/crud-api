@@ -57,7 +57,7 @@ import crud.core.WritableResourceSet;
         final javax.jms.Session realSession = sessionImpl.getDelegate();
         try {
             final MessageProducer messageProducer = realSession.createProducer(this.destination);
-            return new MessageProducerResource<>(sessionImpl.worker(), messageProducer);
+            return new MessageProducerResource<>(sessionImpl.getWorker(), messageProducer);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

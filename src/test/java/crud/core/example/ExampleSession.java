@@ -16,17 +16,12 @@ package crud.core.example;
 
 import crud.core.Session;
 import crud.implementer.AbstractSession;
-import crud.implementer.SessionWorker;
 
 
 /*package*/ final class ExampleSession extends AbstractSession {
 
     public ExampleSession() {
         super(Session.Ordering.ORDERED);
-    }
-
-    /*package*/ SessionWorker worker() {
-        return getWorker();
     }
 
 }

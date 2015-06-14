@@ -17,11 +17,13 @@ package crud.file.example;
 import java.io.File;
 import java.util.StringTokenizer;
 
+import crud.core.DataBus;
 import crud.core.ReadableResource;
+import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.core.WritableResource;
-import crud.file.FileSession;
-import crud.file.TextLineFileResource;
+import crud.core.WritableResourceSet;
+import crud.file.FileSystem;
 import crud.pattern.ResourceMerger;
 import rx.Observable;
 import rx.functions.Func1;
@@ -29,6 +31,15 @@ import rx.functions.Func1;
 
 public final class TextFileExample {
 
+    private static final ReadableResourceSet.Id<File, String> readableFileSetId = new ReadableResourceSet.Id<>(
+            "Example",
+            File.class,
+            String.class);
+    private static final WritableResourceSet.Id<File, String, Void> writableFileSetId = new WritableResourceSet.Id<>(
+            "Example",
+            File.class,
+            String.class,
+            Void.class);
     private static final LineToJson lineToJson = new LineToJson();
 
 
@@ -47,14 +58,14 @@ public final class TextFileExample {
         if (outputFile.isDirectory()) {
             System.err.println("Output " + outputFile + " is a directory");
             System.exit(-1);
-        } else if (outputFile.exists()) {
-            outputFile.delete();    // create from scratch
         }
 
-        final TextLineFileResource.Set files = TextLineFileResource.set();
-        final Session session = new FileSession(); // TODO: Complete File-based implementation!
-        final ReadableResource<String> inputLines = files.get(inputFile, session);
-        final WritableResource<String, Void> outputLines = files.get(outputFile, session);
+        final DataBus fileSystem = new FileSystem();
+        final ReadableResourceSet<File, String> readableFiles = fileSystem.resources(readableFileSetId).get();
+        final WritableResourceSet<File, String, Void> writableFiles = fileSystem.resources(writableFileSetId).get();
+        final Session session = fileSystem.startSession(false);
+        final ReadableResource<String> inputLines = readableFiles.get(inputFile, session);
+        final WritableResource<String, Void> outputLines = writableFiles.get(outputFile, session);
         final ResourceMerger<Void> merger = ResourceMerger.mapToWriter(
                 inputLines,
                 lineToJson,

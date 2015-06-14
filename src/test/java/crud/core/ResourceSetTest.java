@@ -16,8 +16,12 @@ package crud.core;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
+
+import crud.implementer.AbstractSession;
+import crud.implementer.SessionWorker;
 
 
 /**
@@ -25,7 +29,7 @@ import org.junit.Test;
  */
 public abstract class ResourceSetTest<KEY> {
 
-    protected final Session mockSession = mock(Session.class);
+    protected final Session mockSession = createSession();
 
 
     @Test
@@ -39,6 +43,21 @@ public abstract class ResourceSetTest<KEY> {
 
         // then:
         assertNotNull(resource);
+    }
+
+    /**
+     * Return a mock {@link AbstractSession} by default; override to change
+     * it. The mock {@link Session} has a mock {@link SessionWorker}.
+     *
+     * This approach is taken in preference to returning a simple mock
+     * {@link Session}, because many {@link Session} implementations extend
+     * {@link AbstractSession}, and will not have to override this method.
+     */
+    protected Session createSession() {
+        final SessionWorker mockWorker = mock(SessionWorker.class);
+        final AbstractSession session = mock(AbstractSession.class);
+        when(session.getWorker()).thenReturn(mockWorker);
+        return session;
     }
 
     /**

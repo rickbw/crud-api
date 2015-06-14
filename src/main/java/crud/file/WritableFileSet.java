@@ -1,4 +1,4 @@
-/* Copyright 2015 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,25 +12,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package crud.core.example;
+package crud.file;
 
-import java.io.Writer;
+import java.io.File;
 
-import crud.core.WritableResource;
 import crud.core.Session;
+import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
+import crud.implementer.AbstractSession;
 import crud.implementer.AbstractWritableResourceSet;
+import crud.implementer.SessionWorker;
 
 
-/*package*/ final class PrintingResourceSet extends AbstractWritableResourceSet<Writer, String, Integer> {
+/*package*/ final class WritableFileSet extends AbstractWritableResourceSet<File, String, Void> {
 
-    public PrintingResourceSet(final WritableResourceSet.Id<Writer, String, Integer> id) {
+    public WritableFileSet(final WritableResourceSet.Id<File, String, Void> id) {
         super(id);
     }
 
     @Override
-    public WritableResource<String, Integer> get(final Writer writer, final Session session) {
-        return new PrintingWritableResource(writer, ((ExampleSession) session).getWorker());
+    public WritableResource<String, Void> get(final File key, final Session session) {
+        final SessionWorker worker = ((AbstractSession) session).getWorker();
+        return new TextLineFileAppender(key, worker);
     }
 
 }

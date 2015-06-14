@@ -29,14 +29,13 @@ import org.junit.Test;
 
 import crud.core.WritableResource;
 import crud.core.WritableResourceTest;
+import crud.implementer.SessionWorker;
 import rx.Observable;
 
 
-/**
- * Test of the {@link WritableResource} aspect of {@link TextLineFileResource}.
- */
-public class WritableTextLineFileResourceTest extends WritableResourceTest<String, Void> {
+public class TextLineFileAppenderTest extends WritableResourceTest<String, Void> {
 
+    private final SessionWorker worker = new SessionWorker();
     private File file;
 
 
@@ -70,8 +69,8 @@ public class WritableTextLineFileResourceTest extends WritableResourceTest<Strin
     }
 
     @Override
-    protected TextLineFileResource createDefaultResource() {
-        return new TextLineFileResource(this.file);
+    protected TextLineFileAppender createDefaultResource() {
+        return new TextLineFileAppender(this.file, this.worker);
     }
 
     @Override

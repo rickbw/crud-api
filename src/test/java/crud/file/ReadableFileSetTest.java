@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,14 +17,15 @@ package crud.file;
 import java.io.File;
 import java.io.IOException;
 
+import crud.core.ReadableResourceSet;
 import crud.core.ResourceSetTest;
 
 
-public class TextLineFileResourceSetTest extends ResourceSetTest<File> {
+public class ReadableFileSetTest extends ResourceSetTest<File> {
 
     @Override
-    protected TextLineFileResource.Set createDefaultResourceSet() {
-        return TextLineFileResource.set();
+    protected ReadableFileSet createDefaultResourceSet() {
+        return new ReadableFileSet(new ReadableResourceSet.Id<>("Test", File.class, String.class));
     }
 
     @Override

@@ -35,10 +35,14 @@ import rx.schedulers.Schedulers;
 /**
  * Runs tasks in a background thread on behalf of {@link Session}
  * implementations.
+ * <p/>
+ * <em>ATTN</em>: This class is not declared {@code final} in order to support
+ * mocking in unit tests. Nevertheless, it is not intended for subclassing,
+ * and the behavior in that case is unspecified.
  *
  * @author Rick Warren
  */
-public final class SessionWorker {
+public class SessionWorker {
 
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final ExecutorService executor = Executors.newSingleThreadExecutor();

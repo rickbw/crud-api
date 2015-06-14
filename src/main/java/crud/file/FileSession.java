@@ -18,7 +18,7 @@ import crud.core.Session;
 import crud.implementer.AbstractSession;
 
 
-public final class FileSession extends AbstractSession {
+/*package*/ final class FileSession extends AbstractSession {
 
     public FileSession() {
         super(Session.Ordering.ORDERED);
