@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
+import crud.core.Session;
 import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
 import crud.util.BooleanSubscription;
@@ -55,6 +56,11 @@ implements ReadableResource<String>, WritableResource<String, Void> {
     @Override
     public Observable<Void> write(final String newLine) {
         return Observable.create(new WriteLineOnSubscribe(newLine));
+    }
+
+    @Override
+    public Observable<Void> shutdown() {
+        return Observable.empty();
     }
 
     @Override
@@ -98,7 +104,7 @@ implements ReadableResource<String>, WritableResource<String, Void> {
     public static class Set
     implements ReadableResourceSet<File, String>, WritableResourceSet<File, String, Void> {
         @Override
-        public TextLineFileResource get(final File file) {
+        public TextLineFileResource get(final File file, final Session ignored) {
             return new TextLineFileResource(file);
         }
 

@@ -49,7 +49,7 @@ extends TransformedReadableResourceSetTest {
 
         // when:
         when(super.mockResource.read()).thenReturn(Observable.<Object>just("world"));
-        final TransformedReadableResource<Object> resource = rsrcSet.get(key);
+        final TransformedReadableResource<Object> resource = rsrcSet.get(key, this.mockSession);
         final Observable<Object> response = resource.read();
 
         // then:

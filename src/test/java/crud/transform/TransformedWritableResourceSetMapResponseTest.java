@@ -53,7 +53,7 @@ extends TransformedWritableResourceSetTest {
 
         // when:
         when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
-        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key);
+        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key, this.mockSession);
         final Observable<Object> response = resource.write(value);
 
         // then:

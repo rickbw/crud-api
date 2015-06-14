@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,8 @@ import rx.functions.Func1;
 
 /**
  * A set of transformations on {@link WritableResource}s.
+ *
+ * @author Rick Warren
  */
 public abstract class TransformedWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
@@ -76,7 +78,7 @@ public abstract class TransformedWritableResource<RSRC, RESPONSE> implements Wri
      * this resource.
      */
     public Func1<RSRC, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
+        return new DelegateObjectMethods.Function1<RSRC, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
                 return TransformedWritableResource.this.write(newValue);
@@ -98,6 +100,11 @@ public abstract class TransformedWritableResource<RSRC, RESPONSE> implements Wri
                 final WritableResource<FROMRS, FROMRP> delegate,
                 final T auxiliary) {
             this.state = new TransformedResourceStateMixin<>(delegate, auxiliary);
+        }
+
+        @Override
+        public Observable<Void> shutdown() {
+            return this.state.getDelegate().shutdown();
         }
 
         @Override

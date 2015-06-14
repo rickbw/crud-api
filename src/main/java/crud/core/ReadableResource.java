@@ -15,6 +15,7 @@
 package crud.core;
 
 import rx.Observable;
+import rx.Observer;
 
 
 /**
@@ -28,14 +29,27 @@ import rx.Observable;
  *
  * @see WritableResource
  * @see ReadableResourceSet
+ *
+ * @author Rick Warren
  */
 public interface ReadableResource<RSRC> extends Resource {
 
     /**
      * Request the value(s) of this resource. Zero or more values will be
-     * delivered when they are ready.
-     *
+     * delivered when they are ready. The {@link Observable} may be
+     * either "hot" or "cold", depending on the nature of the resource.
+     * <p/>
      * This operation is idempotent.
+     * <p/>
+     * <b>Note to implementers</b>: Except in special cases, consuming from
+     * this {@link ReadableResource} will involve I/O. In the interest of
+     * segregating those threads that perform blocking I/O and those that
+     * perform computation, implementations should not block on this call, nor
+     * should elements be delivered in the thread
+     * {@link Observable#subscribe() subscribing} to the Observable. Instead,
+     * data elements should be delivered to {@link Observer}s in a thread
+     * associated with the {@link Session} used to create this
+     * {@code ReadableResource}.
      *
      * @see Observable#subscribe(rx.Observer)
      */

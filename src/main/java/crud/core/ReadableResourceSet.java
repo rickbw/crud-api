@@ -14,16 +14,58 @@
  */
 package crud.core;
 
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
+
 
 /**
  * Look up a {@link ReadableResource} based on a given key.
  *
  * @see WritableResourceSet
  * @see ReadableResource
+ *
+ * @author Rick Warren
  */
-public interface ReadableResourceSet<KEY, RSRC> extends ResourceSet<KEY> {
+public interface ReadableResourceSet<KEY, RSRC> extends ResourceSet<KEY, RSRC> {
 
+    /**
+     * Return a readable source of those data elements of type {@code E}
+     * identified by the given key. Those elements must be read in the
+     * thread associated with the given {@link Session}.
+     *
+     * @throws ClassCastException               If the {@link Session} was not
+     *              obtained from a {@link DataBus} compatible with this
+     *              {@link ReadableResourceSet}.
+     */
     @Override
-    public abstract ReadableResource<RSRC> get(KEY key);
+    public abstract @Nonnull ReadableResource<RSRC> get(@Nonnull KEY key, @Nonnull Session session);
+
+
+    /**
+     * Identifies {@link ReadableResourceSet}: a named collection of homogeneously-typed data
+     * elements in the target middleware. Subsets of these elements are identified
+     * by keys.
+     *
+     * @param <KEY>     The type of the keys.
+     * @param <RSRC>    The type of the data elements, identified by those keys.
+     */
+    @Immutable
+    public static final class Id<KEY, RSRC> extends ResourceSet.Id<KEY, RSRC> {
+        public Id(
+                @Nonnull final String name,
+                @Nonnull final Class<KEY> keyType,
+                @Nonnull final Class<RSRC> type) {
+            super(name, keyType, type);
+        }
+
+        @Override
+        public String toString() {
+            return ReadableResourceSet.class.getSimpleName()
+                    + '.' + getClass().getSimpleName() + "(\""
+                    + getName() + "\", "
+                    + getKeyType().getName() + " -> " + getElementType().getName()
+                    + ')';
+        }
+    }
 
 }

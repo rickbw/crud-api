@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-Copyright 2013–2014 Rick Warren
+Copyright 2013–2015 Rick Warren
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,7 @@ the License.
 
     <groupId>rickbw</groupId>
     <artifactId>crud-api</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Crud API</name>
@@ -63,8 +63,11 @@ the License.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <rxjava.version>1.0.0-rc.9</rxjava.version>
-        <guava.version>16.0.1</guava.version>
+        <rxjava.version>1.0.10</rxjava.version>
+        <guava.version>18.0</guava.version>
+        <jsr305.version>3.0.0</jsr305.version>
+        <javaee.version>7.0</javaee.version>
+        <slf4j.version>1.7.12</slf4j.version>
 
         <junit.version>4.11</junit.version>
         <mockito.version>1.8.5</mockito.version>
@@ -88,6 +91,32 @@ the License.
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${jsr305.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>${javaee.version}</version>
+            <exclusions>
+                <exclusion>
+                    <!--
+                    javaee-api already contains these classes, but depends on
+                    the artifact as well. Genius.
+                    -->
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>javax.mail</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

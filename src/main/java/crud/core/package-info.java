@@ -1,8 +1,8 @@
 /**
- * This package supports data-oriented interactions with generic
- * {@link crud.core.Resource}s, which encapsulate
- * state. The design emphasizes generality, safety and concurrency.
- *
+ * This package contains a basic middleware abstraction based on generic
+ * {@link crud.core.Resource}s, which encapsulate state, and
+ * {@link crud.core.Session}s, which encapsulate the relative order of
+ * operations. The design emphasizes generality, safety and concurrency.
  * <ul>
  *  <li><em>Generality</em>: The available interactions consist of the
  *  simple {@link crud.core.ReadableResource#read() read} and
@@ -24,7 +24,7 @@
  *  </li>
  * </ul>
  *
- * There are two primary abstractions in the API:
+ * There are two primary data abstractions in the API:
  * {@link crud.core.Resource}s and
  * {@link crud.core.ResourceSet}s. The former encapsulates the
  * I/O operations on state, and hence uses a reactive style. There are two
@@ -53,5 +53,22 @@
  *      implement combinations of Crud interfaces intended to meet the needs
  *      of certain data-access patterns out of the box.</li>
  * </li>
+ * <p/>
+ * <h3>Idioms and Conventions</h3>
+ * <code><b>Observable&lt;Void&gt;</b></code>: Indicates an operation that may
+ * operate asynchronously, emits no data on
+ * {@link rx.Observer#onCompleted() success}, and emits a
+ * {@link java.lang.Throwable} on
+ * {@link rx.Observer#onError(Throwable) error}.
+ * <p/>
+ * <b>Nullability</b> is generally indicated explicitly with the
+ * {@link javax.annotation.Nonnull} and {@link javax.annotation.Nullable}
+ * annotations. When not indicated, assume the value is <em>not</em> nullable.
+ * In particular, types that already encapsulate multiplicity -- such as
+ * {@link com.google.common.base.Optional}, {@link java.util.Collection} and
+ * its subtypes, and {@link rx.Observable} -- are not generally explicitly
+ * annotated, and are never considered nullable.
+ *
+ * @author Rick Warren
  */
 package crud.core;

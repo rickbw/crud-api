@@ -25,6 +25,8 @@ import rx.functions.Func1;
 
 /**
  * A set of transformations on {@link ReadableResource}s.
+ *
+ * @author Rick Warren
  */
 public abstract class TransformedReadableResource<RSRC> implements ReadableResource<RSRC> {
 
@@ -98,6 +100,11 @@ public abstract class TransformedReadableResource<RSRC> implements ReadableResou
                 final ReadableResource<FROM> delegate,
                 final T auxiliary) {
             this.state = new TransformedResourceStateMixin<>(delegate, auxiliary);
+        }
+
+        @Override
+        public Observable<Void> shutdown() {
+            return this.state.getDelegate().shutdown();
         }
 
         @Override

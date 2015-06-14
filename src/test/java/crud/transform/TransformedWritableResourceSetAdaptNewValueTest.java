@@ -43,7 +43,7 @@ extends TransformedWritableResourceSetTest {
         final String adaptedValue = this.adapter.call(origValue);
 
         // when:
-        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key);
+        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key, this.mockSession);
         resource.write(origValue);
 
         // then:

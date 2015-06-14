@@ -20,6 +20,7 @@ import crud.core.Resource;
 import crud.core.ResourceSet;
 import rx.functions.Func0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 
 /**
@@ -73,10 +74,19 @@ import rx.functions.Func1;
     }
 
 
-    public static abstract class Function<T1, RESPONSE>
+    public static abstract class Function1<T1, RESPONSE>
     extends DelegateObjectMethods
     implements Func1<T1, RESPONSE> {
-        public Function(final Object delegate) {
+        public Function1(final Object delegate) {
+            super(delegate);
+        }
+    }
+
+
+    public static abstract class Function2<T1, T2, RESPONSE>
+    extends DelegateObjectMethods
+    implements Func2<T1, T2, RESPONSE> {
+        public Function2(final Object delegate) {
             super(delegate);
         }
     }

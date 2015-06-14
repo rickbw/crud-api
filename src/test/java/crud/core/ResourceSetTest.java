@@ -1,4 +1,4 @@
-/* Copyright 2013–2014 Rick Warren
+/* Copyright 2013–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@ package crud.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
@@ -25,14 +26,17 @@ import org.junit.Test;
  */
 public abstract class ResourceSetTest<KEY> {
 
+    protected final Session mockSession = mock(Session.class);
+
+
     @Test
     public void getDefaultKeyReturnsNonNullResource() {
         // given:
-        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
+        final ResourceSet<KEY, ?> rsrcSet = createDefaultResourceSet();
         final KEY key = createDefaultKey();
 
         // when:
-        final Resource resource = rsrcSet.get(key);
+        final Resource resource = rsrcSet.get(key, this.mockSession);
 
         // then:
         assertNotNull(resource);
@@ -41,31 +45,22 @@ public abstract class ResourceSetTest<KEY> {
     @Test
     public void twoResourcesFromSameKeyAreEqual() {
         // given:
-        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
+        final ResourceSet<KEY, ?> rsrcSet = createDefaultResourceSet();
         final KEY key = createDefaultKey();
 
         // when:
-        final Resource resource1 = rsrcSet.get(key);
-        final Resource resource2 = rsrcSet.get(key);
+        final Resource resource1 = rsrcSet.get(key, this.mockSession);
+        final Resource resource2 = rsrcSet.get(key, this.mockSession);
 
         // then:
         assertEquals(resource1, resource2);
-    }
-
-    @Test(expected=NullPointerException.class)
-    public void getNullKeyThrows() {
-        // given:
-        final ResourceSet<KEY> rsrcSet = createDefaultResourceSet();
-
-        // when:
-        rsrcSet.get(null);
     }
 
     /**
      * Create and return a new instance of the {@link ResourceSet} class
      * under test.
      */
-    protected abstract ResourceSet<KEY> createDefaultResourceSet();
+    protected abstract ResourceSet<KEY, ?> createDefaultResourceSet();
 
     /**
      * Create and return a key that can be passed to the resource sets

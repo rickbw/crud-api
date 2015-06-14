@@ -17,6 +17,7 @@ package crud.transform;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,10 +26,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crud.core.ResourceSetTest;
+import crud.core.Session;
 import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
 import rx.Observable;
-import rx.functions.Func1;
+import rx.functions.Func2;
 
 
 /**
@@ -46,8 +48,7 @@ public class TransformedWritableResourceSetTest extends ResourceSetTest<Object> 
     @Before
     public void setup() {
         when(this.mockResource.write(any())).thenReturn(Observable.empty());
-        when(this.mockResourceSet.get(any())).thenReturn(this.mockResource);
-        when(this.mockResourceSet.get(null)).thenThrow(new NullPointerException("mock"));
+        when(this.mockResourceSet.get(any(), eq(this.mockSession))).thenReturn(this.mockResource);
     }
 
     @Test
@@ -81,24 +82,24 @@ public class TransformedWritableResourceSetTest extends ResourceSetTest<Object> 
         final Object key = createDefaultKey();
 
         // when:
-        rsrcSet.get(key);
+        rsrcSet.get(key, this.mockSession);
 
         // then:
-        verify(this.mockResourceSet).get(key);
+        verify(this.mockResourceSet).get(key, this.mockSession);
     }
 
     @Test
     public void functionCallsDelegate() {
         // given:
         final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
-        final Func1<Object, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
+        final Func2<Object, Session, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object key = createDefaultKey();
 
         // when:
-        function.call(key);
+        function.call(key, this.mockSession);
 
         // then:
-        verify(this.mockResourceSet).get(key);
+        verify(this.mockResourceSet).get(key, this.mockSession);
     }
 
     @Override

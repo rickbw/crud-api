@@ -17,8 +17,10 @@ package crud.transform;
 import java.util.Objects;
 
 import crud.core.ReadableResourceSet;
+import crud.core.Session;
 import rx.Observable;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 
 public abstract class TransformedReadableResourceSet<KEY, RSRC>
@@ -31,8 +33,8 @@ implements ReadableResourceSet<KEY, RSRC> {
         } else {
             return new TransformedReadableResourceSet<KEY, RSRC>() {
                 @Override
-                public TransformedReadableResource<RSRC> get(final KEY key) {
-                    return TransformedReadableResource.from(rsrcSet.get(key));
+                public TransformedReadableResource<RSRC> get(final KEY key, final Session session) {
+                    return TransformedReadableResource.from(rsrcSet.get(key, session));
                 }
             };
         }
@@ -43,9 +45,9 @@ implements ReadableResourceSet<KEY, RSRC> {
         Objects.requireNonNull(mapper, "null function");
         final TransformedReadableResourceSet<KEY, R> result = new TransformedReadableResourceSet<KEY, R>() {
             @Override
-            public TransformedReadableResource<R> get(final KEY key) {
+            public TransformedReadableResource<R> get(final KEY key, final Session session) {
                 return outerResourceSet()
-                        .get(key)
+                        .get(key, session)
                         .mapValue(mapper);
             }
         };
@@ -57,26 +59,26 @@ implements ReadableResourceSet<KEY, RSRC> {
         Objects.requireNonNull(adapter, "null function");
         final TransformedReadableResourceSet<K, RSRC> result = new TransformedReadableResourceSet<K, RSRC>() {
             @Override
-            public TransformedReadableResource<RSRC> get(final K key) {
+            public TransformedReadableResource<RSRC> get(final K key, final Session session) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerResourceSet().get(transformedKey);
+                return outerResourceSet().get(transformedKey, session);
             }
         };
         return result;
     }
 
-    public Func1<KEY, TransformedReadableResource<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, TransformedReadableResource<RSRC>>(this) {
+    public Func2<KEY, Session, TransformedReadableResource<RSRC>> toFunction() {
+        return new DelegateObjectMethods.Function2<KEY, Session, TransformedReadableResource<RSRC>>(this) {
             @Override
-            public TransformedReadableResource<RSRC> call(final KEY key) {
-                return get(key);
+            public TransformedReadableResource<RSRC> call(final KEY key, final Session session) {
+                return get(key, session);
             }
         };
     }
 
     @Override
-    public abstract TransformedReadableResource<RSRC> get(KEY key);
+    public abstract TransformedReadableResource<RSRC> get(KEY key, Session session);
 
     private TransformedReadableResourceSet<KEY, RSRC> outerResourceSet() {
         return this;

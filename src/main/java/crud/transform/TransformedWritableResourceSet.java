@@ -16,9 +16,11 @@ package crud.transform;
 
 import java.util.Objects;
 
+import crud.core.Session;
 import crud.core.WritableResourceSet;
 import rx.Observable;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 
 public abstract class TransformedWritableResourceSet<KEY, RSRC, RESPONSE>
@@ -31,8 +33,8 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         } else {
             return new TransformedWritableResourceSet<KEY, RSRC, RESPONSE>() {
                 @Override
-                public TransformedWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    return TransformedWritableResource.from(rsrcSet.get(key));
+                public TransformedWritableResource<RSRC, RESPONSE> get(final KEY key, final Session session) {
+                    return TransformedWritableResource.from(rsrcSet.get(key, session));
                 }
             };
         }
@@ -43,9 +45,9 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(mapper, "null function");
         final TransformedWritableResourceSet<KEY, RSRC, RESP> result = new TransformedWritableResourceSet<KEY, RSRC, RESP>() {
             @Override
-            public TransformedWritableResource<RSRC, RESP> get(final KEY key) {
+            public TransformedWritableResource<RSRC, RESP> get(final KEY key, final Session session) {
                 return outerResourceSet()
-                        .get(key)
+                        .get(key, session)
                         .mapResponse(mapper);
             }
         };
@@ -57,9 +59,9 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final TransformedWritableResourceSet<KEY, RC, RESPONSE> result = new TransformedWritableResourceSet<KEY, RC, RESPONSE>() {
             @Override
-            public TransformedWritableResource<RC, RESPONSE> get(final KEY key) {
+            public TransformedWritableResource<RC, RESPONSE> get(final KEY key, final Session session) {
                 return outerResourceSet()
-                        .get(key)
+                        .get(key, session)
                         .<RC>adaptNewValue(adapter);
             }
         };
@@ -71,26 +73,26 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         Objects.requireNonNull(adapter, "null function");
         final TransformedWritableResourceSet<K, RSRC, RESPONSE> result = new TransformedWritableResourceSet<K, RSRC, RESPONSE>() {
             @Override
-            public TransformedWritableResource<RSRC, RESPONSE> get(final K key) {
+            public TransformedWritableResource<RSRC, RESPONSE> get(final K key, final Session session) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
-                return outerResourceSet().get(transformedKey);
+                return outerResourceSet().get(transformedKey, session);
             }
         };
         return result;
     }
 
-    public Func1<KEY, TransformedWritableResource<RSRC, RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, TransformedWritableResource<RSRC, RESPONSE>>(this) {
+    public Func2<KEY, Session, TransformedWritableResource<RSRC, RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function2<KEY, Session, TransformedWritableResource<RSRC, RESPONSE>>(this) {
             @Override
-            public TransformedWritableResource<RSRC, RESPONSE> call(final KEY key) {
-                return get(key);
+            public TransformedWritableResource<RSRC, RESPONSE> call(final KEY key, final Session session) {
+                return get(key, session);
             }
         };
     }
 
     @Override
-    public abstract TransformedWritableResource<RSRC, RESPONSE> get(KEY key);
+    public abstract TransformedWritableResource<RSRC, RESPONSE> get(KEY key, Session session);
 
     private TransformedWritableResourceSet<KEY, RSRC, RESPONSE> outerResourceSet() {
         return this;

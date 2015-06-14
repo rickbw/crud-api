@@ -16,7 +16,9 @@ package crud.transform;
 
 import static org.mockito.Mockito.verify;
 
+import crud.core.Session;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 
 public class TransformedWritableResourceSetAdaptKeyTest
@@ -40,25 +42,25 @@ extends TransformedWritableResourceSetTest {
         final String transformedKey = this.adapter.call(origKey);
 
         // when:
-        rsrcSet.get(origKey);
+        rsrcSet.get(origKey, this.mockSession);
 
         // then:
-        verify(this.mockResourceSet).get(transformedKey);
+        verify(this.mockResourceSet).get(transformedKey, this.mockSession);
     }
 
     @Override
     public void functionCallsDelegate() {
         // given:
         final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
-        final Func1<Object, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
+        final Func2<Object, Session, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = this.adapter.call(origKey);
 
         // when:
-        function.call(origKey);
+        function.call(origKey, this.mockSession);
 
         // then:
-        verify(this.mockResourceSet).get(transformedKey);
+        verify(this.mockResourceSet).get(transformedKey, this.mockSession);
     }
 
     @Override

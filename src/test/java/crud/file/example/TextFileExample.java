@@ -18,7 +18,9 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 import crud.core.ReadableResource;
+import crud.core.Session;
 import crud.core.WritableResource;
+import crud.file.FileSession;
 import crud.file.TextLineFileResource;
 import crud.pattern.ResourceMerger;
 import rx.Observable;
@@ -50,8 +52,9 @@ public final class TextFileExample {
         }
 
         final TextLineFileResource.Set files = TextLineFileResource.set();
-        final ReadableResource<String> inputLines = files.get(inputFile);
-        final WritableResource<String, Void> outputLines = files.get(outputFile);
+        final Session session = new FileSession(); // TODO: Complete File-based implementation!
+        final ReadableResource<String> inputLines = files.get(inputFile, session);
+        final WritableResource<String, Void> outputLines = files.get(outputFile, session);
         final ResourceMerger<Void> merger = ResourceMerger.mapToWriter(
                 inputLines,
                 lineToJson,
