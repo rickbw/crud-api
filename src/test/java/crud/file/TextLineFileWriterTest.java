@@ -35,7 +35,7 @@ import rx.Observable;
 
 public class TextLineFileWriterTest extends WritableResourceTest<String, Void> {
 
-    private final SessionWorker worker = new SessionWorker();
+    private final SessionWorker worker = SessionWorker.create();
     private File file;
 
 

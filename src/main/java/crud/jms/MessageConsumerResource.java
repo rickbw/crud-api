@@ -22,8 +22,8 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 
-import crud.core.ReadableResource;
 import crud.core.MiddlewareException;
+import crud.core.ReadableResource;
 import crud.implementer.SessionWorker;
 import rx.Observable;
 import rx.Subscriber;
@@ -34,7 +34,7 @@ import rx.Subscription;
 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final MessageConsumer consumer;
-    private @Nonnull final Observable<M> hotObservable;
+    private @Nonnull final Observable<M> sharedObservable;
 
     private final MessageListenerRemover messageListenerRemover = new MessageListenerRemover();
 
@@ -46,13 +46,13 @@ import rx.Subscription;
         this.worker = Objects.requireNonNull(worker);
         this.consumer = Objects.requireNonNull(consumer);
 
-        this.hotObservable = Observable.create(new MessageListenerToSubscriberHandoff(messageType)).share();
-        this.worker.subscribeHot(this.hotObservable);
+        final MessageListenerToSubscriberHandoff task = new MessageListenerToSubscriberHandoff(messageType);
+        this.sharedObservable = this.worker.scheduleCold(task).share();
     }
 
     @Override
     public Observable<M> read() {
-        return this.hotObservable;
+        return this.sharedObservable;
     }
 
     @Override
@@ -61,7 +61,7 @@ import rx.Subscription;
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
                 /* TODO: Should this result in an onCompleted() to the
-                 * hotObservable? Or perhaps an onError() with a specific
+                 * sharedObservable? Or perhaps an onError() with a specific
                  * source-termination "exception"?
                  */
                 MessageConsumerResource.this.consumer.close();
@@ -70,7 +70,7 @@ import rx.Subscription;
     }
 
 
-    private final class MessageListenerToSubscriberHandoff implements Observable.OnSubscribe<M> {
+    private final class MessageListenerToSubscriberHandoff implements SessionWorker.Task<M> {
         private final Class<M> messageType;
 
         public MessageListenerToSubscriberHandoff(final Class<M> messageType) {
@@ -78,8 +78,8 @@ import rx.Subscription;
         }
 
         @Override
-        public void call(final Subscriber<? super M> sub) {
-            try {
+        public void call(final Subscriber<? super M> sub) throws JMSException {
+            if (MessageConsumerResource.this.consumer.getMessageListener() == null) {
                 sub.add(MessageConsumerResource.this.messageListenerRemover);
                 MessageConsumerResource.this.consumer.setMessageListener(new MessageListener() {
                     @Override
@@ -87,9 +87,6 @@ import rx.Subscription;
                         sub.onNext(MessageListenerToSubscriberHandoff.this.messageType.cast(message));
                     }
                 });
-            } catch (final JMSException jx) {
-                // Will become a call to onError:
-                throw new MiddlewareException(jx.getMessage(), jx);
             }
         }
     }

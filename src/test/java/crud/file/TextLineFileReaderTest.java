@@ -40,7 +40,7 @@ public class TextLineFileReaderTest extends ReadableResourceTest<String> {
             "foo=bar bax=quux",
             "hello, world");
 
-    private final SessionWorker worker = new SessionWorker();
+    private final SessionWorker worker = SessionWorker.create();
     private File file;
 
 

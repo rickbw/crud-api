@@ -62,7 +62,7 @@ public abstract class AbstractTransactedSession extends AbstractSession implemen
     }
 
     protected AbstractTransactedSession() {
-        this(new SessionWorker());
+        this(SessionWorker.create());
     }
 
     /**

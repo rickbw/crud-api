@@ -71,7 +71,7 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
     }
 
     protected AbstractSession(@Nonnull final Session.Ordering ordering) {
-        this(new SessionWorker(), ordering);
+        this(SessionWorker.create(), ordering);
     }
 
     /**

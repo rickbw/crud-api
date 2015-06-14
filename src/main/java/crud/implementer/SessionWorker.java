@@ -16,6 +16,7 @@ package crud.implementer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,19 +36,48 @@ import rx.schedulers.Schedulers;
 /**
  * Runs tasks in a background thread on behalf of {@link Session}
  * implementations.
- * <p/>
- * <em>ATTN</em>: This class is not declared {@code final} in order to support
- * mocking in unit tests. Nevertheless, it is not intended for subclassing,
- * and the behavior in that case is unspecified.
  *
  * @author Rick Warren
  */
 public class SessionWorker {
 
-    private final AtomicBoolean stopped = new AtomicBoolean(false);
+    /**
+     * All subscriptions run here.
+     *
+     * @see #scheduler
+     */
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    /**
+     * An Rx-friendly facade for the single-threaded {@link #executor}.
+     */
     private final Scheduler scheduler = Schedulers.from(this.executor);
 
+    /**
+     * The first phase of the shutdown process is to call the
+     * {@link #shutdown(Task, long, TimeUnit) shutdown} method. We only want
+     * to do that once. We keep track of that here.
+     *
+     * @see #isFinalTaskRun
+     */
+    private final AtomicBoolean isShutdownCalled = new AtomicBoolean(false);
+    /**
+     * The second phase of the shutdown process is to run a final {@link Task}
+     * provided by the application, which will presumably clean up any final
+     * resources. Since we can't control when the application will subscribe
+     * to any {@link Observable}s created by {@link #scheduleCold(Task)},
+     * there is an unavoidable race condition, wherein the application can
+     * attempt to schedule more work after the final task ha been scheduled,
+     * but before the {@link #executor} is shut down. This flag is used to
+     * work around that condition.
+     *
+     * @see #isShutdownCalled
+     */
+    private volatile boolean isFinalTaskRun = false;
+
+
+    public static SessionWorker create() {
+        return new SessionWorker();
+    }
 
     /**
      * Wrap the given {@link Action1 action} in an {@link Observable} and
@@ -55,23 +85,11 @@ public class SessionWorker {
      * by this {@link SessionWorker worker}. This method only creates the
      * {@link Observable}; it does not subscribe to it.
      *
-     * @see #subscribeHot(Observable)
+     * @see #scheduleHot(Task)
      */
     public <T> Observable<T> scheduleCold(@Nonnull final Task<T> task) {
-        final Observable.OnSubscribe<T> onSubscribe = new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> sub) {
-                try {
-                    task.call(sub);
-                    sub.onCompleted();
-                } catch (final MiddlewareException mx) {
-                    sub.onError(mx);
-                } catch (final Exception ex) {
-                    sub.onError(new MiddlewareException(ex.getMessage(), ex));
-                }
-            }
-        };
-        return Observable.create(onSubscribe).subscribeOn(this.scheduler);
+        final boolean isFinalTask = false;
+        return doScheduleCold(task, isFinalTask);
     }
 
     /**
@@ -85,23 +103,10 @@ public class SessionWorker {
      * small.
      *
      * @see #scheduleCold(Task)
-     * @see #subscribeHot(Observable)
      */
     public <T> Observable<T> scheduleHot(@Nonnull final Task<T> task) {
-        final Observable<T> result = scheduleCold(task).cache();
-        doSubscribeHot(result);
-        return result;
-    }
-
-    /**
-     * Start subscribing to the given {@link Observable} on the
-     * {@link Scheduler} encapsulated by this {@link SessionWorker worker}.
-     * Note that the caller may miss some results if it does not e.g.
-     * {@link Observable#share() share} the input Observable before calling
-     * this method.
-     */
-    public <T> void subscribeHot(final Observable<T> obs) {
-        doSubscribeHot(obs.subscribeOn(this.scheduler));
+        final boolean isFinalTask = false;
+        return doScheduleHot(task, isFinalTask);
     }
 
     /**
@@ -112,15 +117,27 @@ public class SessionWorker {
      * termination is complete, a {@link TimeoutException} if it fails to
      * complete within the given duration, or {@link InterruptedException} if
      * the shutdown is interrupted.
+     * <p/>
+     * This method only operates once. Calling it additional times has no
+     * effect.
      *
      * @param finalTask The caller should perform any of its own cleanup in
      *                  this task, scheduled here to avoid race conditions.
+     *
+     * @return  If this worker was previously shut down, the result is an
+     *          empty successful {@link Observable}. Otherwise, it it an
+     *          {@code Observable} that emits -- in order of preference -- any
+     *          failure of the final task, a {@link TimeoutException} if the
+     *          shutdown did not complete in time, an
+     *          {@link InterruptedException} if the shutdown was interrupted,
+     *          or an empty successful result if there were no errors.
      */
     public Observable<Void> shutdown(
             @Nonnull final Task<Void> finalTask,
             final long waitDuration, @Nonnull final TimeUnit waitUnit) {
-        if (!this.stopped.getAndSet(true)) {
-            final Observable<Void> taskResult = scheduleHot(finalTask);
+        if (!this.isShutdownCalled.getAndSet(true)) {
+            final boolean isFinalTask = true;
+            final Observable<Void> taskResult = doScheduleHot(finalTask, isFinalTask);
             this.executor.shutdown();   // non-blocking
             final Observable<Void> await = Observable.create(new Observable.OnSubscribe<Void>() {
                 @Override
@@ -138,28 +155,49 @@ public class SessionWorker {
                     }
                 }
             });
-            /* The final task is submitted, and the Executor is shut down, no
-             * matter what happens now. If the app decides to observe the
-             * result, it will see first the result of the final task it
-             * submitted, which in the success case will be empty. In the
-             * failure case, it will observe the failure of its own task. If
-             * its task succeeds, then it will observe the termination of the
-             * Executor, which should again be empty, and non-blocking, since
-             * we know at that point there are no more tasks to wait for. But
-             * if it does fail for some reason, that app will have a chance
-             * to observe that.
-             */
             return Observable.concat(taskResult, await);
         } else {
             return Observable.empty(); // do nothing
         }
     }
 
-    private static <T> void doSubscribeHot(final Observable<T> obs) {
+    private SessionWorker() {
+        /* Private to prevent subclassing. We could just make the class final,
+         * but that would prevent mocking as well. Fortunately, Mockito can
+         * call a private constructor reflectively.
+         */
+    }
+
+    private <T> Observable<T> doScheduleHot(final Task<T> task, final boolean isFinalTask) {
+        final Observable<T> obs = doScheduleCold(task, isFinalTask).cache();
         /* The no-argument subscribe() does not handle errors, so
          * materialize() so that it won't see any.
          */
         obs.materialize().subscribe();
+        return obs;
+    }
+
+    private <T> Observable<T> doScheduleCold(final Task<T> task, final boolean isFinalTask) {
+        final Observable.OnSubscribe<T> onSubscribe = new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(final Subscriber<? super T> sub) {
+                if (isFinalTask) {
+                    SessionWorker.this.isFinalTaskRun = true;
+                } else if (SessionWorker.this.isFinalTaskRun) {
+                    throw new RejectedExecutionException("Session already shut down");
+                }
+
+                try {
+                    task.call(sub);
+                    sub.onCompleted();
+                } catch (final MiddlewareException mx) {
+                    sub.onError(mx);
+                } catch (final Exception ex) {
+                    sub.onError(new MiddlewareException(ex.getMessage(), ex));
+                }
+            }
+        };
+        return Observable.create(onSubscribe).subscribeOn(this.scheduler);
     }
 
 
