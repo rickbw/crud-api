@@ -24,36 +24,36 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
-import crud.core.ReadableResource;
-import crud.core.ReadableResourceSet;
 import crud.core.ResourceSetTest;
+import crud.core.WritableResource;
+import crud.core.WritableResourceSet;
 import rx.Observable;
 import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link FluentReadableResourceSet} that don't
+ * Tests those methods of {@link TransformedWritableResourceSet} that don't
  * require wrapping the delegate in an additional layer of nested subclasses.
  * Those layered behaviors (like retries) are covered in test classes of their
  * own.
  */
-public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
+public class TransformedWritableResourceSetTest extends ResourceSetTest<Object> {
 
-    protected final ReadableResource<Object> mockResource = mock(ReadableResource.class);
-    protected final ReadableResourceSet<Object, Object> mockResourceSet = mock(ReadableResourceSet.class);
+    protected final WritableResource<Object, Object> mockResource = mock(WritableResource.class);
+    protected final WritableResourceSet<Object, Object, Object> mockResourceSet = mock(WritableResourceSet.class);
 
 
     @Before
     public void setup() {
-        when(this.mockResource.read()).thenReturn(Observable.empty());
+        when(this.mockResource.write(any())).thenReturn(Observable.empty());
         when(this.mockResourceSet.get(any())).thenReturn(this.mockResource);
         when(this.mockResourceSet.get(null)).thenThrow(new NullPointerException("mock"));
     }
 
     @Test
-    public void fluentResourceSetNotEqualDelegate() {
+    public void transformedResourceSetNotEqualDelegate() {
         // given:
-        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -62,12 +62,12 @@ public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
     }
 
     @Test
-    public void fromFluentResourceSetReturnsSameObject() {
+    public void fromTransformedResourceSetReturnsSameObject() {
         // given:
-        final FluentReadableResourceSet<Object, Object> origRsrcSet = createDefaultResourceSet();
+        final TransformedWritableResourceSet<Object, Object, Object> origRsrcSet = createDefaultResourceSet();
 
         // when:
-        final FluentReadableResourceSet<Object, Object> wrappedRsrcSet = FluentReadableResourceSet.from(
+        final TransformedWritableResourceSet<Object, Object, Object> wrappedRsrcSet = TransformedWritableResourceSet.from(
                 origRsrcSet);
 
         // then:
@@ -75,9 +75,9 @@ public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
     }
 
     @Test
-    public void fluentResourceSetCallsDelegate() {
+    public void transformedResourceSetCallsDelegate() {
         // given:
-        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
 
         // when:
@@ -90,8 +90,8 @@ public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
     @Test
     public void functionCallsDelegate() {
         // given:
-        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
-        final Func1<Object, FluentReadableResource<Object>> function = rsrcSet.toFunction();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final Func1<Object, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object key = createDefaultKey();
 
         // when:
@@ -102,8 +102,8 @@ public class FluentReadableResourceSetTest extends ResourceSetTest<Object> {
     }
 
     @Override
-    protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
-        return FluentReadableResourceSet.from(this.mockResourceSet);
+    protected TransformedWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return TransformedWritableResourceSet.from(this.mockResourceSet);
     }
 
     @Override

@@ -22,10 +22,10 @@ import rx.functions.Func1;
 
 
 /**
- * Tests the nested subclass of {@link FluentWritableResource} that handles
+ * Tests the nested subclass of {@link TransformedWritableResource} that handles
  * transforming responses.
  */
-public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResourceTest {
+public class TransformedWritableResourceAdaptNewValueTest extends TransformedWritableResourceTest {
 
     private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
 
@@ -39,9 +39,9 @@ public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResou
 
     @Override
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void transformedResourceCallsDelegate() {
         // given:
-        final FluentWritableResource<Object, Object> resource = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource = createDefaultResource();
         final Object original = createDefaultResourceState();
         final String adapted = adapter.call(original);
 
@@ -53,7 +53,7 @@ public class FluentWritableResourceAdaptNewValueTest extends FluentWritableResou
     }
 
     @Override
-    protected FluentWritableResource<Object, Object> createDefaultResource() {
+    protected TransformedWritableResource<Object, Object> createDefaultResource() {
         return super.createDefaultResource().<Object>adaptNewValue(adapter);
     }
 

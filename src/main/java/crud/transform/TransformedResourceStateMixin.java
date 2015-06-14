@@ -17,15 +17,14 @@ package crud.transform;
 import java.util.Objects;
 
 import crud.core.Resource;
-
 import rx.functions.Func1;
 
 
 /**
- * Maintains state on behalf of the {@code Fluent*Resource} classes in this
+ * Maintains state on behalf of the {@code Transformed*Resource} classes in this
  * package, in order to minimize repeated boilerplate code.
  */
-/*package*/ final class FluentResourceStateMixin<R extends Resource, T> {
+/*package*/ final class TransformedResourceStateMixin<R extends Resource, T> {
 
     private final R delegate;
     private final T auxiliaryState;
@@ -39,7 +38,7 @@ import rx.functions.Func1;
      *                  {@link Func1} -- specific to the concrete type of the
      *                  wrapping {@code Resource}. It may be null.
      */
-    public FluentResourceStateMixin(final R delegate, final T auxiliary) {
+    public TransformedResourceStateMixin(final R delegate, final T auxiliary) {
         this.delegate = Objects.requireNonNull(delegate);
         this.auxiliaryState = auxiliary;    // may be null
     }
@@ -63,7 +62,7 @@ import rx.functions.Func1;
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FluentResourceStateMixin<?, ?> other = (FluentResourceStateMixin<?, ?>) obj;
+        final TransformedResourceStateMixin<?, ?> other = (TransformedResourceStateMixin<?, ?>) obj;
         if (!this.delegate.equals(other.delegate)) {
             return false;
         }

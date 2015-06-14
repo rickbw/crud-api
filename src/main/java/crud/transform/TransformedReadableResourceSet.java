@@ -21,29 +21,29 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public abstract class FluentReadableResourceSet<KEY, RSRC>
+public abstract class TransformedReadableResourceSet<KEY, RSRC>
 implements ReadableResourceSet<KEY, RSRC> {
 
-    public static <KEY, RSRC> FluentReadableResourceSet<KEY, RSRC> from(
+    public static <KEY, RSRC> TransformedReadableResourceSet<KEY, RSRC> from(
             final ReadableResourceSet<KEY, RSRC> rsrcSet) {
-        if (rsrcSet instanceof FluentReadableResourceSet<?, ?>) {
-            return (FluentReadableResourceSet<KEY, RSRC>) rsrcSet;
+        if (rsrcSet instanceof TransformedReadableResourceSet<?, ?>) {
+            return (TransformedReadableResourceSet<KEY, RSRC>) rsrcSet;
         } else {
-            return new FluentReadableResourceSet<KEY, RSRC>() {
+            return new TransformedReadableResourceSet<KEY, RSRC>() {
                 @Override
-                public FluentReadableResource<RSRC> get(final KEY key) {
-                    return FluentReadableResource.from(rsrcSet.get(key));
+                public TransformedReadableResource<RSRC> get(final KEY key) {
+                    return TransformedReadableResource.from(rsrcSet.get(key));
                 }
             };
         }
     }
 
-    public <R> FluentReadableResourceSet<KEY, R> mapValue(
+    public <R> TransformedReadableResourceSet<KEY, R> mapValue(
             final Func1<? super Observable<? super RSRC>, ? extends Observable<R>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentReadableResourceSet<KEY, R> result = new FluentReadableResourceSet<KEY, R>() {
+        final TransformedReadableResourceSet<KEY, R> result = new TransformedReadableResourceSet<KEY, R>() {
             @Override
-            public FluentReadableResource<R> get(final KEY key) {
+            public TransformedReadableResource<R> get(final KEY key) {
                 return outerResourceSet()
                         .get(key)
                         .mapValue(mapper);
@@ -52,12 +52,12 @@ implements ReadableResourceSet<KEY, RSRC> {
         return result;
     }
 
-    public <K> FluentReadableResourceSet<K, RSRC> adaptKey(
+    public <K> TransformedReadableResourceSet<K, RSRC> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentReadableResourceSet<K, RSRC> result = new FluentReadableResourceSet<K, RSRC>() {
+        final TransformedReadableResourceSet<K, RSRC> result = new TransformedReadableResourceSet<K, RSRC>() {
             @Override
-            public FluentReadableResource<RSRC> get(final K key) {
+            public TransformedReadableResource<RSRC> get(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerResourceSet().get(transformedKey);
@@ -66,19 +66,19 @@ implements ReadableResourceSet<KEY, RSRC> {
         return result;
     }
 
-    public Func1<KEY, FluentReadableResource<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, FluentReadableResource<RSRC>>(this) {
+    public Func1<KEY, TransformedReadableResource<RSRC>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, TransformedReadableResource<RSRC>>(this) {
             @Override
-            public FluentReadableResource<RSRC> call(final KEY key) {
+            public TransformedReadableResource<RSRC> call(final KEY key) {
                 return get(key);
             }
         };
     }
 
     @Override
-    public abstract FluentReadableResource<RSRC> get(KEY key);
+    public abstract TransformedReadableResource<RSRC> get(KEY key);
 
-    private FluentReadableResourceSet<KEY, RSRC> outerResourceSet() {
+    private TransformedReadableResourceSet<KEY, RSRC> outerResourceSet() {
         return this;
     }
 

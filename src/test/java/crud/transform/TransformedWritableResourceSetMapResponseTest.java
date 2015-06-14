@@ -23,18 +23,15 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-/**
- * Tests the nested subclass of {@link FluentWritableResource} that handles
- * transforming responses.
- */
-public class FluentWritableResourceMapResponseTest extends FluentWritableResourceTest {
+public class TransformedWritableResourceSetMapResponseTest
+extends TransformedWritableResourceSetTest {
 
-    private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
+    private static final String PREFIX = "Goodbye, cruel ";
 
     private static final Func1<Object, Object> singleMapper = new Func1<Object, Object>() {
         @Override
-        public String call(final Object input) {
-            return RESPONSE_PREFIX + input;
+        public Object call(final Object response) {
+            return PREFIX + response;
         }
     };
     private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
@@ -48,23 +45,25 @@ public class FluentWritableResourceMapResponseTest extends FluentWritableResourc
     @Test
     public void transformationApplied() {
         // given:
-        final FluentWritableResource<Object, Object> resource = createDefaultResource();
-        final Object newValue = createDefaultResourceState();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final Object key = createDefaultKey();
+        final String value = "Hello";
         final String origResponse = "world";
         final String mappedResponse = singleMapper.call(origResponse).toString();
 
         // when:
-        when(super.mockDelegate.write(newValue)).thenReturn(Observable.<Object>just(origResponse));
-        final Observable<Object> response = resource.write(newValue);
+        when(super.mockResource.write(value)).thenReturn(Observable.<Object>just(origResponse));
+        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key);
+        final Observable<Object> response = resource.write(value);
 
         // then:
-        final Object responseValue = response.toBlocking().first();
-        assertEquals(mappedResponse, responseValue);
+        final String responseString = (String) response.toBlocking().single();
+        assertEquals(mappedResponse, responseString);
     }
 
     @Override
-    protected FluentWritableResource<Object, Object> createDefaultResource() {
-        return super.createDefaultResource().mapResponse(mapper);
+    protected TransformedWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().mapResponse(mapper);
     }
 
 }

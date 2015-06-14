@@ -22,18 +22,18 @@ import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link WritableResource}s.
+ * A set of transformations on {@link WritableResource}s.
  */
-public abstract class FluentWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
+public abstract class TransformedWritableResource<RSRC, RESPONSE> implements WritableResource<RSRC, RESPONSE> {
 
     /**
-     * If the given resource is a {@code FluentWritableResource}, return it.
+     * If the given resource is a {@code TransformedWritableResource}, return it.
      * Otherwise, wrap it in a new instance.
      */
-    public static <RSRC, RESPONSE> FluentWritableResource<RSRC, RESPONSE> from(
+    public static <RSRC, RESPONSE> TransformedWritableResource<RSRC, RESPONSE> from(
             final WritableResource<RSRC, RESPONSE> resource) {
-        if (resource instanceof FluentWritableResource<?, ?>) {
-            return (FluentWritableResource<RSRC, RESPONSE>) resource;
+        if (resource instanceof TransformedWritableResource<?, ?>) {
+            return (TransformedWritableResource<RSRC, RESPONSE>) resource;
         } else {
             return new DelegatingWritableResource<>(resource);
         }
@@ -43,13 +43,13 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * Create and return a new resource that will transform the responses from
      * this resource.
      *
-     * If this method is called on two equal {@code FluentWritableResource}s,
+     * If this method is called on two equal {@code TransformedWritableResource}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> FluentWritableResource<RSRC, TO> mapResponse(
+    public <TO> TransformedWritableResource<RSRC, TO> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<TO>> mapper) {
         return new MappingWritableResource<>(this, mapper);
     }
@@ -58,13 +58,13 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * Create and return a new resource that will transform the input resource
      * states before passing them to this resource.
      *
-     * If this method is called on two equal {@code FluentWritableResource}s,
+     * If this method is called on two equal {@code TransformedWritableResource}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> FluentWritableResource<TO, RESPONSE> adaptNewValue(
+    public <TO> TransformedWritableResource<TO, RESPONSE> adaptNewValue(
             final Func1<? super TO, ? extends RSRC> adapter) {
         return new AdaptingWritableResource<>(this, adapter);
     }
@@ -79,7 +79,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
         return new DelegateObjectMethods.Function<RSRC, Observable<RESPONSE>>(this) {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
-                return FluentWritableResource.this.write(newValue);
+                return TransformedWritableResource.this.write(newValue);
             }
         };
     }
@@ -90,14 +90,14 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentWritableResource<FROMRS, TORS, FROMRP, TORP, T>
-    extends FluentWritableResource<TORS, TORP> {
-        protected final FluentResourceStateMixin<WritableResource<FROMRS, FROMRP>, T> state;
+    private static abstract class AbstractTransformedWritableResource<FROMRS, TORS, FROMRP, TORP, T>
+    extends TransformedWritableResource<TORS, TORP> {
+        protected final TransformedResourceStateMixin<WritableResource<FROMRS, FROMRP>, T> state;
 
-        protected AbstractFluentWritableResource(
+        protected AbstractTransformedWritableResource(
                 final WritableResource<FROMRS, FROMRP> delegate,
                 final T auxiliary) {
-            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
+            this.state = new TransformedResourceStateMixin<>(delegate, auxiliary);
         }
 
         @Override
@@ -111,7 +111,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentWritableResource<?, ?, ?, ?, ?> other = (AbstractFluentWritableResource<?, ?, ?, ?, ?>) obj;
+            final AbstractTransformedWritableResource<?, ?, ?, ?, ?> other = (AbstractTransformedWritableResource<?, ?, ?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -123,7 +123,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
 
     private static final class DelegatingWritableResource<RSRC, RESPONSE>
-    extends AbstractFluentWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
+    extends AbstractTransformedWritableResource<RSRC, RSRC, RESPONSE, RESPONSE, Void> {
         public DelegatingWritableResource(final WritableResource<RSRC, RESPONSE> delegate) {
             super(delegate, null);
         }
@@ -138,7 +138,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
 
     private static final class MappingWritableResource<RSRC, FROM, TO>
-    extends AbstractFluentWritableResource<RSRC, RSRC, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
+    extends AbstractTransformedWritableResource<RSRC, RSRC, FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingWritableResource(
                 final WritableResource<RSRC, FROM> delegate,
                 final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {
@@ -156,7 +156,7 @@ public abstract class FluentWritableResource<RSRC, RESPONSE> implements Writable
 
 
     private static final class AdaptingWritableResource<FROM, TO, RESPONSE>
-    extends AbstractFluentWritableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
+    extends AbstractTransformedWritableResource<FROM, TO, RESPONSE, RESPONSE, Func1<? super TO, ? extends FROM>> {
         private AdaptingWritableResource(
                 final WritableResource<FROM, RESPONSE> delegate,
                 final Func1<? super TO, ? extends FROM> adapter) {

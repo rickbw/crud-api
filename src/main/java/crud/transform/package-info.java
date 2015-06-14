@@ -1,5 +1,5 @@
 /**
- * This package provides fluent extensions to the core {@link crud}
- * API, including transformations and retries.
+ * This package provides fluent transformations to the core {@link crud}
+ * API.
  */
 package crud.transform;

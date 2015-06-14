@@ -32,11 +32,11 @@ import rx.functions.Func1;
 
 
 /**
- * Tests those methods of {@link FluentWritableResource} that don't require
+ * Tests those methods of {@link TransformedWritableResource} that don't require
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
-public class FluentWritableResourceTest extends WritableResourceTest<Object, Object> {
+public class TransformedWritableResourceTest extends WritableResourceTest<Object, Object> {
 
     protected final WritableResource<Object, Object> mockDelegate = mock(WritableResource.class);
 
@@ -47,9 +47,9 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void transformedResourceNotEqualDelegate() {
         // given:
-        final FluentWritableResource<Object, Object> resource = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource = createDefaultResource();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -58,9 +58,9 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void transformedResourceCallsDelegate() {
         // given:
-        final FluentWritableResource<Object, Object> resource = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource = createDefaultResource();
         final Object newState = createDefaultResourceState();
 
         // when:
@@ -71,12 +71,12 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromTransformedResourceReturnsSameObject() {
         // given:
-        final FluentWritableResource<Object, Object> origRsrc = createDefaultResource();
+        final TransformedWritableResource<Object, Object> origRsrc = createDefaultResource();
 
         // when:
-        final FluentWritableResource<Object, Object> wrappedRsrc = FluentWritableResource.from(origRsrc);
+        final TransformedWritableResource<Object, Object> wrappedRsrc = TransformedWritableResource.from(origRsrc);
 
         // then:
         assertSame(origRsrc, wrappedRsrc);
@@ -85,8 +85,8 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     @Test
     public void equalResourcesHaveEqualFunctions() {
         // given:
-        final FluentWritableResource<Object, Object> resource1 = createDefaultResource();
-        final FluentWritableResource<Object, Object> resource2 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
 
         // when:
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
@@ -103,8 +103,8 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     @Test
     public void equalFunctionsHaveEqualStrings() {
         // given:
-        final FluentWritableResource<Object, Object> resource1 = createDefaultResource();
-        final FluentWritableResource<Object, Object> resource2 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
         final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
 
@@ -119,8 +119,8 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     @Test
     public void equalFunctionsHaveEqualHashcodes() {
         // given:
-        final FluentWritableResource<Object, Object> resource1 = createDefaultResource();
-        final FluentWritableResource<Object, Object> resource2 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
+        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
         final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
         final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
 
@@ -133,8 +133,8 @@ public class FluentWritableResourceTest extends WritableResourceTest<Object, Obj
     }
 
     @Override
-    protected FluentWritableResource<Object, Object> createDefaultResource() {
-        return FluentWritableResource.from(this.mockDelegate);
+    protected TransformedWritableResource<Object, Object> createDefaultResource() {
+        return TransformedWritableResource.from(this.mockDelegate);
     }
 
     @Override

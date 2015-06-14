@@ -33,11 +33,11 @@ import rx.functions.Func0;
 
 
 /**
- * Tests those methods of {@link FluentReadableResource} that don't require
+ * Tests those methods of {@link TransformedReadableResource} that don't require
  * wrapping the delegate in an additional layer of nested subclasses. Those
  * layered behaviors (like retries) are covered in test classes of their own.
  */
-public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
+public class TransformedReadableResourceTest extends ReadableResourceTest<Object> {
 
     protected final ReadableResource<Object> mockDelegate = mock(ReadableResource.class);
 
@@ -48,9 +48,9 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     }
 
     @Test
-    public void fluentResourceNotEqualDelegate() {
+    public void transformedResourceNotEqualDelegate() {
         // given:
-        final FluentReadableResource<Object> resource = createDefaultResource();
+        final TransformedReadableResource<Object> resource = createDefaultResource();
 
         // then:
         // Don't know which object's equals() gets called, so check both:
@@ -59,9 +59,9 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     }
 
     @Test
-    public void fluentResourceCallsDelegate() {
+    public void transformedResourceCallsDelegate() {
         // given:
-        final FluentReadableResource<Object> resource = createDefaultResource();
+        final TransformedReadableResource<Object> resource = createDefaultResource();
 
         // when:
         resource.read();
@@ -71,12 +71,12 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     }
 
     @Test
-    public void fromFluentResourceReturnsSameObject() {
+    public void fromTransformedResourceReturnsSameObject() {
         // given:
-        final FluentReadableResource<Object> origRsrc = createDefaultResource();
+        final TransformedReadableResource<Object> origRsrc = createDefaultResource();
 
         // when:
-        final FluentReadableResource<Object> wrappedRsrc = FluentReadableResource.from(origRsrc);
+        final TransformedReadableResource<Object> wrappedRsrc = TransformedReadableResource.from(origRsrc);
 
         // then:
         assertSame(origRsrc, wrappedRsrc);
@@ -85,8 +85,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalResourcesHaveEqualFunctions() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
 
         // when:
         final Func0<Observable<Object>> function1 = resource1.toFunction();
@@ -103,8 +103,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalFunctionsHaveEqualStrings() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
         final Func0<Observable<Object>> function1 = resource1.toFunction();
         final Func0<Observable<Object>> function2 = resource2.toFunction();
 
@@ -119,8 +119,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalFunctionsHaveEqualHashcodes() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
         final Func0<Observable<Object>> function1 = resource1.toFunction();
         final Func0<Observable<Object>> function2 = resource2.toFunction();
 
@@ -135,8 +135,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalResourcesHaveEqualCallables() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -151,8 +151,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalCallablesHaveEqualStrings() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -167,8 +167,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     @Test
     public void equalCallablesHaveEqualHashcodes() {
         // given:
-        final FluentReadableResource<Object> resource1 = createDefaultResource();
-        final FluentReadableResource<Object> resource2 = createDefaultResource();
+        final TransformedReadableResource<Object> resource1 = createDefaultResource();
+        final TransformedReadableResource<Object> resource2 = createDefaultResource();
         final Callable<Observable<Object>> callable1 = resource1.toCallable();
         final Callable<Observable<Object>> callable2 = resource2.toCallable();
 
@@ -182,8 +182,8 @@ public class FluentReadableResourceTest extends ReadableResourceTest<Object> {
     }
 
     @Override
-    protected FluentReadableResource<Object> createDefaultResource() {
-        return FluentReadableResource.from(this.mockDelegate);
+    protected TransformedReadableResource<Object> createDefaultResource() {
+        return TransformedReadableResource.from(this.mockDelegate);
     }
 
 }

@@ -17,8 +17,8 @@ package crud.pattern;
 import crud.core.ReadableResource;
 import crud.core.Resource;
 import crud.core.WritableResource;
-import crud.transform.FluentReadableResource;
-import crud.transform.FluentWritableResource;
+import crud.transform.TransformedReadableResource;
+import crud.transform.TransformedWritableResource;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -37,7 +37,7 @@ import rx.functions.Function;
  * back.
  *
  * This class is provided as an alternative to flatMap operations on the
- * {@link FluentReadableResource} and {@link FluentWritableResource} types.
+ * {@link TransformedReadableResource} and {@link TransformedWritableResource} types.
  * In contrast to those hypothetical operations, this class makes explicit the
  * relationship between reading and writing, and encapsulates any side effects
  * in the caller-provided function.
@@ -55,7 +55,7 @@ public abstract class ResourceMerger<RESPONSE> {
     public static <RSRC, RESPONSE> ResourceMerger<RESPONSE> withWriter(
             final ReadableResource<RSRC> reader,
             final WritableResource<RSRC, RESPONSE> writer) {
-        return new MergerImpl<>(reader, FluentWritableResource.from(writer).toFunction());
+        return new MergerImpl<>(reader, TransformedWritableResource.from(writer).toFunction());
     }
 
     /**
@@ -68,8 +68,8 @@ public abstract class ResourceMerger<RESPONSE> {
             final Func1<? super Observable<RRSRC>, ? extends Observable<WRSRC>> mapper,
             final WritableResource<WRSRC, RESPONSE> writer) {
         return new MergerImpl<>(
-                FluentReadableResource.from(reader).mapValue(mapper),
-                FluentWritableResource.from(writer).toFunction());
+                TransformedReadableResource.from(reader).mapValue(mapper),
+                TransformedWritableResource.from(writer).toFunction());
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class ResourceMerger<RESPONSE> {
      * reflected in the public API.
      */
     private static final class MergerImpl<RSRC, RESPONSE> extends ResourceMerger<RESPONSE> {
-        private final FluentReadableResource<RESPONSE> merger;
+        private final TransformedReadableResource<RESPONSE> merger;
         /**
          * Kept around just for {@link #toString()}, {@link #equals(Object)},
          * and {@link #hashCode()}. The results of the former and latter could
@@ -121,7 +121,7 @@ public abstract class ResourceMerger<RESPONSE> {
         public MergerImpl(
                 final ReadableResource<RSRC> reader,
                 final Func1<RSRC, ? extends Observable<? extends RESPONSE>> writer) {
-            this.merger = FluentReadableResource.from(reader).mapValue(new Func1<Observable<RSRC>, Observable<RESPONSE>>() {
+            this.merger = TransformedReadableResource.from(reader).mapValue(new Func1<Observable<RSRC>, Observable<RESPONSE>>() {
                 @Override
                 public Observable<RESPONSE> call(final Observable<RSRC> resource) {
                     return resource.flatMap(writer);

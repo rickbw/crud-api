@@ -21,8 +21,8 @@ import org.junit.Test;
 import rx.functions.Func1;
 
 
-public class FluentWritableResourceSetAdaptNewValueTest
-extends FluentWritableResourceSetTest {
+public class TransformedWritableResourceSetAdaptNewValueTest
+extends TransformedWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -37,13 +37,13 @@ extends FluentWritableResourceSetTest {
     @Test
     public void passAdaptedValueToResource() {
         // given:
-        final FluentWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object key = createDefaultKey();
         final String origValue = "World!";
         final String adaptedValue = this.adapter.call(origValue);
 
         // when:
-        final FluentWritableResource<Object, Object> resource = rsrcSet.get(key);
+        final TransformedWritableResource<Object, Object> resource = rsrcSet.get(key);
         resource.write(origValue);
 
         // then:
@@ -51,7 +51,7 @@ extends FluentWritableResourceSetTest {
     }
 
     @Override
-    protected FluentWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
+    protected TransformedWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
         return super.createDefaultResourceSet().<Object>adaptNewValue(this.adapter);
     }
 

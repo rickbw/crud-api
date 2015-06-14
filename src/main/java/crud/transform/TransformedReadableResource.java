@@ -24,17 +24,17 @@ import rx.functions.Func1;
 
 
 /**
- * A set of fluent transformations on {@link ReadableResource}s.
+ * A set of transformations on {@link ReadableResource}s.
  */
-public abstract class FluentReadableResource<RSRC> implements ReadableResource<RSRC> {
+public abstract class TransformedReadableResource<RSRC> implements ReadableResource<RSRC> {
 
     /**
-     * If the given resource is a {@code FluentReadableResource}, return it.
+     * If the given resource is a {@code TransformedReadableResource}, return it.
      * Otherwise, wrap it in a new instance.
      */
-    public static <RSRC> FluentReadableResource<RSRC> from(final ReadableResource<RSRC> resource) {
-        if (resource instanceof FluentReadableResource<?>) {
-            return (FluentReadableResource<RSRC>) resource;
+    public static <RSRC> TransformedReadableResource<RSRC> from(final ReadableResource<RSRC> resource) {
+        if (resource instanceof TransformedReadableResource<?>) {
+            return (TransformedReadableResource<RSRC>) resource;
         } else {
             return new DelegatingReadableResource<>(resource);
         }
@@ -44,13 +44,13 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      * Create and return a new resource that will transform the state of
      * this resource.
      *
-     * If this method is called on two equal {@code FluentReadableResource}s,
+     * If this method is called on two equal {@code TransformedReadableResource}s,
      * the results will be equal if the functions are equal. If equality
      * behavior it important to you (for example, if you intend to keep
      * resources in a {@code HashSet}), consider it in your function
      * implementation.
      */
-    public <TO> FluentReadableResource<TO> mapValue(
+    public <TO> TransformedReadableResource<TO> mapValue(
             final Func1<? super Observable<RSRC>, ? extends Observable<TO>> mapper) {
         return new MappingReadableResource<>(this, mapper);
     }
@@ -79,7 +79,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
         return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
             @Override
             public Observable<RSRC> call() {
-                return FluentReadableResource.this.read();
+                return TransformedReadableResource.this.read();
             }
         };
     }
@@ -90,14 +90,14 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
      * combined with its parent class, because it needs additional type
      * parameters that should not be public.
      */
-    private static abstract class AbstractFluentReadableResource<FROM, TO, T>
-    extends FluentReadableResource<TO> {
-        protected final FluentResourceStateMixin<ReadableResource<FROM>, T> state;
+    private static abstract class AbstractTransformedReadableResource<FROM, TO, T>
+    extends TransformedReadableResource<TO> {
+        protected final TransformedResourceStateMixin<ReadableResource<FROM>, T> state;
 
-        protected AbstractFluentReadableResource(
+        protected AbstractTransformedReadableResource(
                 final ReadableResource<FROM> delegate,
                 final T auxiliary) {
-            this.state = new FluentResourceStateMixin<>(delegate, auxiliary);
+            this.state = new TransformedResourceStateMixin<>(delegate, auxiliary);
         }
 
         @Override
@@ -111,7 +111,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final AbstractFluentReadableResource<?, ?, ?> other = (AbstractFluentReadableResource<?, ?, ?>) obj;
+            final AbstractTransformedReadableResource<?, ?, ?> other = (AbstractTransformedReadableResource<?, ?, ?>) obj;
             return this.state.equals(other.state);
         }
 
@@ -124,11 +124,11 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
     /**
      * It may seem that the business of this class could be accomplished by
-     * FluentReadableResource itself. However, that would require an
+     * TransformedReadableResource itself. However, that would require an
      * additional layer of equals() and hashCode overrides and an unsafe cast.
      */
     private static final class DelegatingReadableResource<RSRC>
-    extends AbstractFluentReadableResource<RSRC, RSRC, Void> {
+    extends AbstractTransformedReadableResource<RSRC, RSRC, Void> {
         public DelegatingReadableResource(final ReadableResource<RSRC> delegate) {
             super(delegate, null);
         }
@@ -143,7 +143,7 @@ public abstract class FluentReadableResource<RSRC> implements ReadableResource<R
 
 
     private static final class MappingReadableResource<FROM, TO>
-    extends AbstractFluentReadableResource<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
+    extends AbstractTransformedReadableResource<FROM, TO, Func1<? super Observable<FROM>, ? extends Observable<TO>>> {
         public MappingReadableResource(
                 final ReadableResource<FROM> delegate,
                 final Func1<? super Observable<FROM>, ? extends Observable<TO>> mapper) {

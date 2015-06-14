@@ -21,29 +21,29 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-public abstract class FluentWritableResourceSet<KEY, RSRC, RESPONSE>
+public abstract class TransformedWritableResourceSet<KEY, RSRC, RESPONSE>
 implements WritableResourceSet<KEY, RSRC, RESPONSE> {
 
-    public static <KEY, RSRC, RESPONSE> FluentWritableResourceSet<KEY, RSRC, RESPONSE> from(
+    public static <KEY, RSRC, RESPONSE> TransformedWritableResourceSet<KEY, RSRC, RESPONSE> from(
             final WritableResourceSet<KEY, RSRC, RESPONSE> rsrcSet) {
-        if (rsrcSet instanceof FluentWritableResourceSet<?, ?, ?>) {
-            return (FluentWritableResourceSet<KEY, RSRC, RESPONSE>) rsrcSet;
+        if (rsrcSet instanceof TransformedWritableResourceSet<?, ?, ?>) {
+            return (TransformedWritableResourceSet<KEY, RSRC, RESPONSE>) rsrcSet;
         } else {
-            return new FluentWritableResourceSet<KEY, RSRC, RESPONSE>() {
+            return new TransformedWritableResourceSet<KEY, RSRC, RESPONSE>() {
                 @Override
-                public FluentWritableResource<RSRC, RESPONSE> get(final KEY key) {
-                    return FluentWritableResource.from(rsrcSet.get(key));
+                public TransformedWritableResource<RSRC, RESPONSE> get(final KEY key) {
+                    return TransformedWritableResource.from(rsrcSet.get(key));
                 }
             };
         }
     }
 
-    public <RESP> FluentWritableResourceSet<KEY, RSRC, RESP> mapResponse(
+    public <RESP> TransformedWritableResourceSet<KEY, RSRC, RESP> mapResponse(
             final Func1<? super Observable<RESPONSE>, ? extends Observable<RESP>> mapper) {
         Objects.requireNonNull(mapper, "null function");
-        final FluentWritableResourceSet<KEY, RSRC, RESP> result = new FluentWritableResourceSet<KEY, RSRC, RESP>() {
+        final TransformedWritableResourceSet<KEY, RSRC, RESP> result = new TransformedWritableResourceSet<KEY, RSRC, RESP>() {
             @Override
-            public FluentWritableResource<RSRC, RESP> get(final KEY key) {
+            public TransformedWritableResource<RSRC, RESP> get(final KEY key) {
                 return outerResourceSet()
                         .get(key)
                         .mapResponse(mapper);
@@ -52,12 +52,12 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public <RC> FluentWritableResourceSet<KEY, RC, RESPONSE> adaptNewValue(
+    public <RC> TransformedWritableResourceSet<KEY, RC, RESPONSE> adaptNewValue(
             final Func1<? super RC, ? extends RSRC> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentWritableResourceSet<KEY, RC, RESPONSE> result = new FluentWritableResourceSet<KEY, RC, RESPONSE>() {
+        final TransformedWritableResourceSet<KEY, RC, RESPONSE> result = new TransformedWritableResourceSet<KEY, RC, RESPONSE>() {
             @Override
-            public FluentWritableResource<RC, RESPONSE> get(final KEY key) {
+            public TransformedWritableResource<RC, RESPONSE> get(final KEY key) {
                 return outerResourceSet()
                         .get(key)
                         .<RC>adaptNewValue(adapter);
@@ -66,12 +66,12 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public <K> FluentWritableResourceSet<K, RSRC, RESPONSE> adaptKey(
+    public <K> TransformedWritableResourceSet<K, RSRC, RESPONSE> adaptKey(
             final Func1<? super K, ? extends KEY> adapter) {
         Objects.requireNonNull(adapter, "null function");
-        final FluentWritableResourceSet<K, RSRC, RESPONSE> result = new FluentWritableResourceSet<K, RSRC, RESPONSE>() {
+        final TransformedWritableResourceSet<K, RSRC, RESPONSE> result = new TransformedWritableResourceSet<K, RSRC, RESPONSE>() {
             @Override
-            public FluentWritableResource<RSRC, RESPONSE> get(final K key) {
+            public TransformedWritableResource<RSRC, RESPONSE> get(final K key) {
                 Objects.requireNonNull(key, "null key");
                 final KEY transformedKey = adapter.call(key);
                 return outerResourceSet().get(transformedKey);
@@ -80,19 +80,19 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
         return result;
     }
 
-    public Func1<KEY, FluentWritableResource<RSRC, RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function<KEY, FluentWritableResource<RSRC, RESPONSE>>(this) {
+    public Func1<KEY, TransformedWritableResource<RSRC, RESPONSE>> toFunction() {
+        return new DelegateObjectMethods.Function<KEY, TransformedWritableResource<RSRC, RESPONSE>>(this) {
             @Override
-            public FluentWritableResource<RSRC, RESPONSE> call(final KEY key) {
+            public TransformedWritableResource<RSRC, RESPONSE> call(final KEY key) {
                 return get(key);
             }
         };
     }
 
     @Override
-    public abstract FluentWritableResource<RSRC, RESPONSE> get(KEY key);
+    public abstract TransformedWritableResource<RSRC, RESPONSE> get(KEY key);
 
-    private FluentWritableResourceSet<KEY, RSRC, RESPONSE> outerResourceSet() {
+    private TransformedWritableResourceSet<KEY, RSRC, RESPONSE> outerResourceSet() {
         return this;
     }
 

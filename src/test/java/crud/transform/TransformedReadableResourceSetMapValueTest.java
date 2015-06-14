@@ -23,21 +23,18 @@ import rx.Observable;
 import rx.functions.Func1;
 
 
-/**
- * Tests the nested subclass of {@link FluentReadableResource} that handles
- * transforming resource states.
- */
-public class FluentReadableResourceMapValueTest extends FluentReadableResourceTest {
+public class TransformedReadableResourceSetMapValueTest
+extends TransformedReadableResourceSetTest {
 
-    private static final String RESPONSE_PREFIX = "Goodbye, cruel ";
+    private static final String PREFIX = "Goodbye, cruel ";
 
-    private static final Func1<Observable<Object>, Observable<Object>> mapper = new Func1<Observable<Object>, Observable<Object>>() {
+    private final Func1<Observable<?>, Observable<Object>> mapper = new Func1<Observable<?>, Observable<Object>>() {
         @Override
-        public Observable<Object> call(final Observable<Object> allInput) {
+        public Observable<Object> call(final Observable<?> allInput) {
             return allInput.map(new Func1<Object, Object>() {
                 @Override
                 public Object call(final Object oneInput) {
-                    return RESPONSE_PREFIX + oneInput;
+                    return PREFIX + oneInput;
                 }
             });
         }
@@ -47,20 +44,22 @@ public class FluentReadableResourceMapValueTest extends FluentReadableResourceTe
     @Test
     public void transformationApplied() {
         // given:
-        final FluentReadableResource<Object> resource = createDefaultResource();
+        final TransformedReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
+        final Object key = createDefaultKey();
 
         // when:
-        when(super.mockDelegate.read()).thenReturn(Observable.<Object>just("world"));
+        when(super.mockResource.read()).thenReturn(Observable.<Object>just("world"));
+        final TransformedReadableResource<Object> resource = rsrcSet.get(key);
         final Observable<Object> response = resource.read();
 
         // then:
-        final Object responseValue = response.toBlocking().first();
-        assertTrue(((String) responseValue).startsWith(RESPONSE_PREFIX));
+        final String responseString = (String) response.toBlocking().single();
+        assertTrue(responseString.startsWith(PREFIX));
     }
 
     @Override
-    protected FluentReadableResource<Object> createDefaultResource() {
-        return super.createDefaultResource().mapValue(mapper);
+    protected TransformedReadableResourceSet<Object, Object> createDefaultResourceSet() {
+        return super.createDefaultResourceSet().mapValue(this.mapper);
     }
 
 }

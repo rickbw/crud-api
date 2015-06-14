@@ -19,8 +19,8 @@ import static org.mockito.Mockito.verify;
 import rx.functions.Func1;
 
 
-public class FluentReadableResourceSetAdaptKeyTest
-extends FluentReadableResourceSetTest {
+public class TransformedWritableResourceSetAdaptKeyTest
+extends TransformedWritableResourceSetTest {
 
     private static final String PREFIX = "Goodbye, cruel ";
 
@@ -33,9 +33,9 @@ extends FluentReadableResourceSetTest {
 
 
     @Override
-    public void fluentResourceSetCallsDelegate() {
+    public void transformedResourceSetCallsDelegate() {
         // given:
-        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
         final Object origKey = createDefaultKey();
         final String transformedKey = this.adapter.call(origKey);
 
@@ -49,8 +49,8 @@ extends FluentReadableResourceSetTest {
     @Override
     public void functionCallsDelegate() {
         // given:
-        final FluentReadableResourceSet<Object, Object> rsrcSet = createDefaultResourceSet();
-        final Func1<Object, FluentReadableResource<Object>> function = rsrcSet.toFunction();
+        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
+        final Func1<Object, TransformedWritableResource<Object, Object>> function = rsrcSet.toFunction();
         final Object origKey = createDefaultKey();
         final String transformedKey = this.adapter.call(origKey);
 
@@ -62,7 +62,7 @@ extends FluentReadableResourceSetTest {
     }
 
     @Override
-    protected FluentReadableResourceSet<Object, Object> createDefaultResourceSet() {
+    protected TransformedWritableResourceSet<Object, Object, Object> createDefaultResourceSet() {
         return super.createDefaultResourceSet().<Object>adaptKey(this.adapter);
     }
 
