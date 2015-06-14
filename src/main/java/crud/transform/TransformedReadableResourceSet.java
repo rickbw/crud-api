@@ -69,7 +69,7 @@ implements ReadableResourceSet<KEY, RSRC> {
     }
 
     public Func2<KEY, Session, TransformedReadableResource<RSRC>> toFunction() {
-        return new DelegateObjectMethods.Function2<KEY, Session, TransformedReadableResource<RSRC>>(this) {
+        return new Func2<KEY, Session, TransformedReadableResource<RSRC>>() {
             @Override
             public TransformedReadableResource<RSRC> call(final KEY key, final Session session) {
                 return get(key, session);

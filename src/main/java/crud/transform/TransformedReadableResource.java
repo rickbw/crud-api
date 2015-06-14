@@ -15,7 +15,6 @@
 package crud.transform;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import crud.core.ReadableResource;
 import rx.Observable;
@@ -64,21 +63,7 @@ public abstract class TransformedReadableResource<RSRC> implements ReadableResou
      * this resource.
      */
     public Func0<Observable<RSRC>> toFunction() {
-        return toResourceCallable();
-    }
-
-    /**
-     * Return a {@link Callable} that delegates to {@link #read()}.
-     * The {@code Callable} overrides {@link Object#equals(Object)},
-     * {@link Object#hashCode()}, and {@link Object#toString()} in terms of
-     * this resource.
-     */
-    public Callable<Observable<RSRC>> toCallable() {
-        return toResourceCallable();
-    }
-
-    private DelegateObjectMethods.Callable<Observable<RSRC>> toResourceCallable() {
-        return new DelegateObjectMethods.Callable<Observable<RSRC>>(this) {
+        return new Func0<Observable<RSRC>>() {
             @Override
             public Observable<RSRC> call() {
                 return TransformedReadableResource.this.read();

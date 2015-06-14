@@ -14,7 +14,6 @@
  */
 package crud.transform;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -49,17 +48,6 @@ public class TransformedWritableResourceSetTest extends ResourceSetTest<Object> 
     public void setup() {
         when(this.mockResource.write(any())).thenReturn(Observable.empty());
         when(this.mockResourceSet.get(any(), eq(this.mockSession))).thenReturn(this.mockResource);
-    }
-
-    @Test
-    public void transformedResourceSetNotEqualDelegate() {
-        // given:
-        final TransformedWritableResourceSet<Object, Object, Object> rsrcSet = createDefaultResourceSet();
-
-        // then:
-        // Don't know which object's equals() gets called, so check both:
-        assertNotEquals(this.mockResourceSet, rsrcSet);
-        assertNotEquals(rsrcSet, this.mockResourceSet);
     }
 
     @Test

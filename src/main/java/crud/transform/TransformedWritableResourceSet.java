@@ -83,7 +83,7 @@ implements WritableResourceSet<KEY, RSRC, RESPONSE> {
     }
 
     public Func2<KEY, Session, TransformedWritableResource<RSRC, RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function2<KEY, Session, TransformedWritableResource<RSRC, RESPONSE>>(this) {
+        return new Func2<KEY, Session, TransformedWritableResource<RSRC, RESPONSE>>() {
             @Override
             public TransformedWritableResource<RSRC, RESPONSE> call(final KEY key, final Session session) {
                 return get(key, session);

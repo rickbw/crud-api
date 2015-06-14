@@ -15,7 +15,6 @@
 package crud.pattern;
 
 import crud.core.ReadableResource;
-import crud.core.Resource;
 import crud.core.WritableResource;
 import crud.transform.TransformedReadableResource;
 import crud.transform.TransformedWritableResource;
@@ -83,16 +82,6 @@ public abstract class ResourceMerger<RESPONSE> {
      * The functions from two equal mergers will themselves be equal.
      */
     public abstract Func0<Observable<RESPONSE>> toFunction();
-
-    /**
-     * Two mergers are considered to be equal if and only if their
-     * constituent {@link Resource}s and {@link Function}s (if any) are equal.
-     */
-    @Override
-    public abstract boolean equals(Object other);
-
-    @Override // overridden here to avoid compiler warnings; see impl. below
-    public abstract int hashCode();
 
     private ResourceMerger() {
         // restrict visibility

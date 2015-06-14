@@ -14,8 +14,6 @@
  */
 package crud.transform;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -28,7 +26,6 @@ import org.junit.Test;
 import crud.core.WritableResource;
 import crud.core.WritableResourceTest;
 import rx.Observable;
-import rx.functions.Func1;
 
 
 /**
@@ -44,17 +41,6 @@ public class TransformedWritableResourceTest extends WritableResourceTest<Object
     @Before
     public void setup() {
         when(this.mockDelegate.write(any())).thenReturn(Observable.empty());
-    }
-
-    @Test
-    public void transformedResourceNotEqualDelegate() {
-        // given:
-        final TransformedWritableResource<Object, Object> resource = createDefaultResource();
-
-        // then:
-        // Don't know which object's equals() gets called, so check both:
-        assertNotEquals(this.mockDelegate, resource);
-        assertNotEquals(resource, this.mockDelegate);
     }
 
     @Test
@@ -80,56 +66,6 @@ public class TransformedWritableResourceTest extends WritableResourceTest<Object
 
         // then:
         assertSame(origRsrc, wrappedRsrc);
-    }
-
-    @Test
-    public void equalResourcesHaveEqualFunctions() {
-        // given:
-        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
-        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
-
-        // when:
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
-
-        // then:
-        // Resources should be equal, so functions too:
-        assertEquals(function1, function2);
-        // ...but functions should not be equal to resources:
-        assertNotEquals(resource1, function1);
-        assertNotEquals(resource2, function2);
-    }
-
-    @Test
-    public void equalFunctionsHaveEqualStrings() {
-        // given:
-        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
-        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
-
-        // when:
-        final String string1 = function1.toString();
-        final String string2 = function2.toString();
-
-        // then:
-        assertEquals(string1, string2);
-    }
-
-    @Test
-    public void equalFunctionsHaveEqualHashcodes() {
-        // given:
-        final TransformedWritableResource<Object, Object> resource1 = createDefaultResource();
-        final TransformedWritableResource<Object, Object> resource2 = createDefaultResource();
-        final Func1<Object, Observable<Object>> function1 = resource1.toFunction();
-        final Func1<Object, Observable<Object>> function2 = resource2.toFunction();
-
-        // when:
-        final int hash1 = function1.hashCode();
-        final int hash2 = function2.hashCode();
-
-        // then:
-        assertEquals(hash1, hash2);
     }
 
     @Override

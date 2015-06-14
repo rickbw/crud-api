@@ -78,7 +78,7 @@ public abstract class TransformedWritableResource<RSRC, RESPONSE> implements Wri
      * this resource.
      */
     public Func1<RSRC, Observable<RESPONSE>> toFunction() {
-        return new DelegateObjectMethods.Function1<RSRC, Observable<RESPONSE>>(this) {
+        return new Func1<RSRC, Observable<RESPONSE>>() {
             @Override
             public Observable<RESPONSE> call(final RSRC newValue) {
                 return TransformedWritableResource.this.write(newValue);

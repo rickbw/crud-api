@@ -14,7 +14,6 @@
  */
 package crud.core;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
@@ -40,20 +39,6 @@ public abstract class ResourceSetTest<KEY> {
 
         // then:
         assertNotNull(resource);
-    }
-
-    @Test
-    public void twoResourcesFromSameKeyAreEqual() {
-        // given:
-        final ResourceSet<KEY, ?> rsrcSet = createDefaultResourceSet();
-        final KEY key = createDefaultKey();
-
-        // when:
-        final Resource resource1 = rsrcSet.get(key, this.mockSession);
-        final Resource resource2 = rsrcSet.get(key, this.mockSession);
-
-        // then:
-        assertEquals(resource1, resource2);
     }
 
     /**

@@ -1,4 +1,4 @@
-/* Copyright 2014 Rick Warren
+/* Copyright 2014–2015 Rick Warren
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,10 +14,6 @@
  */
 package crud.core;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 
 /**
  * A base class for all unit test classes that operate on
@@ -25,26 +21,6 @@ import org.junit.Test;
  * for all implementations.
  */
 public abstract class ResourceTest {
-
-    @Test
-    public void twoDefaultInstancesAreEqual() {
-        // given:
-        final Resource resource1 = createDefaultResource();
-        final Resource resource2 = createDefaultResource();
-
-        // then:
-        assertEquals(resource1, resource2);
-    }
-
-    @Test
-    public void twoDefaultInstancesHaveSameHashcode() {
-        // given:
-        final Resource resource1 = createDefaultResource();
-        final Resource resource2 = createDefaultResource();
-
-        // then:
-        assertEquals(resource1.hashCode(), resource2.hashCode());
-    }
 
     /**
      * Create a new instance of the resource.

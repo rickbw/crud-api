@@ -15,7 +15,6 @@
 package crud.pattern;
 
 import static crud.core.RxAssertions.assertObservablesEqual;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,71 +36,7 @@ public abstract class ResourceMergerTest {
 
     @Before
     public void setup() {
-        when(this.mockReader.read()).thenReturn(mockReaderState);
-    }
-
-    @Test
-    public void twoDefaultMergersAreEqual() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-
-        // then:
-        assertEquals(merger1, merger2);
-    }
-
-    @Test
-    public void hashCodesOfEqualMergersAreEqual() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-
-        // then:
-        assertEquals(merger1.hashCode(), merger2.hashCode());
-    }
-
-    @Test
-    public void toStringResultsOfEqualMergersAreEqual() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-
-        // then:
-        assertEquals(merger1.toString(), merger2.toString());
-    }
-
-    @Test
-    public void functionsOfEqualMergersAreEqual() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-
-        // then:
-        assertEquals(merger1.toFunction(), merger2.toFunction());
-    }
-
-    @Test
-    public void functionsOfEqualMergersHaveEqualHashCodes() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-        final Func0<Observable<Object>> function1 = merger1.toFunction();
-        final Func0<Observable<Object>> function2 = merger2.toFunction();
-
-        // then:
-        assertEquals(function1.hashCode(), function2.hashCode());
-    }
-
-    @Test
-    public void functionsOfEqualMergersHaveEqualStrings() {
-        // given:
-        final ResourceMerger<Object> merger1 = createDefaultMerger(this.mockReader);
-        final ResourceMerger<Object> merger2 = createDefaultMerger(this.mockReader);
-        final Func0<Observable<Object>> function1 = merger1.toFunction();
-        final Func0<Observable<Object>> function2 = merger2.toFunction();
-
-        // then:
-        assertEquals(function1.toString(), function2.toString());
+        when(this.mockReader.read()).thenReturn(this.mockReaderState);
     }
 
     @Test
