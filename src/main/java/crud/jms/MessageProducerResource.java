@@ -39,6 +39,8 @@ import rx.Subscriber;
             @Nonnull final MessageProducer producer) {
         this.worker = Objects.requireNonNull(worker);
         this.producer = Objects.requireNonNull(producer);
+
+        this.worker.addPreShutdownHook(this);
     }
 
     @Override

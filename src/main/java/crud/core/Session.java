@@ -16,6 +16,8 @@ package crud.core;
 
 import javax.annotation.Nonnull;
 
+import rx.Observable;
+
 
 /**
  * A context for {@link Ordering ordering} data reads and writes. For
@@ -36,6 +38,15 @@ public interface Session extends AsyncCloseable {
      * order in which data elements will be observed.
      */
     public @Nonnull Ordering getOrdering();
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Shutting down a {@link Session} implicitly shuts down all
+     * {@link Resource}s created in the context of that {@code DataBus}.
+     */
+    @Override
+    public Observable<Void> shutdown();
 
 
     /**

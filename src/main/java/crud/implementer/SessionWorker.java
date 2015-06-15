@@ -14,6 +14,8 @@
  */
 package crud.implementer;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 
 import crud.core.MiddlewareException;
+import crud.core.Resource;
 import crud.core.Session;
 import rx.Observable;
 import rx.Observer;
@@ -73,6 +76,12 @@ public class SessionWorker {
      * @see #isShutdownCalled
      */
     private volatile boolean isFinalTaskRun = false;
+    /**
+     * All of these will be {@link Resource#shutdown() shut down} first
+     * as part of this worker's {@link #shutdown(Task, long, TimeUnit)}
+     * process.
+     */
+    private final Set<Resource<?>> preShutdownHooks = new LinkedHashSet<>();
 
 
     public static SessionWorker create() {
@@ -110,35 +119,60 @@ public class SessionWorker {
     }
 
     /**
+     * Add a listener that will be called prior to this {@link SessionWorker}
+     * being {@link #shutdown(Task, long, TimeUnit) shut down}. The listener
+     * will only be called once, just before shutting down.
+     */
+    public void addPreShutdownHook(@Nonnull final Resource<?> shutMeDown) {
+        this.preShutdownHooks.add(shutMeDown);
+    }
+
+    /**
      * {@link #scheduleHot(Task) Schedule} the given
      * task, then stop accepting any new tasks, and initiate
      * the termination of this worker's background thread. The resulting
-     * {@link Observable} will emit {@link Observer#onCompleted()} once the
-     * termination is complete, a {@link TimeoutException} if it fails to
-     * complete within the given duration, or {@link InterruptedException} if
-     * the shutdown is interrupted.
+     * {@link Observable} will emit one of the following:
+     * <ol>
+     *  <li>Any {@link Observer#onError(Throwable) error} emitted by the given
+     *      final task. (This task will be run after all
+     *      {@link #addPreShutdownHook(Resource) pre-shutdown hooks}
+     *      have been shut down, but any error from it will receive precedence
+     *      with respect to reporting, because it is likely to be the most
+     *      relevant to the caller.)</li>
+     *  <li>The first {@link Observer#onError(Throwable) error}, if any,
+     *      emitted by any of the
+     *      {@link #addPreShutdownHook(Resource) pre-shutdown hooks}.
+     *      (These hooks are shut down before the final task runs, but their
+     *      errors are not allowed to hide any errors from that task.)</li>
+     *  <li>A {@link TimeoutException} if all scheduled tasks fail to complete
+     *      within the given duration.</li>
+     *  <li>An {@link InterruptedException} if the shutdown process is
+     *      interrupted from another thread.</li>
+     *  <li>{@link Observer#onCompleted()} once the termination is complete,
+     *      if no errors occurred.</li>
+     * </ol>
      * <p/>
      * This method only operates once. Calling it additional times has no
-     * effect.
+     * effect, and will return an {@link Observable} that emits
+     * {@link Observer#onCompleted()}.
      *
      * @param finalTask The caller should perform any of its own cleanup in
      *                  this task, scheduled here to avoid race conditions.
-     *
-     * @return  If this worker was previously shut down, the result is an
-     *          empty successful {@link Observable}. Otherwise, it it an
-     *          {@code Observable} that emits -- in order of preference -- any
-     *          failure of the final task, a {@link TimeoutException} if the
-     *          shutdown did not complete in time, an
-     *          {@link InterruptedException} if the shutdown was interrupted,
-     *          or an empty successful result if there were no errors.
      */
     public Observable<Void> shutdown(
             @Nonnull final Task<Void> finalTask,
             final long waitDuration, @Nonnull final TimeUnit waitUnit) {
         if (!this.isShutdownCalled.getAndSet(true)) {
+            /* ATTN: Shutting down the hooks will likely cause more tasks to
+             * be scheduled on this worker!
+             */
+            final Observable<Void> shutdownHookResults = AsyncResults.shutdownAll(this.preShutdownHooks);
+
             final boolean isFinalTask = true;
             final Observable<Void> taskResult = doScheduleHot(finalTask, isFinalTask);
+
             this.executor.shutdown();   // non-blocking
+
             final Observable<Void> await = Observable.create(new Observable.OnSubscribe<Void>() {
                 @Override
                 public void call(final Subscriber<? super Void> sub) {
@@ -155,7 +189,9 @@ public class SessionWorker {
                     }
                 }
             });
-            return Observable.concat(taskResult, await);
+
+            // Concat in the order described in the JavaDoc above:
+            return Observable.concat(taskResult, shutdownHookResults, await);
         } else {
             return Observable.empty(); // do nothing
         }

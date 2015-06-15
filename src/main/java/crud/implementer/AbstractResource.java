@@ -52,6 +52,7 @@ public abstract class AbstractResource<RSRC> implements Resource<RSRC> {
 
     protected AbstractResource(@Nonnull final SessionWorker worker) {
         this.worker = Objects.requireNonNull(worker);
+        this.worker.addPreShutdownHook(this);
     }
 
     /**

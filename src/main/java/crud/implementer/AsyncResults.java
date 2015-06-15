@@ -14,6 +14,9 @@
  */
 package crud.implementer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import crud.core.AsyncCloseable;
 import rx.Notification;
 import rx.Observable;
@@ -27,12 +30,32 @@ import rx.Observable;
  */
 public final class AsyncResults {
 
+    public static Observable<Void> shutdownAll(final Iterable<? extends AsyncCloseable> shutUsDown) {
+        final List<Observable<Void>> results = new ArrayList<>();
+        for (final AsyncCloseable shutMeDown : shutUsDown) {
+            /* Per the contract of shutdown(), these result Observables are
+             * hot. We don't need to subscribe to them here to make the
+             * shutdowns happen.
+             */
+            results.add(shutMeDown.shutdown());
+        }
+
+        /* Per our conventions, no Observable<Void> should ever emit any
+         * elements, so concat'ing them together should yield simply an
+         * onCompleted() (if all complete successfully) or an onError
+         * (carrying the first failure that was seen). However, just in case
+         * someone does try to emit any data elements, call ignoreElements()
+         * to eliminate them.
+         */
+        return Observable.concat(Observable.from(results)).ignoreElements();
+    }
+
     public static void awaitShutdown(final AsyncCloseable shutMeDown) throws Exception {
         final Observable<Void> shutdownResult = shutMeDown.shutdown();
         awaitCompletion(shutdownResult);
     }
 
-    public static void awaitCompletion(final Observable<Void> obs) throws Error, Exception {
+    public static void awaitCompletion(final Observable<Void> obs) throws Exception {
         // Will be onCompleted or onError:
         final Notification<Void> last = obs.materialize().toBlocking().last();
         if (last.isOnError()) {

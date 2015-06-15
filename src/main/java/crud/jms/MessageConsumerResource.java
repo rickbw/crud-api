@@ -46,6 +46,8 @@ import rx.Subscription;
         this.worker = Objects.requireNonNull(worker);
         this.consumer = Objects.requireNonNull(consumer);
 
+        this.worker.addPreShutdownHook(this);
+
         final MessageListenerToSubscriberHandoff task = new MessageListenerToSubscriberHandoff(messageType);
         this.sharedObservable = this.worker.scheduleCold(task).share();
     }
