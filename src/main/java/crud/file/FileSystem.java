@@ -62,7 +62,7 @@ public final class FileSystem extends AbstractDataBus {
 
     @Override
     protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
-        return File.class == id.getKeyType()
+        return WriteRequest.class == id.getKeyType()
             && String.class == id.getElementType()
             && Void.class == id.getWriteResultType();
     }

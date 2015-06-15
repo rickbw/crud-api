@@ -24,6 +24,7 @@ import crud.core.Session;
 import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
 import crud.file.FileSystem;
+import crud.file.WriteRequest;
 import crud.pattern.ResourceMerger;
 import rx.Observable;
 import rx.functions.Func1;
@@ -35,9 +36,9 @@ public final class TextFileExample {
             "Example",
             File.class,
             String.class);
-    private static final WritableResourceSet.Id<File, String, Void> writableFileSetId = new WritableResourceSet.Id<>(
+    private static final WritableResourceSet.Id<WriteRequest, String, Void> writableFileSetId = new WritableResourceSet.Id<>(
             "Example",
-            File.class,
+            WriteRequest.class,
             String.class,
             Void.class);
     private static final LineToJson lineToJson = new LineToJson();
@@ -58,14 +59,16 @@ public final class TextFileExample {
         if (outputFile.isDirectory()) {
             System.err.println("Output " + outputFile + " is a directory");
             System.exit(-1);
+        } else if (outputFile.exists()) {
+            outputFile.delete();    // create from scratch
         }
 
         final DataBus fileSystem = new FileSystem();
         final ReadableResourceSet<File, String> readableFiles = fileSystem.resources(readableFileSetId).get();
-        final WritableResourceSet<File, String, Void> writableFiles = fileSystem.resources(writableFileSetId).get();
+        final WritableResourceSet<WriteRequest, String, Void> writableFiles = fileSystem.resources(writableFileSetId).get();
         final Session session = fileSystem.startSession(false);
         final ReadableResource<String> inputLines = readableFiles.get(inputFile, session);
-        final WritableResource<String, Void> outputLines = writableFiles.get(outputFile, session);
+        final WritableResource<String, Void> outputLines = writableFiles.get(new WriteRequest(WriteRequest.Type.APPEND, outputFile), session);
         final ResourceMerger<Void> merger = ResourceMerger.mapToWriter(
                 inputLines,
                 lineToJson,
@@ -73,7 +76,9 @@ public final class TextFileExample {
 
         System.out.println("Transforming from " + inputFile + " into " + outputFile + "...");
         final Observable<Void> result = merger.merge();
-        result.toBlocking().toFuture().get();
+        result.materialize().toBlocking().toFuture().get();
+        session.shutdown();     // TODO: Make this automatic
+        fileSystem.shutdown();  // Don't bother waiting for it to complete
         System.out.println("Done!");
     }
 

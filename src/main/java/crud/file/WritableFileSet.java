@@ -14,8 +14,6 @@
  */
 package crud.file;
 
-import java.io.File;
-
 import crud.core.Session;
 import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
@@ -24,16 +22,19 @@ import crud.implementer.AbstractWritableResourceSet;
 import crud.implementer.SessionWorker;
 
 
-/*package*/ final class WritableFileSet extends AbstractWritableResourceSet<File, String, Void> {
+/*package*/ final class WritableFileSet extends AbstractWritableResourceSet<WriteRequest, String, Void> {
 
-    public WritableFileSet(final WritableResourceSet.Id<File, String, Void> id) {
+    public WritableFileSet(final WritableResourceSet.Id<WriteRequest, String, Void> id) {
         super(id);
     }
 
     @Override
-    public WritableResource<String, Void> get(final File key, final Session session) {
+    public WritableResource<String, Void> get(final WriteRequest key, final Session session) {
         final SessionWorker worker = ((AbstractSession) session).getWorker();
-        return new TextLineFileAppender(key, worker);
+        return new TextLineFileWriter(
+                key.getFileToWrite(),
+                key.getType() == WriteRequest.Type.APPEND,
+                worker);
     }
 
 }

@@ -27,14 +27,19 @@ import crud.implementer.SessionWorker;
 import rx.Subscriber;
 
 
-/*package*/ final class TextLineFileAppender extends AbstractWritableResource<String, Void> {
+/*package*/ final class TextLineFileWriter extends AbstractWritableResource<String, Void> {
 
     private @Nonnull final File writeMe;
+    private final boolean appendToFile;
 
 
-    public TextLineFileAppender(@Nonnull final File writeMe, @Nonnull final SessionWorker worker) {
+    public TextLineFileWriter(
+            @Nonnull final File writeMe,
+            final boolean appendToFile,
+            @Nonnull final SessionWorker worker) {
         super(worker);
         this.writeMe = Objects.requireNonNull(writeMe);
+        this.appendToFile = appendToFile;
     }
 
     @Override
@@ -56,8 +61,7 @@ import rx.Subscriber;
          * If we could pass in a whole Observable of lines, we could
          * stream them all in, and only close at the end.
          */
-        final boolean appendToFile = true;
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.writeMe, appendToFile))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.writeMe, this.appendToFile))) {
             writer.write(normalizedLine);
             writer.newLine();
         }

@@ -21,17 +21,25 @@ import crud.core.ResourceSetTest;
 import crud.core.WritableResourceSet;
 
 
-public class WritableFileSetTest extends ResourceSetTest<File> {
+public class WritableFileSetTest extends ResourceSetTest<WriteRequest> {
 
     @Override
     protected WritableFileSet createDefaultResourceSet() {
-        return new WritableFileSet(new WritableResourceSet.Id<>("Test", File.class, String.class, Void.class));
+        final WritableResourceSet.Id<WriteRequest, String, Void> id = new WritableResourceSet.Id<>(
+                "Test",
+                WriteRequest.class,
+                String.class,
+                Void.class);
+        return new WritableFileSet(id);
     }
 
     @Override
-    protected File createDefaultKey() {
+    protected WriteRequest createDefaultKey() {
         try {
-            return File.createTempFile(getClass().getSimpleName(), null);
+            final File tmpFile = File.createTempFile(getClass().getSimpleName(), null);
+            return new WriteRequest(
+                    WriteRequest.Type.APPEND,
+                    tmpFile);
         } catch (final IOException ex) {
             throw new IllegalStateException(ex);
         }

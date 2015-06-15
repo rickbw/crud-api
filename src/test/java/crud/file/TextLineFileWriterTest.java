@@ -33,7 +33,7 @@ import crud.implementer.SessionWorker;
 import rx.Observable;
 
 
-public class TextLineFileAppenderTest extends WritableResourceTest<String, Void> {
+public class TextLineFileWriterTest extends WritableResourceTest<String, Void> {
 
     private final SessionWorker worker = new SessionWorker();
     private File file;
@@ -69,8 +69,8 @@ public class TextLineFileAppenderTest extends WritableResourceTest<String, Void>
     }
 
     @Override
-    protected TextLineFileAppender createDefaultResource() {
-        return new TextLineFileAppender(this.file, this.worker);
+    protected TextLineFileWriter createDefaultResource() {
+        return new TextLineFileWriter(this.file, true, this.worker);
     }
 
     @Override
