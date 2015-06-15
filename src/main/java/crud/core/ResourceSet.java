@@ -50,7 +50,7 @@ public interface ResourceSet<KEY, RSRC> {
      *              obtained from a {@link DataBus} compatible with this
      *              {@link WritableResourceSet}.
      */
-    public abstract @Nonnull Resource get(@Nonnull KEY key, @Nonnull Session session);
+    public abstract @Nonnull Resource<RSRC> get(@Nonnull KEY key, @Nonnull Session session);
 
 
     /**
@@ -65,15 +65,15 @@ public interface ResourceSet<KEY, RSRC> {
     public static abstract class Id<KEY, RSRC> {
         private @Nonnull final String name;
         private @Nonnull final Class<KEY> keyType;
-        private @Nonnull final Class<RSRC> elementType;
+        private @Nonnull final Class<RSRC> resourceType;
 
         protected Id(
                 @Nonnull final String name,
                 @Nonnull final Class<KEY> keyType,
-                @Nonnull final Class<RSRC> type) {
+                @Nonnull final Class<RSRC> resourceType) {
             this.name = Objects.requireNonNull(name);
             this.keyType = Objects.requireNonNull(keyType);
-            this.elementType = Objects.requireNonNull(type);
+            this.resourceType = Objects.requireNonNull(resourceType);
         }
 
         public final @Nonnull String getName() {
@@ -84,8 +84,8 @@ public interface ResourceSet<KEY, RSRC> {
             return this.keyType;
         }
 
-        public final @Nonnull Class<RSRC> getElementType() {
-            return this.elementType;
+        public final @Nonnull Class<RSRC> getResourceType() {
+            return this.resourceType;
         }
 
         @Override
@@ -106,7 +106,7 @@ public interface ResourceSet<KEY, RSRC> {
             if (this.keyType != other.keyType) {
                 return false;
             }
-            if (this.elementType != other.elementType) {
+            if (this.resourceType != other.resourceType) {
                 return false;
             }
             return true;
@@ -118,7 +118,7 @@ public interface ResourceSet<KEY, RSRC> {
             int result = 1;
             result = prime * result + this.name.hashCode();
             result = prime * result + this.keyType.hashCode();
-            result = prime * result + this.elementType.hashCode();
+            result = prime * result + this.resourceType.hashCode();
             return result;
         }
     }

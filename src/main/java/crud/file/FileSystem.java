@@ -51,7 +51,7 @@ public final class FileSystem extends AbstractDataBus {
     @Override
     protected boolean isResourceSetAvailable(final ReadableResourceSet.Id<?, ?> id) {
         return File.class == id.getKeyType()
-            && String.class == id.getElementType();
+            && String.class == id.getResourceType();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" }) // checked by isResourceSetAvailable()
@@ -63,7 +63,7 @@ public final class FileSystem extends AbstractDataBus {
     @Override
     protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
         return WriteRequest.class == id.getKeyType()
-            && String.class == id.getElementType()
+            && String.class == id.getResourceType()
             && Void.class == id.getWriteResultType();
     }
 

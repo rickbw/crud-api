@@ -41,7 +41,7 @@ public class ExampleDataBus extends AbstractDataBus {
 
     @Override
     protected boolean isResourceSetAvailable(final ReadableResourceSet.Id<?, ?> id) {
-        return id.getKeyType() == id.getElementType();
+        return id.getKeyType() == id.getResourceType();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ExampleDataBus extends AbstractDataBus {
     @Override
     protected boolean isResourceSetAvailable(final WritableResourceSet.Id<?, ?, ?> id) {
         return Writer.class.isAssignableFrom(id.getKeyType())
-            && String.class.isAssignableFrom(id.getElementType())
+            && String.class.isAssignableFrom(id.getResourceType())
             && id.getWriteResultType().isAssignableFrom(Integer.class);
     }
 

@@ -35,8 +35,10 @@ import rx.Observer;
  * or "unknown because of error", may further be expressed with by the
  * declaration idiom {@code Observable<Void>}.
  *
+ * @param <RSRC>    The type of the resource's value(s).
+ *
  * @author Rick Warren
  */
-public interface Resource extends AsyncCloseable {
+public interface Resource<RSRC> extends AsyncCloseable {
     // empty
 }

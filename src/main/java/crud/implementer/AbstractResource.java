@@ -18,9 +18,9 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import crud.core.AsyncCloseable;
-import crud.core.WritableResource;
 import crud.core.ReadableResource;
+import crud.core.Resource;
+import crud.core.WritableResource;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -31,7 +31,7 @@ import rx.Subscriber;
  *
  * @author Rick Warren
  */
-public abstract class AbstractSessionParticipant implements AsyncCloseable {
+public abstract class AbstractResource<RSRC> implements Resource<RSRC> {
 
     private @Nonnull final SessionWorker worker;
 
@@ -50,7 +50,7 @@ public abstract class AbstractSessionParticipant implements AsyncCloseable {
         });
     }
 
-    protected AbstractSessionParticipant(@Nonnull final SessionWorker worker) {
+    protected AbstractResource(@Nonnull final SessionWorker worker) {
         this.worker = Objects.requireNonNull(worker);
     }
 

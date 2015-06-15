@@ -99,8 +99,8 @@ public class JdbcDataBus extends AbstractDataBus {
             log.warn("JDBC ResourceSets have key type StatementTemplate, not {}", id.getKeyType().getName());
             return false;
         }
-        if (ResultSetRow.class != id.getElementType()) {
-            log.warn("JDBC readable ResourceSets have element type ResultSetRow, not {}", id.getElementType().getName());
+        if (ResultSetRow.class != id.getResourceType()) {
+            log.warn("JDBC readable ResourceSets have element type ResultSetRow, not {}", id.getResourceType().getName());
             return false;
         }
         return true;
@@ -119,8 +119,8 @@ public class JdbcDataBus extends AbstractDataBus {
             log.warn("JDBC ResourceSets have key type StatementTemplate, not {}", id.getKeyType().getName());
             return false;
         }
-        if (StatementParameters.class != id.getElementType()) {
-            log.warn("JDBC writable ResourceSets have element type StatementParameters, not {}", id.getElementType().getName());
+        if (StatementParameters.class != id.getResourceType()) {
+            log.warn("JDBC writable ResourceSets have element type StatementParameters, not {}", id.getResourceType().getName());
             return false;
         }
         if (Integer.class != id.getWriteResultType()) {

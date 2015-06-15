@@ -31,7 +31,7 @@ import rx.Observable;
  *
  * @author Rick Warren
  */
-public interface WritableResource<RSRC, RESPONSE> extends Resource {
+public interface WritableResource<RSRC, RESPONSE> extends Resource<RSRC> {
 
     /**
      * Replace or update the value of the resource with the given value. It is

@@ -27,7 +27,9 @@ import rx.Observable;
 import rx.Subscriber;
 
 
-/*package*/ final class QueryResource extends StatementProvider implements ReadableResource<ResultSetRow> {
+/*package*/ final class QueryResource
+extends StatementProvider<ResultSetRow>
+implements ReadableResource<ResultSetRow> {
 
     public QueryResource(
             @Nonnull final Connection connection,

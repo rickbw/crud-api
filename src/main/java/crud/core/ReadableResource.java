@@ -32,7 +32,7 @@ import rx.Observer;
  *
  * @author Rick Warren
  */
-public interface ReadableResource<RSRC> extends Resource {
+public interface ReadableResource<RSRC> extends Resource<RSRC> {
 
     /**
      * Request the value(s) of this resource. Zero or more values will be

@@ -27,7 +27,7 @@ import rx.Subscriber;
 
 
 /*package*/ final class UpdateResource
-extends StatementProvider
+extends StatementProvider<StatementParameters>
 implements WritableResource<StatementParameters, Integer> {
 
     public UpdateResource(

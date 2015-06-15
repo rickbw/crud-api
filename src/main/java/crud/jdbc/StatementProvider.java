@@ -22,11 +22,11 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import crud.implementer.AbstractSessionParticipant;
+import crud.implementer.AbstractResource;
 import crud.implementer.SessionWorker;
 
 
-/*package*/ class StatementProvider extends AbstractSessionParticipant {
+/*package*/ class StatementProvider<RSRC> extends AbstractResource<RSRC> {
 
     private @Nonnull final Connection connection;
     private @Nonnull final StatementTemplate statementTemplate;

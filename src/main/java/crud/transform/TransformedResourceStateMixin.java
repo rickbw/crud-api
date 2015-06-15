@@ -24,7 +24,7 @@ import rx.functions.Func1;
  * Maintains state on behalf of the {@code Transformed*Resource} classes in this
  * package, in order to minimize repeated boilerplate code.
  */
-/*package*/ final class TransformedResourceStateMixin<R extends Resource, T> {
+/*package*/ final class TransformedResourceStateMixin<R extends Resource<?>, T> {
 
     private final R delegate;
     private final T auxiliaryState;

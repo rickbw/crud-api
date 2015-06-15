@@ -197,8 +197,8 @@ public class JmsDataBus implements DataBus {
             log.warn("JMS ResourceSets have key type String, not {}", id.getKeyType().getName());
             return false;
         }
-        if (!Message.class.isAssignableFrom(id.getElementType())) {
-            log.warn("JMS ResourceSets have element type Message, not {}", id.getElementType().getName());
+        if (!Message.class.isAssignableFrom(id.getResourceType())) {
+            log.warn("JMS ResourceSets have element type Message, not {}", id.getResourceType().getName());
             return false;
         }
         return true;

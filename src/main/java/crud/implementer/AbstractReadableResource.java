@@ -23,7 +23,7 @@ import rx.Subscriber;
 
 
 public abstract class AbstractReadableResource<RSRC>
-extends AbstractSessionParticipant
+extends AbstractResource<RSRC>
 implements ReadableResource<RSRC> {
 
     @Override

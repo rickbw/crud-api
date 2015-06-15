@@ -23,7 +23,7 @@ import rx.Subscriber;
 
 
 public abstract class AbstractWritableResource<RSRC, RESPONSE>
-extends AbstractSessionParticipant
+extends AbstractResource<RSRC>
 implements WritableResource<RSRC, RESPONSE> {
 
     /**

@@ -18,7 +18,7 @@ import crud.core.Resource;
 import crud.implementer.AsyncResults;
 
 
-public abstract class SyncResource<D extends Resource>
+public abstract class SyncResource<RSRC, D extends Resource<RSRC>>
 extends SyncDelegateHolder<D>
 implements AutoCloseable {
 

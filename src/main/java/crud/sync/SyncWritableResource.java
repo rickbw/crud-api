@@ -25,7 +25,7 @@ import crud.core.WritableResource;
  * @author Rick Warren
  */
 public class SyncWritableResource<RSRC, RESPONSE>
-extends SyncResource<WritableResource<RSRC, RESPONSE>> {
+extends SyncResource<RSRC, WritableResource<RSRC, RESPONSE>> {
 
     public SyncWritableResource(@Nonnull final WritableResource<RSRC, RESPONSE> delegate) {
         super(delegate);

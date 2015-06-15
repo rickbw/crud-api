@@ -24,7 +24,7 @@ import crud.core.ReadableResource;
  *
  * @author Rick Warren
  */
-public class SyncReadableResource<RSRC> extends SyncResource<ReadableResource<RSRC>> {
+public class SyncReadableResource<RSRC> extends SyncResource<RSRC, ReadableResource<RSRC>> {
 
     public SyncReadableResource(@Nonnull final ReadableResource<RSRC> delegate) {
         super(delegate);

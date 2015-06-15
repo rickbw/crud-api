@@ -80,7 +80,7 @@ public interface WritableResourceSet<KEY, RSRC, RESPONSE> extends ResourceSet<KE
             return WritableResourceSet.class.getSimpleName()
                     + '.' + getClass().getSimpleName() + "(\""
                     + getName() + "\", "
-                    + getKeyType().getName() + " -> " + getElementType().getName()
+                    + getKeyType().getName() + " -> " + getResourceType().getName()
                     + " -> " + this.writeResultType.getName()
                     + ')';
         }

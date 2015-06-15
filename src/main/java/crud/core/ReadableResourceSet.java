@@ -63,7 +63,7 @@ public interface ReadableResourceSet<KEY, RSRC> extends ResourceSet<KEY, RSRC> {
             return ReadableResourceSet.class.getSimpleName()
                     + '.' + getClass().getSimpleName() + "(\""
                     + getName() + "\", "
-                    + getKeyType().getName() + " -> " + getElementType().getName()
+                    + getKeyType().getName() + " -> " + getResourceType().getName()
                     + ')';
         }
     }

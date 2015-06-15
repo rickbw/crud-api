@@ -29,7 +29,7 @@ extends SyncDelegateHolder<D> {
     /**
      * @see ResourceSet#get(Object, Session)
      */
-    public abstract @Nonnull SyncResource<?> get(
+    public abstract @Nonnull SyncResource<RSRC, ?> get(
             @Nonnull final KEY key,
             @Nonnull final SyncSession session);
 
