@@ -25,6 +25,7 @@ import javax.jms.MessageListener;
 import crud.core.MiddlewareException;
 import crud.core.ReadableResource;
 import crud.implementer.SessionWorker;
+import crud.implementer.Task;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -59,7 +60,7 @@ import rx.Subscription;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
+        return this.worker.scheduleHot(new Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
                 /* TODO: Should this result in an onCompleted() to the
@@ -72,7 +73,7 @@ import rx.Subscription;
     }
 
 
-    private final class MessageListenerToSubscriberHandoff implements SessionWorker.Task<M> {
+    private final class MessageListenerToSubscriberHandoff implements Task<M> {
         private final Class<M> messageType;
 
         public MessageListenerToSubscriberHandoff(final Class<M> messageType) {

@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 
 import crud.core.WritableResource;
 import crud.implementer.SessionWorker;
+import crud.implementer.Task;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -39,7 +40,7 @@ implements WritableResource<StatementParameters, Integer> {
 
     @Override
     public Observable<Integer> write(final StatementParameters params) {
-        return getWorker().scheduleHot(new SessionWorker.Task<Integer>() {
+        return getWorker().scheduleHot(new Task<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> sub) throws SQLException {
                 @SuppressWarnings("resource")

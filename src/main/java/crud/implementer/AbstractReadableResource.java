@@ -28,7 +28,7 @@ implements ReadableResource<RSRC> {
 
     @Override
     public Observable<RSRC> read() {
-        return getWorker().scheduleCold(new SessionWorker.Task<RSRC>() {
+        return getWorker().scheduleCold(new Task<RSRC>() {
             @Override
             public void call(final Subscriber<? super RSRC> sub) throws Exception {
                 onReadSubscribe(sub);

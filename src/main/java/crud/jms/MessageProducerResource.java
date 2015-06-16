@@ -24,6 +24,7 @@ import javax.jms.MessageProducer;
 
 import crud.core.WritableResource;
 import crud.implementer.SessionWorker;
+import crud.implementer.Task;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -45,7 +46,7 @@ import rx.Subscriber;
 
     @Override
     public Observable<Void> write(final M message) {
-        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
+        return this.worker.scheduleHot(new Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
                 MessageProducerResource.this.producer.send(message, new CompletionListener() {
@@ -65,7 +66,7 @@ import rx.Subscriber;
 
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
+        return this.worker.scheduleHot(new Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws JMSException {
                 MessageProducerResource.this.producer.close();

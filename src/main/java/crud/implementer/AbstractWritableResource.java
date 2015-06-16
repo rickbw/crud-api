@@ -37,7 +37,7 @@ implements WritableResource<RSRC, RESPONSE> {
      */
     @Override
     public Observable<RESPONSE> write(final RSRC value) {
-        return getWorker().scheduleHot(new SessionWorker.Task<RESPONSE>() {
+        return getWorker().scheduleHot(new Task<RESPONSE>() {
             @Override
             public void call(final Subscriber<? super RESPONSE> sub) throws Exception {
                 doWrite(value, sub);

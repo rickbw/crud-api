@@ -42,7 +42,7 @@ public abstract class AbstractResource<RSRC> implements Resource<RSRC> {
      */
     @Override
     public Observable<Void> shutdown() {
-        return this.worker.scheduleHot(new SessionWorker.Task<Void>() {
+        return this.worker.scheduleHot(new Task<Void>() {
             @Override
             public void call(final Subscriber<? super Void> sub) throws Exception {
                 doShutdown();

@@ -30,7 +30,7 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
     private @Nonnull final SessionWorker worker;
     private @Nonnull final Session.Ordering ordering;
 
-    private final SessionWorker.Task<Void> shutdownTask = new SessionWorker.Task<Void>() {
+    private final Task<Void> shutdownTask = new Task<Void>() {
         @Override
         public void call(final Subscriber<? super Void> sub) throws Exception {
             doShutdown();

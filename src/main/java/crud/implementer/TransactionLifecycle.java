@@ -40,13 +40,13 @@ public abstract class TransactionLifecycle {
 
     private @Nonnull final SessionWorker worker;
 
-    private final SessionWorker.Task<Void> commitTask = new SessionWorker.Task<Void>() {
+    private final Task<Void> commitTask = new Task<Void>() {
         @Override
         public void call(final Subscriber<? super Void> sub) throws Exception {
             doCommit();
         }
     };
-    private final SessionWorker.Task<Void> rollbackTask = new SessionWorker.Task<Void>() {
+    private final Task<Void> rollbackTask = new Task<Void>() {
         @Override
         public void call(final Subscriber<? super Void> sub) throws Exception {
             doRollback();

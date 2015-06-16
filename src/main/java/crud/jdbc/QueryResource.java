@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 
 import crud.core.ReadableResource;
 import crud.implementer.SessionWorker;
+import crud.implementer.Task;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -40,7 +41,7 @@ implements ReadableResource<ResultSetRow> {
 
     @Override
     public Observable<ResultSetRow> read() {
-        return getWorker().scheduleCold(new SessionWorker.Task<ResultSetRow>() {
+        return getWorker().scheduleCold(new Task<ResultSetRow>() {
             @Override
             public void call(final Subscriber<? super ResultSetRow> sub) throws SQLException {
                 @SuppressWarnings("resource")
