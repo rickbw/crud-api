@@ -77,7 +77,6 @@ public final class TextFileExample {
         System.out.println("Transforming from " + inputFile + " into " + outputFile + "...");
         final Observable<Void> result = merger.merge();
         result.materialize().toBlocking().toFuture().get();
-        session.shutdown();     // TODO: Make this automatic
         fileSystem.shutdown();  // Don't bother waiting for it to complete
         System.out.println("Done!");
     }

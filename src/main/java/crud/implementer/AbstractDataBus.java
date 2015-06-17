@@ -14,6 +14,7 @@
  */
 package crud.implementer;
 
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -28,7 +29,9 @@ import crud.core.Session;
 import crud.core.TransactedSession;
 import crud.core.UnsupportedSessionOrderingException;
 import crud.core.WritableResourceSet;
+import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 
 
 /**
@@ -41,7 +44,28 @@ import rx.Observer;
  *
  * @author Rick Warren
  */
-public abstract class AbstractDataBus extends AbstractAsyncCloseable implements DataBus {
+public abstract class AbstractDataBus implements DataBus {
+
+    private @Nonnull final DataBusWorker worker;
+
+    private final Task<Void> shutdownTask = new Task<Void>() {
+        @Override
+        public void call(final Subscriber<? super Void> sub) throws Exception {
+            doShutdown();
+        }
+    };
+
+
+    /**
+     * Provided for use by subclasses and their clients.
+     * <p/>
+     * <em>ATTN</em>: This method is not declared {@code final} in order to
+     * support mocking in unit tests. Nevertheless, it is not intended for
+     * overriding, and the behavior in that case is unspecified.
+     */
+    public @Nonnull DataBusWorker getWorker() {
+        return this.worker;
+    }
 
     /**
      * Do nothing. Subclasses can override this method to do more.
@@ -161,8 +185,16 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
         }
     }
 
-    protected AbstractDataBus() {
-        // nothing to do
+    /**
+     * Subclasses should override {@link #doShutdown()} instead.
+     */
+    @Override
+    public final Observable<Void> shutdown() {
+        return this.worker.shutdown(this.shutdownTask);
+    }
+
+    protected AbstractDataBus(@Nonnull final DataBusWorker worker) {
+        this.worker = Objects.requireNonNull(worker);
     }
 
     /**
@@ -299,6 +331,22 @@ public abstract class AbstractDataBus extends AbstractAsyncCloseable implements 
      */
     protected WritableResourceSet<?, ?, ?> resolveResourceSet(final WritableResourceSet.Id<?, ?, ?> id) throws Exception {
         throw new AssertionError("isResourceSetAvailable() indicated ResourceSet available, but this method was not overridden");
+    }
+
+    /**
+     * Subclasses should override this method to perform any shutdown task
+     * they have to do.
+     *
+     * By default, this method does nothing.
+     *
+     * @throws Exception    Subclasses may throw whatever they wish.
+     *                      Exceptions will be passed to
+     *                      {@link Observer#onError(Throwable)}.
+     *
+     * @see #shutdown()
+     */
+    protected void doShutdown() throws Exception {
+        // do nothing
     }
 
 }

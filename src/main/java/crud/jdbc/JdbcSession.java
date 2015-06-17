@@ -24,6 +24,7 @@ import crud.core.ReadableResource;
 import crud.core.Session;
 import crud.core.WritableResource;
 import crud.implementer.AbstractSession;
+import crud.implementer.DataBusWorker;
 import crud.implementer.SessionWorker;
 
 
@@ -32,8 +33,10 @@ import crud.implementer.SessionWorker;
     private @Nonnull final Connection connection;
 
 
-    public JdbcSession(@Nonnull final Connection connection) {
-        super(SessionWorker.create(), Session.Ordering.ORDERED);
+    public JdbcSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final Connection connection) {
+        super(dataBusWorker, SessionWorker.create(), Session.Ordering.ORDERED);
         this.connection = Objects.requireNonNull(connection);
     }
 

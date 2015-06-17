@@ -14,13 +14,18 @@
  */
 package crud.jms;
 
+import javax.annotation.Nonnull;
+
 import crud.core.Session;
+import crud.implementer.DataBusWorker;
 
 
 /*package*/ final class NonTransactedJmsSession extends SessionWrapper implements Session {
 
-    public NonTransactedJmsSession(final javax.jms.Session delegate) {
-        super(Session.Ordering.ORDERED, delegate);
+    public NonTransactedJmsSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final javax.jms.Session delegate) {
+        super(dataBusWorker, Session.Ordering.ORDERED, delegate);
         // Assumed, but illegal to check in this thread:
         //assert !getDelegate().getTransacted();
     }

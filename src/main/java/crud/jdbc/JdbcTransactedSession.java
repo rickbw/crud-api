@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 import crud.core.Session;
 import crud.core.TransactedSession;
+import crud.implementer.DataBusWorker;
 import crud.implementer.TransactionLifecycle;
 import rx.Observable;
 
@@ -29,8 +30,10 @@ import rx.Observable;
     private final TransactionLifecycle tx;
 
 
-    public JdbcTransactedSession(@Nonnull final Connection connection) {
-        super(connection);
+    public JdbcTransactedSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final Connection connection) {
+        super(dataBusWorker, connection);
         this.tx = new TransactionLifecycle(getWorker()) {
             @Override
             protected void doCommit() throws Exception {

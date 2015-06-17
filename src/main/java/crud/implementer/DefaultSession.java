@@ -14,6 +14,8 @@
  */
 package crud.implementer;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.base.Preconditions;
 
 import crud.core.Session;
@@ -28,8 +30,10 @@ import crud.core.Session;
  */
 public class DefaultSession extends AbstractSession {
 
-    public DefaultSession(final Session.Ordering ordering) {
-        super(SessionWorker.create(), ordering);
+    public DefaultSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final Session.Ordering ordering) {
+        super(dataBusWorker, SessionWorker.create(), ordering);
         Preconditions.checkArgument(
                 getOrdering() != Session.Ordering.TRANSACTED,
                 "Not a TransactedSession");

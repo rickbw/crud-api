@@ -30,13 +30,23 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+import crud.core.DataBus;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.core.TransactedSession;
 import crud.core.WritableResourceSet;
 import crud.implementer.AbstractDataBus;
+import crud.implementer.DataBusWorker;
 
 
+/**
+ * A {@link DataBus} implementation that wraps a JDBC {@link DataSource}.
+ * It supports {@link TransactedSession}s by means of the usual JDBC
+ * transactions. It also supports ordered {@link Session}s by means of
+ * {@link Connection#setAutoCommit(boolean) auto-commit}.
+ *
+ * @author Rick Warren
+ */
 public class JdbcDataBus extends AbstractDataBus {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcDataBus.class);
@@ -55,8 +65,8 @@ public class JdbcDataBus extends AbstractDataBus {
 
     public JdbcDataBus(
             @Nonnull final DataSource dataSource,
-            final String username,
-            final String password) {
+            @Nonnull final String username,
+            @Nonnull final String password) {
         this(dataSource, Optional.of(username), Optional.of(password));
     }
 
@@ -64,6 +74,7 @@ public class JdbcDataBus extends AbstractDataBus {
             @Nonnull final DataSource dataSource,
             final Optional<String> username,
             final Optional<String> password) {
+        super(DataBusWorker.create());
         this.dataSource = Objects.requireNonNull(dataSource);
         this.username = Objects.requireNonNull(username);
         this.password = Objects.requireNonNull(password);
@@ -82,7 +93,7 @@ public class JdbcDataBus extends AbstractDataBus {
     protected Session doStartOrderedSession() throws SQLException {
         final Connection connection = getConnection();
         connection.setAutoCommit(true);
-        return new JdbcSession(connection);
+        return new JdbcSession(getWorker(), connection);
     }
 
     @Override
@@ -90,7 +101,7 @@ public class JdbcDataBus extends AbstractDataBus {
     protected TransactedSession doStartTransactedSession() throws SQLException {
         final Connection connection = getConnection();
         connection.setAutoCommit(false);
-        return new JdbcTransactedSession(connection);
+        return new JdbcTransactedSession(getWorker(), connection);
     }
 
     @Override

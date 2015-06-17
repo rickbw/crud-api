@@ -70,6 +70,14 @@ public abstract class AbstractSession extends AbstractAsyncCloseable implements 
         this.ordering = Objects.requireNonNull(ordering);
     }
 
+    protected AbstractSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final SessionWorker myWorker,
+            @Nonnull final Session.Ordering ordering) {
+        this(myWorker, ordering);
+        dataBusWorker.addPreShutdownHook(this);
+    }
+
     /**
      * Subclasses should override this method to perform any shutdown task
      * they have to do. It will be run in the context of the

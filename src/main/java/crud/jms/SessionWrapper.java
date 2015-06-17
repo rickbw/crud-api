@@ -21,6 +21,7 @@ import javax.jms.JMSException;
 
 import crud.core.Session;
 import crud.implementer.AbstractSession;
+import crud.implementer.DataBusWorker;
 import crud.implementer.SessionWorker;
 
 
@@ -29,8 +30,11 @@ import crud.implementer.SessionWorker;
     private @Nonnull final javax.jms.Session delegate;
 
 
-    protected SessionWrapper(@Nonnull final Session.Ordering ordering, @Nonnull final javax.jms.Session delegate) {
-        super(SessionWorker.create(), ordering);
+    protected SessionWrapper(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final Session.Ordering ordering,
+            @Nonnull final javax.jms.Session delegate) {
+        super(dataBusWorker, SessionWorker.create(), ordering);
         this.delegate = Objects.requireNonNull(delegate);
     }
 

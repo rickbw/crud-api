@@ -14,8 +14,11 @@
  */
 package crud.jms;
 
+import javax.annotation.Nonnull;
+
 import crud.core.Session;
 import crud.core.TransactedSession;
+import crud.implementer.DataBusWorker;
 import crud.implementer.TransactionLifecycle;
 import rx.Observable;
 
@@ -25,8 +28,10 @@ import rx.Observable;
     private final TransactionLifecycle tx;
 
 
-    public TransactedJmsSession(final javax.jms.Session delegate) {
-        super(Session.Ordering.TRANSACTED, delegate);
+    public TransactedJmsSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final javax.jms.Session delegate) {
+        super(dataBusWorker, Session.Ordering.TRANSACTED, delegate);
         // Assumed, but illegal to check in this thread:
         //assert getDelegate().getTransacted();
         this.tx = new TransactionLifecycle(getWorker()) {

@@ -117,4 +117,13 @@ public interface DataBus extends AsyncCloseable {
      */
     public @Nonnull TransactedSession startTransactedSession();
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Shutting down a {@link DataBus} implicitly shuts down all
+     * {@link Session}s created in the context of that {@code DataBus}.
+     */
+    @Override
+    public Observable<Void> shutdown();
+
 }

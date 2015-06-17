@@ -39,6 +39,7 @@ import crud.core.Session;
 import crud.core.Session.Ordering;
 import crud.core.TransactedSession;
 import crud.core.WritableResourceSet;
+import crud.implementer.DataBusWorker;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -56,6 +57,12 @@ public class JmsDataBus implements DataBus {
     private static final int ORDERED_ACKNOWLEDGE_MODE = javax.jms.Session.AUTO_ACKNOWLEDGE;
     private static final int UNORDERED_ACKNOWLEDGE_MODE = javax.jms.Session.DUPS_OK_ACKNOWLEDGE;
 
+    /**
+     * Makes sure that our {@link Session}s are all shut down when this
+     * {@link DataBus} is shut down. Normally that's automatic with JMS, but
+     * this wrapper layer has some additional state that it manages.
+     */
+    private @Nonnull final DataBusWorker worker = DataBusWorker.create();
     private @Nonnull final Connection connection;
     private @Nonnull final Func1<String, Destination> destinationLookup;
 
@@ -129,7 +136,7 @@ public class JmsDataBus implements DataBus {
             final javax.jms.Session delegateSession = this.connection.createSession(
                     false,
                     requireOrdering ? ORDERED_ACKNOWLEDGE_MODE : UNORDERED_ACKNOWLEDGE_MODE);
-            return new NonTransactedJmsSession(delegateSession);
+            return new NonTransactedJmsSession(this.worker, delegateSession);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }
@@ -142,7 +149,7 @@ public class JmsDataBus implements DataBus {
             final javax.jms.Session delegateSession = this.connection.createSession(
                     true,
                     ORDERED_ACKNOWLEDGE_MODE);
-            return new TransactedJmsSession(delegateSession);
+            return new TransactedJmsSession(this.worker, delegateSession);
         } catch (final JMSException jx) {
             throw new MiddlewareException(jx.getMessage(), jx);
         }

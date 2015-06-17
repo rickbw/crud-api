@@ -45,20 +45,16 @@ public abstract class AbstractTransactedSession extends AbstractSession implemen
         return this.tx.rollback();
     }
 
-    protected AbstractTransactedSession(@Nonnull final SessionWorker worker) {
-        super(worker, Session.Ordering.TRANSACTED);
+    protected AbstractTransactedSession(@Nonnull final SessionWorker myWorker) {
+        super(myWorker, Session.Ordering.TRANSACTED);
+        this.tx = initTransactionLifecycle(myWorker);
+    }
 
-        this.tx = new TransactionLifecycle(worker) {
-            @Override
-            protected void doCommit() throws Exception {
-                AbstractTransactedSession.this.doCommit();
-            }
-
-            @Override
-            protected void doRollback() throws Exception {
-                AbstractTransactedSession.this.doRollback();
-            }
-        };
+    protected AbstractTransactedSession(
+            @Nonnull final DataBusWorker dataBusWorker,
+            @Nonnull final SessionWorker myWorker) {
+        super(dataBusWorker, myWorker, Session.Ordering.TRANSACTED);
+        this.tx = initTransactionLifecycle(myWorker);
     }
 
     /**
@@ -78,5 +74,19 @@ public abstract class AbstractTransactedSession extends AbstractSession implemen
      *                      {@link Observer#onError(Throwable)}.
      */
     protected abstract void doRollback() throws Exception;
+
+    private TransactionLifecycle initTransactionLifecycle(final SessionWorker myWorker) {
+        return new TransactionLifecycle(myWorker) {
+            @Override
+            protected void doCommit() throws Exception {
+                AbstractTransactedSession.this.doCommit();
+            }
+
+            @Override
+            protected void doRollback() throws Exception {
+                AbstractTransactedSession.this.doRollback();
+            }
+        };
+    }
 
 }
