@@ -18,6 +18,7 @@ import crud.core.ReadableResource;
 import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.implementer.AbstractReadableResourceSet;
+import crud.implementer.AbstractSession;
 
 
 /*package*/ final class EchoReadableResourceSet<T> extends AbstractReadableResourceSet<T, T> {
@@ -28,7 +29,7 @@ import crud.implementer.AbstractReadableResourceSet;
 
     @Override
     public ReadableResource<T> get(final T key, final Session session) {
-        return new EchoReadableResource<>(((ExampleSession) session).getWorker(), key);
+        return new EchoReadableResource<>(((AbstractSession) session).getWorker(), key);
     }
 
 }

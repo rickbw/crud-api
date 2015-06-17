@@ -16,9 +16,10 @@ package crud.core.example;
 
 import java.io.Writer;
 
-import crud.core.WritableResource;
 import crud.core.Session;
+import crud.core.WritableResource;
 import crud.core.WritableResourceSet;
+import crud.implementer.AbstractSession;
 import crud.implementer.AbstractWritableResourceSet;
 
 
@@ -30,7 +31,7 @@ import crud.implementer.AbstractWritableResourceSet;
 
     @Override
     public WritableResource<String, Integer> get(final Writer writer, final Session session) {
-        return new PrintingWritableResource(writer, ((ExampleSession) session).getWorker());
+        return new PrintingWritableResource(writer, ((AbstractSession) session).getWorker());
     }
 
 }

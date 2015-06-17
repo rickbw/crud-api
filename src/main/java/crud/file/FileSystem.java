@@ -24,6 +24,7 @@ import crud.core.Session;
 import crud.core.Session.Ordering;
 import crud.core.WritableResourceSet;
 import crud.implementer.AbstractDataBus;
+import crud.implementer.DefaultSession;
 
 
 /**
@@ -45,7 +46,7 @@ public final class FileSystem extends AbstractDataBus {
 
     @Override
     protected Session doStartOrderedSession() throws Exception {
-        return new FileSession();
+        return new DefaultSession(Session.Ordering.ORDERED);
     }
 
     @Override

@@ -61,10 +61,6 @@ public abstract class AbstractTransactedSession extends AbstractSession implemen
         };
     }
 
-    protected AbstractTransactedSession() {
-        this(SessionWorker.create());
-    }
-
     /**
      * Subclasses perform {@link #commit()} logic in here.
      *

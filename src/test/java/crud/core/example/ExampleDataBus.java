@@ -23,6 +23,7 @@ import crud.core.ReadableResourceSet;
 import crud.core.Session;
 import crud.core.WritableResourceSet;
 import crud.implementer.AbstractDataBus;
+import crud.implementer.DefaultSession;
 
 
 public class ExampleDataBus extends AbstractDataBus {
@@ -36,7 +37,7 @@ public class ExampleDataBus extends AbstractDataBus {
 
     @Override
     protected Session doStartOrderedSession() {
-        return new ExampleSession();
+        return new DefaultSession(Session.Ordering.ORDERED);
     }
 
     @Override

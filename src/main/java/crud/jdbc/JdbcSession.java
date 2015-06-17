@@ -24,6 +24,7 @@ import crud.core.ReadableResource;
 import crud.core.Session;
 import crud.core.WritableResource;
 import crud.implementer.AbstractSession;
+import crud.implementer.SessionWorker;
 
 
 /*package*/ class JdbcSession extends AbstractSession {
@@ -32,7 +33,7 @@ import crud.implementer.AbstractSession;
 
 
     public JdbcSession(@Nonnull final Connection connection) {
-        super(Session.Ordering.ORDERED);
+        super(SessionWorker.create(), Session.Ordering.ORDERED);
         this.connection = Objects.requireNonNull(connection);
     }
 
